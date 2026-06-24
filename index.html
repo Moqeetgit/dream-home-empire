@@ -1,0 +1,1869 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Dream Home Empire 🏠</title>
+<style>
+/* ═══════════════════════════════════════════
+   BASE & VARIABLES
+═══════════════════════════════════════════ */
+:root {
+  --gold: #f7c948; --gold-dark: #d4a017;
+  --green: #2ecc71; --red: #e74c3c;
+  --purple: #9b59b6; --blue: #3498db;
+  --bg: #0f0f1a; --surface: #1a1a2e; --surface2: #16213e;
+  --text: #f0f0f0; --text-dim: #aaa; --border: rgba(255,255,255,0.08);
+  --radius: 16px; --radius-sm: 10px;
+  --shadow: 0 8px 32px rgba(0,0,0,0.5);
+}
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html,body { height:100%; background:var(--bg); font-family:'Segoe UI',system-ui,sans-serif; color:var(--text); overflow:hidden; }
+#app { width:100vw; height:100vh; position:relative; overflow:hidden; }
+
+/* ═══════════════════════════════════════════
+   SCREEN SYSTEM
+═══════════════════════════════════════════ */
+.screen { position:absolute; inset:0; display:none; flex-direction:column; overflow:hidden; }
+.screen.active { display:flex; }
+
+/* ═══════════════════════════════════════════
+   TOP BAR (HUD)
+═══════════════════════════════════════════ */
+#hud {
+  position:fixed; top:0; left:0; right:0; z-index:100;
+  background:rgba(15,15,26,0.95); backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border);
+  display:flex; align-items:center; padding:10px 16px; gap:10px;
+  min-height:56px;
+}
+#hud-back { background:none; border:1px solid var(--border); color:var(--text-dim); padding:6px 14px; border-radius:20px; cursor:pointer; font-size:14px; }
+#hud-back:hover { border-color:var(--gold); color:var(--gold); }
+#hud-title { font-size:15px; font-weight:700; flex:1; }
+.hud-stat { display:flex; align-items:center; gap:5px; background:rgba(255,255,255,0.06); border-radius:20px; padding:5px 12px; font-size:14px; font-weight:700; }
+#hud-money { color:var(--gold); }
+#hud-level { color:var(--purple); font-size:13px; }
+.xp-bar { width:60px; height:5px; background:rgba(255,255,255,0.1); border-radius:3px; overflow:hidden; }
+.xp-fill { height:100%; background:linear-gradient(90deg,#9b59b6,#f7c948); border-radius:3px; transition:width 0.5s ease; }
+
+/* ═══════════════════════════════════════════
+   SPLASH SCREEN
+═══════════════════════════════════════════ */
+#screen-splash {
+  background: radial-gradient(ellipse at 30% 60%, #1a1a4e 0%, #0f0f1a 60%);
+  align-items:center; justify-content:center;
+}
+.splash-logo { font-size:80px; animation: float 3s ease-in-out infinite; }
+.splash-title { font-size:38px; font-weight:900; margin:16px 0 8px;
+  background:linear-gradient(135deg, #f7c948, #ff6b6b, #a29bfe);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+.splash-sub { color:var(--text-dim); font-size:16px; margin-bottom:40px; }
+.splash-bar { width:220px; height:6px; background:var(--border); border-radius:3px; overflow:hidden; }
+.splash-progress { height:100%; background:linear-gradient(90deg, var(--gold), #ff6b6b); border-radius:3px; transition:width 0.1s; }
+
+/* ═══════════════════════════════════════════
+   MAIN MENU
+═══════════════════════════════════════════ */
+#screen-menu {
+  background: linear-gradient(160deg, #0f0f1a 0%, #1a0a2e 50%, #0f1a0f 100%);
+  align-items:center; justify-content:flex-start; padding-top:0; overflow-y:auto;
+}
+.menu-hero { width:100%; padding:50px 20px 30px; text-align:center;
+  background:linear-gradient(180deg, rgba(26,0,46,0.8) 0%, transparent 100%); }
+.menu-hero-emoji { font-size:70px; display:block; animation:float 3s ease-in-out infinite; }
+.menu-hero h1 { font-size:36px; font-weight:900; margin:12px 0 6px;
+  background:linear-gradient(135deg, #f7c948, #ff9ff3); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+.menu-hero p { color:var(--text-dim); font-size:15px; margin-bottom:30px; }
+.menu-cards { display:grid; grid-template-columns:1fr 1fr; gap:14px; padding:0 16px 30px; width:100%; max-width:440px; }
+.menu-card {
+  background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+  padding:20px 16px; text-align:center; cursor:pointer;
+  transition:transform 0.15s, border-color 0.15s, box-shadow 0.15s;
+}
+.menu-card:hover, .menu-card:active { transform:scale(1.04); border-color:var(--gold); box-shadow:0 0 20px rgba(247,201,72,0.2); }
+.menu-card .card-emoji { font-size:36px; display:block; margin-bottom:8px; }
+.menu-card h3 { font-size:15px; font-weight:700; }
+.menu-card p { font-size:12px; color:var(--text-dim); margin-top:4px; }
+.menu-card.accent { border-color:rgba(247,201,72,0.3); background:linear-gradient(135deg, #1a1a2e, #16213e); }
+
+/* ═══════════════════════════════════════════
+   WORLD MAP
+═══════════════════════════════════════════ */
+#screen-map { padding-top:56px; overflow-y:auto; }
+.map-header { padding:20px 16px 12px; }
+.map-header h2 { font-size:22px; font-weight:800; }
+.map-header p { color:var(--text-dim); font-size:14px; margin-top:4px; }
+.location-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; padding:0 16px 30px; }
+.location-card {
+  border-radius:var(--radius); overflow:hidden; cursor:pointer;
+  border:2px solid transparent; transition:transform 0.15s, border-color 0.15s;
+  position:relative;
+}
+.location-card:hover { transform:translateY(-3px); }
+.location-card.locked { opacity:0.5; cursor:not-allowed; }
+.location-card.locked:hover { transform:none; }
+.loc-bg { padding:22px 16px; min-height:130px; display:flex; flex-direction:column; justify-content:flex-end; }
+.loc-emoji { font-size:38px; position:absolute; top:14px; right:14px; }
+.loc-name { font-size:16px; font-weight:800; }
+.loc-desc { font-size:12px; opacity:0.8; margin-top:3px; }
+.loc-price { font-size:12px; font-weight:700; color:var(--gold); margin-top:6px; }
+.loc-unlock { position:absolute; top:10px; left:10px; background:rgba(0,0,0,0.6); border-radius:20px; padding:3px 10px; font-size:11px; color:var(--text-dim); }
+
+/* Plot picker modal */
+.modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:200; display:flex; align-items:flex-end; justify-content:center; }
+.modal-panel { background:var(--surface); border-radius:var(--radius) var(--radius) 0 0; width:100%; max-width:480px; padding:24px 16px 32px; max-height:80vh; overflow-y:auto; animation:slideUp 0.25s ease; }
+.modal-panel h3 { font-size:20px; font-weight:800; margin-bottom:6px; }
+.modal-panel p { color:var(--text-dim); font-size:14px; margin-bottom:18px; }
+.plot-options { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
+.plot-btn { background:var(--surface2); border:1px solid var(--border); border-radius:var(--radius-sm); padding:16px 10px; text-align:center; cursor:pointer; transition:transform 0.12s, border-color 0.12s; }
+.plot-btn:hover { transform:scale(1.05); border-color:var(--gold); }
+.plot-btn .plot-size { font-size:22px; }
+.plot-btn .plot-label { font-size:13px; font-weight:700; margin-top:6px; }
+.plot-btn .plot-cost { font-size:12px; color:var(--gold); margin-top:3px; }
+.modal-close { width:100%; margin-top:16px; padding:12px; background:rgba(255,255,255,0.06); border:1px solid var(--border); border-radius:var(--radius-sm); color:var(--text-dim); cursor:pointer; font-size:15px; }
+
+/* ═══════════════════════════════════════════
+   PORTFOLIO (MY PROPERTIES)
+═══════════════════════════════════════════ */
+#screen-portfolio { padding-top:56px; overflow-y:auto; }
+.portfolio-header { padding:20px 16px 14px; display:flex; justify-content:space-between; align-items:center; }
+.portfolio-header h2 { font-size:22px; font-weight:800; }
+.stat-chips { display:flex; gap:8px; flex-wrap:wrap; padding:0 16px 14px; }
+.stat-chip { background:var(--surface); border:1px solid var(--border); border-radius:20px; padding:6px 14px; font-size:13px; }
+.stat-chip span { color:var(--gold); font-weight:700; }
+.property-list { padding:0 16px 30px; display:flex; flex-direction:column; gap:14px; }
+.property-card {
+  background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+  overflow:hidden; cursor:pointer; transition:transform 0.12s, border-color 0.12s;
+}
+.property-card:hover { transform:translateY(-2px); border-color:rgba(247,201,72,0.3); }
+.prop-banner { height:90px; display:flex; align-items:center; padding:0 20px; gap:14px; position:relative; }
+.prop-banner-emoji { font-size:44px; }
+.prop-banner-info { flex:1; }
+.prop-banner-info h3 { font-size:17px; font-weight:800; }
+.prop-banner-info p { font-size:13px; opacity:0.7; margin-top:2px; }
+.prop-status { position:absolute; top:12px; right:12px; padding:4px 12px; border-radius:20px; font-size:11px; font-weight:700; }
+.prop-status.building { background:rgba(52,152,219,0.2); color:#74b9ff; border:1px solid rgba(52,152,219,0.3); }
+.prop-status.complete { background:rgba(46,204,113,0.2); color:#55efc4; border:1px solid rgba(46,204,113,0.3); }
+.prop-status.rented { background:rgba(247,201,72,0.2); color:var(--gold); border:1px solid rgba(247,201,72,0.3); }
+.prop-stats { display:flex; gap:0; border-top:1px solid var(--border); }
+.prop-stat { flex:1; padding:12px; text-align:center; border-right:1px solid var(--border); }
+.prop-stat:last-child { border-right:none; }
+.prop-stat-val { font-size:15px; font-weight:700; color:var(--gold); }
+.prop-stat-lbl { font-size:11px; color:var(--text-dim); margin-top:2px; }
+.empty-portfolio { text-align:center; padding:60px 20px; color:var(--text-dim); }
+.empty-portfolio .big-emoji { font-size:64px; display:block; margin-bottom:16px; }
+.empty-portfolio p { font-size:15px; }
+.btn-primary { padding:14px 28px; background:linear-gradient(135deg, var(--gold-dark), var(--gold)); color:#111; font-weight:800; font-size:15px; border:none; border-radius:30px; cursor:pointer; transition:transform 0.12s, box-shadow 0.12s; }
+.btn-primary:hover { transform:scale(1.05); box-shadow:0 0 20px rgba(247,201,72,0.4); }
+.btn-secondary { padding:12px 22px; background:rgba(255,255,255,0.07); color:var(--text); font-weight:600; font-size:14px; border:1px solid var(--border); border-radius:30px; cursor:pointer; }
+.btn-danger { padding:12px 22px; background:rgba(231,76,60,0.15); color:#ff7675; font-weight:600; font-size:14px; border:1px solid rgba(231,76,60,0.3); border-radius:30px; cursor:pointer; }
+
+/* ═══════════════════════════════════════════
+   BUILD MODE
+═══════════════════════════════════════════ */
+#screen-build { padding-top:56px; flex-direction:row; overflow:hidden; }
+.build-left { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+.build-info-bar { padding:10px 14px; background:var(--surface); border-bottom:1px solid var(--border); display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+.build-info-bar .bi-stat { font-size:13px; }
+.build-info-bar .bi-val { font-weight:700; color:var(--gold); }
+.grid-container { flex:1; overflow:auto; display:flex; align-items:center; justify-content:center; padding:10px; }
+#property-grid { display:grid; gap:3px; background:var(--surface2); padding:10px; border-radius:var(--radius-sm); border:1px solid var(--border); }
+.grid-cell {
+  width:62px; height:56px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06);
+  border-radius:6px; display:flex; align-items:center; justify-content:center;
+  cursor:pointer; transition:background 0.12s; font-size:11px; position:relative; overflow:hidden;
+}
+.grid-cell:hover { background:rgba(255,255,255,0.08); border-color:rgba(247,201,72,0.4); }
+.grid-cell.occupied { cursor:pointer; }
+.grid-cell.occupied:hover { filter:brightness(1.15); }
+.grid-cell.room-anchor { flex-direction:column; gap:2px; }
+.grid-cell.room-anchor .cell-emoji { font-size:20px; }
+.grid-cell.room-anchor .cell-name { font-size:9px; text-align:center; line-height:1.2; opacity:0.9; font-weight:600; }
+.grid-cell.room-fill { }
+.grid-cell.room-selected { outline:2px solid var(--gold) !important; outline-offset:1px; }
+.grid-cell.room-selected.room-fill { outline:2px dashed var(--gold) !important; }
+
+/* Room picker drawer */
+#room-picker { background:var(--surface); border-top:1px solid var(--border); padding:12px 10px; overflow-x:auto; flex-shrink:0; }
+#room-picker .picker-title { font-size:13px; font-weight:700; color:var(--text-dim); margin-bottom:8px; padding:0 4px; }
+#room-picker-list { display:flex; gap:8px; width:max-content; }
+.room-pick-btn {
+  background:var(--surface2); border:1px solid var(--border); border-radius:10px;
+  padding:8px 10px; cursor:pointer; text-align:center; min-width:72px;
+  transition:transform 0.12s, border-color 0.12s;
+}
+.room-pick-btn:hover { transform:scale(1.06); border-color:var(--gold); }
+.room-pick-btn.disabled { opacity:0.35; cursor:not-allowed; }
+.room-pick-btn.disabled:hover { transform:none; border-color:var(--border); }
+.rpb-emoji { font-size:22px; display:block; }
+.rpb-name { font-size:10px; margin-top:3px; font-weight:600; }
+.rpb-cost { font-size:10px; color:var(--gold); margin-top:1px; }
+#cancel-place { display:none; font-size:12px; color:var(--text-dim); padding:8px 14px; background:rgba(255,255,255,0.05); border:1px solid var(--border); border-radius:20px; cursor:pointer; margin-bottom:6px; }
+
+/* Design sidebar */
+#design-panel {
+  width:200px; background:var(--surface); border-left:1px solid var(--border);
+  display:flex; flex-direction:column; overflow-y:auto; flex-shrink:0;
+  transition:transform 0.25s; transform:translateX(100%);
+}
+#design-panel.open { transform:translateX(0); }
+.dp-header { padding:14px 14px 10px; border-bottom:1px solid var(--border); }
+.dp-header h3 { font-size:15px; font-weight:800; }
+.dp-header p { font-size:11px; color:var(--text-dim); margin-top:3px; }
+.dp-section { padding:12px 14px; border-bottom:1px solid var(--border); }
+.dp-section h4 { font-size:11px; font-weight:700; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.8px; margin-bottom:8px; }
+.tier-btn { width:100%; padding:8px 10px; margin-bottom:6px; background:rgba(255,255,255,0.04); border:1px solid var(--border); border-radius:8px; cursor:pointer; display:flex; align-items:center; gap:8px; text-align:left; transition:border-color 0.12s, background 0.12s; }
+.tier-btn:hover { background:rgba(255,255,255,0.08); }
+.tier-btn.active { border-color:var(--gold); background:rgba(247,201,72,0.1); }
+.tier-btn .tb-emoji { font-size:16px; }
+.tier-btn .tb-name { font-size:12px; font-weight:700; flex:1; }
+.tier-btn .tb-cost { font-size:10px; color:var(--gold); }
+.style-grid { display:grid; grid-template-columns:1fr 1fr; gap:5px; }
+.style-btn { padding:7px 4px; background:rgba(255,255,255,0.04); border:1px solid var(--border); border-radius:7px; cursor:pointer; text-align:center; font-size:10px; transition:border-color 0.12s, background 0.12s; }
+.style-btn:hover { background:rgba(255,255,255,0.08); }
+.style-btn.active { border-color:var(--gold); background:rgba(247,201,72,0.1); }
+.style-btn .sb-emoji { font-size:16px; display:block; }
+.style-btn .sb-name { font-size:9px; margin-top:2px; font-weight:600; }
+.dp-room-value { padding:12px 14px; }
+.dp-room-value .rv-label { font-size:11px; color:var(--text-dim); }
+.dp-room-value .rv-val { font-size:20px; font-weight:800; color:var(--gold); margin-top:2px; }
+.dp-actions { padding:12px 14px; display:flex; flex-direction:column; gap:8px; }
+.dp-actions button { width:100%; padding:10px; border:none; border-radius:8px; font-size:13px; font-weight:700; cursor:pointer; }
+.dp-delete { background:rgba(231,76,60,0.15); color:#ff7675; border:1px solid rgba(231,76,60,0.3) !important; }
+
+/* Build action bar */
+.build-actions { padding:10px 14px; background:var(--surface); border-top:1px solid var(--border); display:flex; gap:10px; flex-shrink:0; }
+.build-actions button { flex:1; padding:11px; border-radius:30px; border:none; font-weight:700; font-size:13px; cursor:pointer; }
+.ba-complete { background:linear-gradient(135deg, #00b894, #00cec9); color:#fff; }
+.ba-sell { background:linear-gradient(135deg, #e17055, #d63031); color:#fff; }
+.ba-rent { background:linear-gradient(135deg, #6c5ce7, #a29bfe); color:#fff; }
+.ba-collect { background:linear-gradient(135deg, var(--gold-dark), var(--gold)); color:#111; }
+
+/* ═══════════════════════════════════════════
+   CLIENTS SCREEN
+═══════════════════════════════════════════ */
+#screen-clients { padding-top:56px; overflow-y:auto; }
+.clients-header { padding:20px 16px 14px; }
+.clients-header h2 { font-size:22px; font-weight:800; }
+.clients-header p { color:var(--text-dim); font-size:14px; margin-top:4px; }
+.client-cards { display:flex; flex-direction:column; gap:14px; padding:0 16px 30px; }
+.client-card {
+  background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+  overflow:hidden; position:relative;
+}
+.client-card.completed { opacity:0.4; }
+.cc-top { display:flex; align-items:center; gap:14px; padding:16px; }
+.cc-avatar { font-size:40px; width:60px; height:60px; background:var(--surface2); border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.cc-info { flex:1; }
+.cc-info h3 { font-size:16px; font-weight:800; }
+.cc-info .cc-title { font-size:12px; color:var(--text-dim); }
+.cc-budget { font-size:14px; font-weight:700; color:var(--gold); margin-top:4px; }
+.cc-desc { padding:0 16px 12px; font-size:13px; color:var(--text-dim); line-height:1.5; }
+.cc-reqs { padding:0 16px 12px; display:flex; flex-wrap:wrap; gap:6px; }
+.req-chip { background:rgba(255,255,255,0.06); border:1px solid var(--border); border-radius:16px; padding:3px 10px; font-size:11px; }
+.cc-bottom { display:flex; gap:10px; padding:12px 16px; border-top:1px solid var(--border); align-items:center; }
+.cc-reward { font-size:13px; color:var(--green); font-weight:700; flex:1; }
+.cc-match-btn { padding:10px 20px; background:linear-gradient(135deg, var(--gold-dark), var(--gold)); color:#111; font-weight:800; font-size:13px; border:none; border-radius:20px; cursor:pointer; }
+.cc-match-btn:disabled { opacity:0.4; cursor:not-allowed; }
+
+/* ═══════════════════════════════════════════
+   ACHIEVEMENTS
+═══════════════════════════════════════════ */
+#screen-achievements { padding-top:56px; overflow-y:auto; }
+.ach-header { padding:20px 16px 14px; }
+.ach-header h2 { font-size:22px; font-weight:800; }
+.ach-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; padding:0 16px 30px; }
+.ach-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-sm); padding:16px; text-align:center; }
+.ach-card.unlocked { border-color:rgba(247,201,72,0.4); background:linear-gradient(135deg, rgba(247,201,72,0.08), var(--surface)); }
+.ach-card .ach-emoji { font-size:32px; display:block; margin-bottom:8px; filter:grayscale(1) opacity(0.3); }
+.ach-card.unlocked .ach-emoji { filter:none; }
+.ach-card h4 { font-size:13px; font-weight:700; }
+.ach-card p { font-size:11px; color:var(--text-dim); margin-top:3px; line-height:1.4; }
+.ach-card .ach-xp { font-size:12px; color:var(--gold); font-weight:700; margin-top:6px; }
+
+/* ═══════════════════════════════════════════
+   TOAST NOTIFICATIONS
+═══════════════════════════════════════════ */
+#toast-container { position:fixed; top:66px; right:14px; z-index:999; display:flex; flex-direction:column; gap:8px; pointer-events:none; }
+.toast { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-sm); padding:10px 16px; font-size:13px; font-weight:600; animation:slideInRight 0.3s ease, fadeOut 0.5s ease 2.2s forwards; display:flex; align-items:center; gap:8px; max-width:260px; box-shadow:var(--shadow); }
+.toast.success { border-color:rgba(46,204,113,0.4); }
+.toast.gold { border-color:rgba(247,201,72,0.4); color:var(--gold); }
+.toast.levelup { border-color:rgba(155,89,182,0.5); background:linear-gradient(135deg, rgba(155,89,182,0.2), var(--surface)); color:#d9aaff; font-size:14px; }
+
+/* Money fly animation */
+.money-fly { position:fixed; font-size:18px; font-weight:800; color:var(--gold); pointer-events:none; z-index:1000; animation:moneyFly 1.2s ease-out forwards; }
+@keyframes moneyFly { 0%{transform:translateY(0);opacity:1;} 100%{transform:translateY(-80px);opacity:0;} }
+
+/* ═══════════════════════════════════════════
+   FINANCE SCREEN
+═══════════════════════════════════════════ */
+#screen-finance { padding-top:56px; overflow-y:auto; }
+.finance-content { padding:16px; }
+.finance-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:20px; margin-bottom:14px; }
+.finance-card h3 { font-size:16px; font-weight:800; margin-bottom:14px; }
+.finance-row { display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--border); font-size:14px; }
+.finance-row:last-child { border-bottom:none; }
+.finance-row .fr-val { font-weight:700; }
+.finance-row .fr-pos { color:var(--green); }
+.finance-row .fr-neg { color:var(--red); }
+.finance-row .fr-gold { color:var(--gold); }
+
+/* ═══════════════════════════════════════════
+   ANIMATIONS
+═══════════════════════════════════════════ */
+@keyframes float { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-10px);} }
+@keyframes slideUp { from{transform:translateY(100%);} to{transform:translateY(0);} }
+@keyframes slideInRight { from{transform:translateX(60px);opacity:0;} to{transform:translateX(0);opacity:1;} }
+@keyframes fadeOut { to{opacity:0;transform:translateX(20px);} }
+@keyframes popIn { 0%{transform:scale(0.7);opacity:0;} 80%{transform:scale(1.05);} 100%{transform:scale(1);opacity:1;} }
+@keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.5;} }
+@keyframes shake { 0%,100%{transform:translateX(0);} 25%{transform:translateX(-6px);} 75%{transform:translateX(6px);} }
+
+.pop { animation: popIn 0.3s ease; }
+.shake { animation: shake 0.3s ease; }
+
+/* ═══════════════════════════════════════════
+   MISC
+═══════════════════════════════════════════ */
+.section-label { font-size:12px; font-weight:700; color:var(--text-dim); text-transform:uppercase; letter-spacing:1px; margin:0 16px 10px; }
+::-webkit-scrollbar { width:4px; height:4px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.15); border-radius:2px; }
+.divider { height:1px; background:var(--border); margin:0 16px; }
+.center { text-align:center; }
+.gap-8 { gap:8px; }
+
+/* ═══════════════════════════════════════════
+   TENANT & AUCTION MODALS
+═══════════════════════════════════════════ */
+.tenant-cards { display:flex; flex-direction:column; gap:10px; margin:10px 0; }
+.tenant-card { background:var(--surface2); border:1px solid var(--border); border-radius:var(--radius-sm); padding:14px; display:flex; align-items:center; gap:12px; cursor:pointer; transition:border-color 0.15s, transform 0.12s; }
+.tenant-card:hover { border-color:var(--gold); transform:scale(1.02); }
+.tenant-avatar { font-size:34px; flex-shrink:0; }
+.tenant-info { flex:1; }
+.tenant-info h4 { font-size:15px; font-weight:800; }
+.tenant-info p { font-size:12px; color:var(--text-dim); margin-top:2px; line-height:1.4; }
+.tenant-risk { font-size:10px; padding:2px 8px; border-radius:10px; margin-top:5px; display:inline-block; font-weight:700; }
+.risk-low { background:rgba(46,204,113,0.15); color:#55efc4; }
+.risk-high { background:rgba(231,76,60,0.15); color:#ff7675; }
+.tenant-rent { font-size:15px; font-weight:800; color:var(--gold); }
+
+.auction-display { text-align:center; padding:16px 0 8px; }
+.auction-bid { font-size:38px; font-weight:900; color:var(--gold); display:block; }
+.auction-bid-label { font-size:13px; color:var(--text-dim); margin-top:4px; min-height:18px; }
+.auction-timer-bar { width:100%; height:8px; background:rgba(255,255,255,0.08); border-radius:4px; overflow:hidden; margin:14px 0; }
+.auction-timer-fill { height:100%; background:linear-gradient(90deg,var(--green),var(--gold)); border-radius:4px; transition:width 0.5s linear; }
+.auction-bidders { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin:8px 0; }
+.bidder-chip { font-size:12px; background:rgba(255,255,255,0.06); border:1px solid var(--border); border-radius:16px; padding:4px 12px; transition:all 0.2s; }
+.bidder-chip.active { border-color:var(--gold); color:var(--gold); background:rgba(247,201,72,0.1); }
+.plot-mortgage-link { font-size:10px; color:#74b9ff; margin-top:5px; cursor:pointer; text-decoration:underline; }
+
+/* ═══════════════════════════════════════════
+   MARKET EVENT BANNER
+═══════════════════════════════════════════ */
+#event-banner {
+  position:fixed; top:56px; left:0; right:0; z-index:95;
+  padding:10px 16px; display:flex; align-items:center; gap:10px;
+  border-bottom:1px solid rgba(255,255,255,0.1);
+  transform:translateY(-110%); transition:transform 0.35s ease;
+  backdrop-filter:blur(12px);
+}
+#event-banner.show { transform:translateY(0); }
+.eb-emoji { font-size:24px; flex-shrink:0; }
+.eb-info { flex:1; min-width:0; }
+.eb-name { font-size:13px; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.eb-desc { font-size:11px; opacity:0.85; }
+.eb-timer { font-size:12px; font-weight:700; background:rgba(0,0,0,0.35); padding:4px 10px; border-radius:20px; white-space:nowrap; flex-shrink:0; }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- HUD (always visible during gameplay) -->
+  <div id="hud" style="display:none;">
+    <button id="hud-back" onclick="hudBack()">← Back</button>
+    <span id="hud-title">Dream Home Empire</span>
+    <div class="hud-stat" id="hud-money">💰 <span id="hud-money-val">$50,000</span></div>
+    <div class="hud-stat" id="hud-market" style="font-size:12px;color:var(--text-dim);">📊 100%</div>
+    <div class="hud-stat" style="flex-direction:column;gap:2px;padding:6px 12px;">
+      <span id="hud-level">Lv.1</span>
+      <div class="xp-bar"><div class="xp-fill" id="xp-fill" style="width:0%"></div></div>
+    </div>
+  </div>
+
+  <!-- MARKET EVENT BANNER -->
+  <div id="event-banner">
+    <span class="eb-emoji" id="ev-emoji"></span>
+    <div class="eb-info">
+      <div class="eb-name" id="ev-name"></div>
+      <div class="eb-desc" id="ev-desc"></div>
+    </div>
+    <div class="eb-timer" id="ev-timer"></div>
+  </div>
+
+  <!-- SPLASH -->
+  <div id="screen-splash" class="screen active">
+    <span class="splash-logo">🏠</span>
+    <div class="splash-title">Dream Home Empire</div>
+    <div class="splash-sub">Design • Build • Rule</div>
+    <div class="splash-bar"><div class="splash-progress" id="splash-prog" style="width:0%"></div></div>
+  </div>
+
+  <!-- MENU -->
+  <div id="screen-menu" class="screen">
+    <div class="menu-hero">
+      <span class="menu-hero-emoji">🏰</span>
+      <h1>Dream Home Empire</h1>
+      <p>Build your real estate empire from the ground up</p>
+    </div>
+    <div class="menu-cards">
+      <div class="menu-card accent" onclick="showScreen('map')">
+        <span class="card-emoji">🗺️</span>
+        <h3>Buy Land</h3>
+        <p>Find your perfect location</p>
+      </div>
+      <div class="menu-card" onclick="showScreen('portfolio')">
+        <span class="card-emoji">🏘️</span>
+        <h3>My Properties</h3>
+        <p>Manage your empire</p>
+      </div>
+      <div class="menu-card" onclick="showScreen('clients')">
+        <span class="card-emoji">🤝</span>
+        <h3>Clients</h3>
+        <p>Complete requests for big bonuses</p>
+      </div>
+      <div class="menu-card" onclick="showScreen('finance')">
+        <span class="card-emoji">💹</span>
+        <h3>Finance</h3>
+        <p>Track income & expenses</p>
+      </div>
+      <div class="menu-card" onclick="showScreen('achievements')">
+        <span class="card-emoji">🏆</span>
+        <h3>Achievements</h3>
+        <p>Unlock rewards</p>
+      </div>
+      <div class="menu-card" onclick="collectAllRent()">
+        <span class="card-emoji">💵</span>
+        <h3>Collect Rent</h3>
+        <p id="rent-available-text">No rent due</p>
+      </div>
+    </div>
+    <p id="welcome-msg" style="color:var(--text-dim);font-size:13px;padding:0 20px 20px;text-align:center;"></p>
+  </div>
+
+  <!-- WORLD MAP -->
+  <div id="screen-map" class="screen">
+    <div class="map-header">
+      <h2>🗺️ Choose a Location</h2>
+      <p>Select where you want to build your dream property</p>
+    </div>
+    <div class="location-grid" id="location-grid"></div>
+  </div>
+
+  <!-- PORTFOLIO -->
+  <div id="screen-portfolio" class="screen">
+    <div class="portfolio-header">
+      <h2>🏘️ My Properties</h2>
+      <button class="btn-primary" onclick="showScreen('map')" style="font-size:13px;padding:10px 18px;">+ Buy Land</button>
+    </div>
+    <div class="stat-chips" id="portfolio-stats"></div>
+    <div class="property-list" id="property-list"></div>
+  </div>
+
+  <!-- BUILD MODE -->
+  <div id="screen-build" class="screen">
+    <div class="build-left">
+      <div class="build-info-bar" id="build-info-bar">
+        <span class="bi-stat">Value: <span class="bi-val" id="bi-value">$0</span></span>
+        <span class="bi-stat" style="margin-left:auto;">Rooms: <span class="bi-val" id="bi-rooms">0</span></span>
+        <span class="bi-stat">Design: <span class="bi-val" id="bi-design">⭐0%</span></span>
+      </div>
+      <div class="grid-container">
+        <div id="property-grid"></div>
+      </div>
+      <div id="room-picker">
+        <button id="cancel-place" onclick="cancelPlacement()">✕ Cancel Placement</button>
+        <div class="picker-title">TAP A ROOM TO PLACE IT  ·  Tap empty cell to build</div>
+        <div id="room-picker-list"></div>
+      </div>
+      <div class="build-actions" id="build-actions"></div>
+    </div>
+    <div id="design-panel">
+      <div class="dp-header">
+        <h3 id="dp-room-name">Room</h3>
+        <p id="dp-room-desc">Select tier & style</p>
+      </div>
+      <div class="dp-section">
+        <h4>Furniture Tier</h4>
+        <div id="dp-tiers"></div>
+      </div>
+      <div class="dp-section">
+        <h4>Design Style</h4>
+        <div class="style-grid" id="dp-styles"></div>
+      </div>
+      <div class="dp-room-value">
+        <div class="rv-label">Room Value</div>
+        <div class="rv-val" id="dp-room-val">$0</div>
+      </div>
+      <div class="dp-actions">
+        <button class="dp-delete" onclick="deleteRoom()">🗑 Remove Room</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CLIENTS -->
+  <div id="screen-clients" class="screen">
+    <div class="clients-header">
+      <h2>🤝 Client Requests</h2>
+      <p>Match a client's requirements to earn bonus rewards</p>
+    </div>
+    <div class="client-cards" id="client-cards"></div>
+  </div>
+
+  <!-- ACHIEVEMENTS -->
+  <div id="screen-achievements" class="screen">
+    <div class="ach-header">
+      <h2>🏆 Achievements</h2>
+      <p style="color:var(--text-dim);font-size:14px;padding-top:4px;" id="ach-progress-text"></p>
+    </div>
+    <div class="ach-grid" id="ach-grid"></div>
+  </div>
+
+  <!-- FINANCE -->
+  <div id="screen-finance" class="screen">
+    <div class="finance-content">
+      <div class="finance-card">
+        <h3>💰 Financial Overview</h3>
+        <div class="finance-row"><span>Current Balance</span><span class="fr-val fr-gold" id="fin-balance">$0</span></div>
+        <div class="finance-row"><span>Total Earned</span><span class="fr-val fr-pos" id="fin-earned">$0</span></div>
+        <div class="finance-row"><span>Total Spent</span><span class="fr-val fr-neg" id="fin-spent">$0</span></div>
+        <div class="finance-row"><span>Properties Owned</span><span class="fr-val" id="fin-props">0</span></div>
+        <div class="finance-row"><span>Portfolio Value</span><span class="fr-val fr-gold" id="fin-portval">$0</span></div>
+        <div class="finance-row"><span>Total Debt (Mortgages)</span><span class="fr-val fr-neg" id="fin-debt">$0</span></div>
+        <div class="finance-row"><span>Market Health</span><span class="fr-val" id="fin-market">📊 100%</span></div>
+      </div>
+      <div class="finance-card">
+        <h3>📈 Rental Income</h3>
+        <div class="finance-row"><span>Rented Properties</span><span class="fr-val" id="fin-rented">0</span></div>
+        <div class="finance-row"><span>Daily Income</span><span class="fr-val fr-pos" id="fin-daily">$0/day</span></div>
+        <div class="finance-row"><span>Pending Rent</span><span class="fr-val fr-gold" id="fin-pending">$0</span></div>
+        <div style="margin-top:14px;"><button class="btn-primary" onclick="collectAllRent()" style="width:100%;">💵 Collect All Rent</button></div>
+      </div>
+      <div class="finance-card">
+        <h3>🏆 Performance</h3>
+        <div class="finance-row"><span>Properties Sold</span><span class="fr-val" id="fin-sold">0</span></div>
+        <div class="finance-row"><span>Clients Completed</span><span class="fr-val" id="fin-clients">0</span></div>
+        <div class="finance-row"><span>Rooms Built</span><span class="fr-val" id="fin-rooms">0</span></div>
+        <div class="finance-row"><span>Reputation Level</span><span class="fr-val fr-gold" id="fin-rep">Novice</span></div>
+        <div class="finance-row"><span>Emergency Loans Used</span><span class="fr-val" id="fin-loans-used">0 / 3</span></div>
+      </div>
+      <div class="finance-card" id="emergency-loan-section">
+        <h3>🏦 Emergency Loan</h3>
+        <p style="color:var(--text-dim);font-size:13px;margin-bottom:14px;">Running low? Get an emergency loan instantly. Repaid automatically when you sell a property. Max 3 loans total.</p>
+        <div class="finance-row"><span>Loan Amount</span><span class="fr-val fr-pos">$75,000</span></div>
+        <div class="finance-row"><span>Interest</span><span class="fr-val fr-neg">20% ($15,000)</span></div>
+        <div class="finance-row"><span>Total Owed</span><span class="fr-val fr-neg">$90,000</span></div>
+        <div style="margin-top:14px;"><button class="btn-primary" onclick="getEmergencyLoan()" style="width:100%;background:linear-gradient(135deg,#e17055,#d63031);">🏦 Get Emergency Loan</button></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Plot Picker Modal -->
+  <div id="modal-overlay" class="modal-overlay" style="display:none;" onclick="closeModal(event)">
+    <div class="modal-panel" id="modal-panel">
+      <h3 id="modal-title">Choose Your Plot</h3>
+      <p id="modal-desc">Select the size of land you want to purchase.</p>
+      <div class="plot-options" id="plot-options"></div>
+      <button class="modal-close" onclick="closeModal()">Cancel</button>
+    </div>
+  </div>
+
+  <!-- TENANT SELECTION MODAL -->
+  <div id="tenant-modal" class="modal-overlay" style="display:none;" onclick="closeTenantModal(event)">
+    <div class="modal-panel">
+      <h3>🏷️ Choose Your Tenant</h3>
+      <p>Pick wisely — different tenants pay very different rent!</p>
+      <div class="tenant-cards" id="tenant-cards"></div>
+      <button class="modal-close" onclick="closeTenantModal()">Cancel</button>
+    </div>
+  </div>
+
+  <!-- AUCTION MODAL -->
+  <div id="auction-modal" class="modal-overlay" style="display:none;">
+    <div class="modal-panel">
+      <h3>🔨 Live Auction</h3>
+      <p id="auction-prop-name" style="color:var(--text-dim);font-size:13px;"></p>
+      <div class="auction-display">
+        <span class="auction-bid" id="auction-bid-display">$0</span>
+        <div class="auction-bid-label" id="auction-bid-label">Opening bid…</div>
+      </div>
+      <div class="auction-timer-bar"><div class="auction-timer-fill" id="auction-timer-fill" style="width:100%"></div></div>
+      <div class="auction-bidders" id="auction-bidders"></div>
+      <div style="display:flex;gap:10px;margin-top:14px;">
+        <button class="btn-primary" onclick="acceptAuction()" style="flex:1;">✅ Accept Bid</button>
+        <button class="btn-secondary" onclick="cancelAuction()" style="flex:1;">✕ Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast container -->
+  <div id="toast-container"></div>
+
+</div>
+<script>
+// ═══════════════════════════════════════════════════════════
+// GAME DATA
+// ═══════════════════════════════════════════════════════════
+const LOCATIONS = [
+  { id:'urban',    name:'Urban District',   emoji:'🏙️', bg:['#1a1a2e','#0f3460'],  accent:'#6c63ff', multiplier:1.2, unlockLevel:1,  desc:'City apartments & luxury penthouses',   plots:[{label:'Studio',size:'S',emoji:'🏢',cost:35000,gridW:5,gridH:5},{label:'Apartment',size:'M',emoji:'🏬',cost:55000,gridW:6,gridH:6},{label:'Penthouse',size:'L',emoji:'🌆',cost:80000,gridW:7,gridH:7}] },
+  { id:'beach',    name:'Beachfront',        emoji:'🏖️', bg:['#006994','#00b4d8'],  accent:'#48cae4', multiplier:1.8, unlockLevel:3,  desc:'Stunning ocean villas & beach houses',  plots:[{label:'Beach Lot',size:'S',emoji:'🌊',cost:80000,gridW:5,gridH:5},{label:'Villa Plot',size:'M',emoji:'🏄',cost:130000,gridW:6,gridH:6},{label:'Estate',size:'L',emoji:'🌅',cost:200000,gridW:7,gridH:7}] },
+  { id:'mountain', name:'Mountain Retreat',  emoji:'⛰️', bg:['#2d4a22','#4a7c59'],  accent:'#74c476', multiplier:1.5, unlockLevel:5,  desc:'Scenic mountain lodges & chalets',      plots:[{label:'Cabin Lot',size:'S',emoji:'🏔️',cost:60000,gridW:5,gridH:5},{label:'Chalet',size:'M',emoji:'⛷️',cost:100000,gridW:6,gridH:6},{label:'Alpine Estate',size:'L',emoji:'🦅',cost:150000,gridW:7,gridH:7}] },
+  { id:'lakeside', name:'Lakeside',           emoji:'🏞️', bg:['#1b4332','#40916c'],  accent:'#52b788', multiplier:1.4, unlockLevel:2,  desc:'Peaceful lake houses with private docks', plots:[{label:'Lakefront',size:'S',emoji:'🎣',cost:50000,gridW:5,gridH:5},{label:'Lake House',size:'M',emoji:'⛵',cost:80000,gridW:6,gridH:6},{label:'Lake Estate',size:'L',emoji:'🏊',cost:120000,gridW:7,gridH:7}] },
+  { id:'forest',   name:'Forest Estate',      emoji:'🌲', bg:['#1b3a1f','#3d7a45'],  accent:'#74b849', multiplier:1.3, unlockLevel:2,  desc:'Private eco retreats in nature',        plots:[{label:'Forest Lot',size:'S',emoji:'🌿',cost:40000,gridW:5,gridH:5},{label:'Forest Home',size:'M',emoji:'🍃',cost:65000,gridW:6,gridH:6},{label:'Eco Estate',size:'L',emoji:'🦋',cost:100000,gridW:7,gridH:7}] },
+  { id:'desert',   name:'Desert Modern',      emoji:'🏜️', bg:['#5c3317','#a0522d'],  accent:'#e9c46a', multiplier:1.6, unlockLevel:7,  desc:'Ultra-modern desert architecture',      plots:[{label:'Desert Lot',size:'S',emoji:'🌵',cost:70000,gridW:5,gridH:5},{label:'Desert Villa',size:'M',emoji:'☀️',cost:120000,gridW:6,gridH:6},{label:'Oasis Estate',size:'L',emoji:'🌴',cost:180000,gridW:7,gridH:7}] },
+  { id:'island',   name:'Private Island',     emoji:'🏝️', bg:['#023e8a','#0096c7'],  accent:'#90e0ef', multiplier:3.0, unlockLevel:15, desc:'The ultimate luxury – your own island', plots:[{label:'Small Island',size:'S',emoji:'🐚',cost:500000,gridW:6,gridH:6},{label:'Island Resort',size:'M',emoji:'🦀',cost:1000000,gridW:7,gridH:7},{label:'Private Paradise',size:'L',emoji:'🌺',cost:2000000,gridW:8,gridH:8}] },
+];
+
+const ROOM_TYPES = [
+  { id:'living',   name:'Living Room',     emoji:'🛋️', cost:15000, value:20000, w:2, h:2, color:'#3498db', cat:'main',    desc:'The heart of the home' },
+  { id:'kitchen',  name:'Kitchen',         emoji:'🍳', cost:20000, value:25000, w:2, h:1, color:'#e67e22', cat:'main',    desc:'Gourmet cooking space' },
+  { id:'bedroom',  name:'Bedroom',         emoji:'🛏️', cost:10000, value:13000, w:2, h:1, color:'#9b59b6', cat:'main',    desc:'Restful sleeping space' },
+  { id:'bathroom', name:'Bathroom',        emoji:'🚿', cost:8000,  value:10000, w:1, h:1, color:'#1abc9c', cat:'main',    desc:'Essential bath facility' },
+  { id:'master',   name:'Master Suite',    emoji:'👑', cost:35000, value:50000, w:2, h:2, color:'#f39c12', cat:'luxury',  desc:'Opulent master bedroom' },
+  { id:'dining',   name:'Dining Room',     emoji:'🍽️', cost:12000, value:16000, w:2, h:1, color:'#e74c3c', cat:'main',    desc:'Elegant dining area' },
+  { id:'office',   name:'Home Office',     emoji:'💼', cost:10000, value:14000, w:1, h:1, color:'#2980b9', cat:'main',    desc:'Productive work space' },
+  { id:'gym',      name:'Gym',             emoji:'🏋️', cost:25000, value:32000, w:2, h:1, color:'#c0392b', cat:'luxury',  desc:'Private fitness center' },
+  { id:'theater',  name:'Home Theater',    emoji:'🎬', cost:40000, value:60000, w:2, h:2, color:'#8e44ad', cat:'luxury',  desc:'Cinema-quality entertainment' },
+  { id:'pool',     name:'Swimming Pool',   emoji:'🏊', cost:50000, value:80000, w:2, h:2, color:'#00b4d8', cat:'luxury',  desc:'Stunning private pool' },
+  { id:'garden',   name:'Garden',          emoji:'🌿', cost:15000, value:22000, w:2, h:2, color:'#27ae60', cat:'exterior',desc:'Beautiful landscaped garden' },
+  { id:'garage',   name:'Garage',          emoji:'🚗', cost:18000, value:24000, w:2, h:1, color:'#7f8c8d', cat:'exterior',desc:'Multi-car garage' },
+  { id:'library',  name:'Library',         emoji:'📚', cost:22000, value:30000, w:2, h:1, color:'#8B4513', cat:'luxury',  desc:'Personal book collection' },
+  { id:'wine',     name:'Wine Cellar',     emoji:'🍷', cost:30000, value:45000, w:1, h:1, color:'#922b21', cat:'luxury',  desc:'Temperature-controlled cellar' },
+  { id:'terrace',  name:'Rooftop Terrace', emoji:'☀️', cost:20000, value:32000, w:2, h:2, color:'#f1c40f', cat:'exterior',desc:'Stunning outdoor lounge' },
+];
+
+const FURNITURE_TIERS = [
+  { id:'basic',    name:'Basic',    emoji:'🪑', valueMult:1.0, costMult:0,   color:'#7f8c8d', desc:'Simple & functional' },
+  { id:'standard', name:'Standard', emoji:'🛋️', valueMult:1.35, costMult:0.2, color:'#3498db', desc:'Quality furnishings' },
+  { id:'premium',  name:'Premium',  emoji:'💎', valueMult:1.8, costMult:0.55,color:'#9b59b6', desc:'Designer pieces' },
+  { id:'luxury',   name:'Luxury',   emoji:'👑', valueMult:2.5, costMult:1.2, color:'#f39c12', desc:'World-class luxury' },
+];
+
+const STYLES = [
+  { id:'modern',        name:'Modern',       emoji:'🏗️', bonus:0.10 },
+  { id:'minimalist',    name:'Minimalist',   emoji:'⬜', bonus:0.08 },
+  { id:'luxury',        name:'Luxury',       emoji:'✨', bonus:0.20 },
+  { id:'eco',           name:'Eco',          emoji:'🌿', bonus:0.12 },
+  { id:'mediterranean', name:'Mediter.',     emoji:'🌊', bonus:0.15 },
+  { id:'japanese',      name:'Japanese',     emoji:'🎋', bonus:0.13 },
+  { id:'futuristic',    name:'Futuristic',   emoji:'🚀', bonus:0.18 },
+  { id:'industrial',    name:'Industrial',   emoji:'⚙️', bonus:0.05 },
+];
+
+const CLIENT_TEMPLATES = [
+  { id:'alex',      name:'Alex Chen',        emoji:'👨‍💼', title:'Young Professional', budget:250000, reward:30000, xpReward:150, color:'#3498db',
+    requirements:{ minRooms:3, minBedrooms:1, preferredStyles:['modern','minimalist'], preferredLocations:['urban'], requiredRooms:['living','kitchen','bedroom'] },
+    description:'Needs a sleek modern apartment. Values clean lines and smart home features.' },
+  { id:'johnsons',  name:'The Johnsons',     emoji:'👨‍👩‍👧‍👦', title:'Growing Family',     budget:500000, reward:55000, xpReward:250, color:'#27ae60',
+    requirements:{ minRooms:6, minBedrooms:3, preferredStyles:['modern','eco'], preferredLocations:['lakeside','forest','mountain'], requiredRooms:['living','kitchen','dining','bedroom','bathroom','garden'] },
+    description:'4-bedroom family home near nature. Needs garden and space for kids.' },
+  { id:'victoria',  name:'Victoria Star',    emoji:'🌟', title:'A-List Celebrity',   budget:3000000, reward:350000, xpReward:800, color:'#f39c12',
+    requirements:{ minRooms:10, minBedrooms:5, preferredStyles:['luxury','futuristic'], preferredLocations:['beach','island'], requiredRooms:['master','pool','theater','gym','wine'] },
+    description:'Ultra-luxury beach mansion. Pool, theater, gym required. No expense spared.' },
+  { id:'drgreen',   name:'Dr. Elena Green',  emoji:'🌱', title:'Sustainability Expert', budget:420000, reward:50000, xpReward:220, color:'#2ecc71',
+    requirements:{ minRooms:5, minBedrooms:2, preferredStyles:['eco','minimalist'], preferredLocations:['forest','mountain'], requiredRooms:['living','kitchen','bedroom','garden','office'] },
+    description:'Sustainable eco-home in nature. Must use eco-friendly design style.' },
+  { id:'marcus',    name:'Marcus Webb',      emoji:'💰', title:'Property Investor',  budget:900000, reward:100000, xpReward:400, color:'#e74c3c',
+    requirements:{ minRooms:8, minBedrooms:3, preferredStyles:['modern','luxury'], preferredLocations:['urban','beach'], requiredRooms:['living','kitchen','bedroom','bathroom','dining'] },
+    description:'High-value investment property. Wants maximum rental yield.' },
+  { id:'hendersons',name:'The Hendersons',   emoji:'👴', title:'Luxury Retirees',    budget:1400000, reward:160000, xpReward:600, color:'#9b59b6',
+    requirements:{ minRooms:7, minBedrooms:3, preferredStyles:['mediterranean','luxury'], preferredLocations:['beach','lakeside'], requiredRooms:['master','living','kitchen','garden','terrace'] },
+    description:'Dream retirement home. Mediterranean style with luxury finishes.' },
+];
+
+const ACHIEVEMENTS_DATA = [
+  { id:'first_home',  name:'First Home',       emoji:'🏠', desc:'Complete your first property sale or rental',    xp:100,  check:s=>s.propertiesSold>=1||s.properties.some(p=>p.status==='rented') },
+  { id:'millionaire', name:'Millionaire',       emoji:'💵', desc:'Accumulate $1,000,000 in total earnings',        xp:500,  check:s=>s.totalEarned>=1000000 },
+  { id:'luxury',      name:'Luxury Touch',      emoji:'👑', desc:'Furnish any room with Luxury tier',              xp:200,  check:s=>s.luxuryRooms>=1 },
+  { id:'empire',      name:'Empire Begins',     emoji:'🏘️', desc:'Own 3 or more properties simultaneously',       xp:300,  check:s=>s.properties.length>=3 },
+  { id:'client5',     name:'Client Favorite',   emoji:'🤝', desc:'Complete 5 client requests',                     xp:400,  check:s=>s.clientsCompleted>=5 },
+  { id:'beach',       name:'Beach Lord',         emoji:'🏖️', desc:'Own a beachfront property',                     xp:250,  check:s=>s.properties.some(p=>p.locationId==='beach') },
+  { id:'builder',     name:'Master Builder',     emoji:'🏗️', desc:'Build 30 rooms in total',                       xp:350,  check:s=>s.totalRoomsBuilt>=30 },
+  { id:'designer',    name:'Interior Designer',  emoji:'🎨', desc:'Design 5 rooms with Premium or Luxury tier',    xp:300,  check:s=>s.premiumRooms>=5 },
+  { id:'island',      name:'Island Tycoon',      emoji:'🏝️', desc:'Develop a property on a private island',        xp:1000, check:s=>s.properties.some(p=>p.locationId==='island') },
+  { id:'millionaire2',name:'Multi-Millionaire',  emoji:'💸', desc:'Accumulate $5,000,000 in total earnings',       xp:1500, check:s=>s.totalEarned>=5000000 },
+];
+
+const MARKET_EVENTS = [
+  { id:'housing_boom',  name:'🏠 Housing Boom!',       emoji:'📈', desc:'All property values surge by 60%!',              type:'global_value',  mult:1.6,  duration:3, color:'#00b894' },
+  { id:'market_dip',    name:'📉 Market Correction',   emoji:'📉', desc:'Values drop 25% — great time to buy & build!',  type:'global_value',  mult:0.75, duration:2, color:'#e17055' },
+  { id:'beach_craze',   name:'🏖️ Beach Craze!',         emoji:'🌊', desc:'Beachfront properties worth 2× right now!',     type:'location',      mult:2.0,  duration:4, color:'#0984e3', locationId:'beach' },
+  { id:'urban_surge',   name:'🏙️ City Living Surge!',   emoji:'🏙️', desc:'Urban properties worth 1.8× right now!',        type:'location',      mult:1.8,  duration:3, color:'#6c5ce7', locationId:'urban' },
+  { id:'eco_trend',     name:'🌿 Eco-Living Trend!',    emoji:'🌿', desc:'Eco-style properties valued 2× higher!',        type:'style',         mult:2.0,  duration:3, color:'#00b894', styleId:'eco' },
+  { id:'luxury_demand', name:'👑 Luxury Demand!',       emoji:'👑', desc:'Properties with Luxury/Premium rooms worth 1.7×!', type:'tier',       mult:1.7,  duration:4, color:'#fdcb6e' },
+  { id:'room_sale',     name:'🔨 Builder\'s Sale!',     emoji:'🔨', desc:'All rooms 40% cheaper to build right now!',     type:'cost_discount', mult:0.6,  duration:3, color:'#74b9ff' },
+  { id:'rental_frenzy', name:'🏷️ Rental Frenzy!',       emoji:'🏷️', desc:'Rental income doubled for all properties!',     type:'rent_mult',     mult:2.0,  duration:4, color:'#a29bfe' },
+  { id:'mountain_hype', name:'⛰️ Mountain Getaway!',    emoji:'⛰️', desc:'Mountain properties worth 2× — fresh air sells!', type:'location',    mult:2.0,  duration:3, color:'#55efc4', locationId:'mountain' },
+  { id:'forest_boom',   name:'🌲 Nature Escape!',       emoji:'🌲', desc:'Forest properties are hot — worth 1.8×!',       type:'location',      mult:1.8,  duration:3, color:'#74b849', locationId:'forest' },
+  { id:'island_mania',  name:'🏝️ Island Mania!',        emoji:'🏝️', desc:'Island properties worth 2.5× right now!',       type:'location',      mult:2.5,  duration:5, color:'#00cec9', locationId:'island' },
+  { id:'lake_fever',    name:'🏞️ Lake Life!',            emoji:'🏞️', desc:'Lakeside properties worth 2× — serene sells!',  type:'location',      mult:2.0,  duration:3, color:'#48cae4', locationId:'lakeside' },
+];
+
+const TENANT_TYPES = [
+  { id:'student',     name:'Student',      emoji:'🎓', rentMult:0.80, riskLabel:'Low Risk',  riskClass:'risk-low',  desc:'Pays 20% less but very reliable and tidy.' },
+  { id:'professional',name:'Professional', emoji:'💼', rentMult:1.00, riskLabel:'Low Risk',  riskClass:'risk-low',  desc:'Standard rent. Dependable professional.' },
+  { id:'family',      name:'Young Family', emoji:'👨‍👩‍👧',  rentMult:1.15, riskLabel:'Very Low', riskClass:'risk-low',  desc:'15% above standard rate. Long-term stay.' },
+  { id:'executive',   name:'Executive',    emoji:'🤵', rentMult:1.40, riskLabel:'Low Risk',  riskClass:'risk-low',  desc:'40% premium. Impeccable standards.' },
+  { id:'celebrity',   name:'Celebrity',    emoji:'🌟', rentMult:2.00, riskLabel:'High Risk', riskClass:'risk-high', desc:'Double rent! Parties & paparazzi included.' },
+];
+
+const LEVEL_THRESHOLDS = [0,200,500,1000,1800,3000,4500,6500,9000,12000,16000,21000,27000,35000,44000,55000,68000,83000,100000,120000,150000];
+const REP_TITLES = ['Novice','Apprentice','Builder','Designer','Developer','Architect','Mogul','Tycoon','Empire Lord','Legend'];
+
+// ═══════════════════════════════════════════════════════════
+// GAME STATE
+// ═══════════════════════════════════════════════════════════
+let G = {
+  money: 200000,
+  xp: 0, level: 1,
+  totalEarned: 200000, totalSpent: 0,
+  propertiesSold: 0, clientsCompleted: 0,
+  totalRoomsBuilt: 0, luxuryRooms: 0, premiumRooms: 0,
+  properties: [],
+  completedAchievements: [],
+  activeEvent: null, eventEndTime: 0,
+  marketHealth: 100,
+  totalDebt: 0, emergencyLoansUsed: 0,
+  lastRentTime: Date.now(),
+};
+let nextPropId = 1;
+
+// Active UI state
+let activePropId = null;
+let selectedCell  = null;   // {row, col} being targeted for placement
+let placingRoomType = null; // room type id being placed
+let selectedRoomIdx = null; // room index selected for design
+
+// ═══════════════════════════════════════════════════════════
+// UTILITIES
+// ═══════════════════════════════════════════════════════════
+function fmt(n) {
+  if (n >= 1e6) return '$' + (n/1e6).toFixed(2) + 'M';
+  if (n >= 1e3) return '$' + Math.round(n).toLocaleString();
+  return '$' + Math.round(n);
+}
+function fmtShort(n) {
+  if (n >= 1e6) return '$' + (n/1e6).toFixed(1) + 'M';
+  if (n >= 1000) return '$' + (n/1000).toFixed(0) + 'k';
+  return '$' + Math.round(n);
+}
+
+function toast(msg, type='', emoji='') {
+  const c = document.getElementById('toast-container');
+  const el = document.createElement('div');
+  el.className = 'toast ' + type;
+  el.textContent = (emoji ? emoji+' ' : '') + msg;
+  c.appendChild(el);
+  setTimeout(() => el.remove(), 3000);
+}
+
+function moneyFly(amount, positive=true) {
+  const el = document.createElement('div');
+  el.className = 'money-fly';
+  el.textContent = (positive ? '+' : '-') + fmtShort(Math.abs(amount));
+  el.style.cssText = `color:${positive?'var(--gold)':'#ff7675'};left:${30+Math.random()*40}%;top:${30+Math.random()*20}%;`;
+  document.getElementById('app').appendChild(el);
+  setTimeout(() => el.remove(), 1200);
+}
+
+function addMoney(amount) {
+  G.money += amount;
+  if (amount > 0) { G.totalEarned += amount; moneyFly(amount, true); }
+  else {
+    G.totalSpent += Math.abs(amount); moneyFly(amount, false);
+    if (G.money < 15000 && G.money >= 0 && !lowMoneyWarned) {
+      lowMoneyWarned = true;
+      setTimeout(() => toast('Funds are low! Check Finance for an Emergency Loan.', '', '⚠️'), 800);
+    }
+  }
+  if (G.money >= 20000) lowMoneyWarned = false;
+  updateHud();
+}
+
+function addXP(amount) {
+  G.xp += amount;
+  const prev = G.level;
+  while (G.level < LEVEL_THRESHOLDS.length && G.xp >= (LEVEL_THRESHOLDS[G.level] || Infinity)) G.level++;
+  if (G.level > prev) {
+    toast(`Level Up! Now Level ${G.level}`, 'levelup', '🎉');
+    checkUnlocks();
+  }
+  updateHud();
+  checkAchievements();
+}
+
+function updateHud() {
+  document.getElementById('hud-money-val').textContent = fmt(G.money);
+  document.getElementById('hud-level').textContent = 'Lv.' + G.level;
+  const cur = G.xp - (LEVEL_THRESHOLDS[G.level-1]||0);
+  const nxt = (LEVEL_THRESHOLDS[G.level]||LEVEL_THRESHOLDS[LEVEL_THRESHOLDS.length-1]) - (LEVEL_THRESHOLDS[G.level-1]||0);
+  document.getElementById('xp-fill').style.width = Math.min(100, (cur/nxt)*100) + '%';
+  const mh = Math.round(G.marketHealth);
+  const mhEl = document.getElementById('hud-market');
+  if (mhEl) {
+    const icon = mh >= 110 ? '📈' : mh <= 85 ? '📉' : '📊';
+    mhEl.textContent = `${icon} ${mh}%`;
+    mhEl.style.color = mh >= 110 ? '#55efc4' : mh <= 85 ? '#ff7675' : 'var(--text-dim)';
+  }
+}
+
+function checkUnlocks() {
+  const loc = LOCATIONS.find(l => l.unlockLevel === G.level);
+  if (loc) toast(`New location unlocked: ${loc.name}!`, 'gold', loc.emoji);
+}
+
+// ═══════════════════════════════════════════════════════════
+// MARKET EVENTS
+// ═══════════════════════════════════════════════════════════
+function getEventMult(prop) {
+  if (!G.activeEvent || Date.now() >= G.eventEndTime) return 1;
+  const ev = G.activeEvent;
+  if (ev.type === 'global_value') return ev.mult;
+  if (ev.type === 'location' && prop.locationId === ev.locationId) return ev.mult;
+  if (ev.type === 'style' && prop.rooms.some(r => r.style === ev.styleId)) return ev.mult;
+  if (ev.type === 'tier' && prop.rooms.some(r => r.tier === 'luxury' || r.tier === 'premium')) return ev.mult;
+  return 1;
+}
+
+function getEffectiveRoomCost(rt) {
+  if (G.activeEvent && G.activeEvent.type === 'cost_discount' && Date.now() < G.eventEndTime) {
+    return Math.round(rt.cost * G.activeEvent.mult);
+  }
+  return rt.cost;
+}
+
+function getRentMult() {
+  if (G.activeEvent && G.activeEvent.type === 'rent_mult' && Date.now() < G.eventEndTime) return G.activeEvent.mult;
+  return 1;
+}
+
+function setScreenTopPadding(px) {
+  ['map','portfolio','build','clients','achievements','finance'].forEach(id => {
+    const el = document.getElementById('screen-' + id);
+    if (el) el.style.paddingTop = px + 'px';
+  });
+}
+
+function triggerMarketEvent() {
+  const ev = MARKET_EVENTS[Math.floor(Math.random() * MARKET_EVENTS.length)];
+  G.activeEvent = ev;
+  G.eventEndTime = Date.now() + ev.duration * 60 * 1000;
+  const banner = document.getElementById('event-banner');
+  banner.style.background = ev.color + '22';
+  banner.style.borderBottomColor = ev.color + '55';
+  document.getElementById('ev-emoji').textContent = ev.emoji;
+  document.getElementById('ev-name').textContent = ev.name;
+  document.getElementById('ev-desc').textContent = ev.desc;
+  banner.classList.add('show');
+  setScreenTopPadding(110);
+  toast(`Market Event: ${ev.name}`, 'gold', ev.emoji);
+  if (document.getElementById('screen-build').classList.contains('active')) renderBuildMode();
+}
+
+function hideEventBanner() {
+  document.getElementById('event-banner').classList.remove('show');
+  G.activeEvent = null;
+  setScreenTopPadding(56);
+  if (document.getElementById('screen-build').classList.contains('active')) renderBuildMode();
+  toast('Market event ended.', '', '📊');
+}
+
+function updateEventCountdown() {
+  if (!G.activeEvent) return;
+  const remaining = Math.max(0, G.eventEndTime - Date.now());
+  if (remaining <= 0) { hideEventBanner(); return; }
+  const mins = Math.floor(remaining / 60000);
+  const secs = Math.floor((remaining % 60000) / 1000);
+  document.getElementById('ev-timer').textContent = `⏱ ${mins}:${secs.toString().padStart(2, '0')}`;
+}
+
+// ═══════════════════════════════════════════════════════════
+// SCREEN NAVIGATION
+// ═══════════════════════════════════════════════════════════
+const SCREENS_WITH_HUD = ['map','portfolio','build','clients','achievements','finance'];
+const HUD_BACK_MAP = { map:'menu', portfolio:'menu', build:'portfolio', clients:'menu', achievements:'menu', finance:'menu' };
+const HUD_TITLES = { map:'🗺️ World Map', portfolio:'🏘️ My Properties', build:'🏗️ Build Mode', clients:'🤝 Clients', achievements:'🏆 Achievements', finance:'💹 Finance' };
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+  const hud = document.getElementById('hud');
+  if (SCREENS_WITH_HUD.includes(id)) {
+    hud.style.display = 'flex';
+    document.getElementById('hud-title').textContent = HUD_TITLES[id] || 'Dream Home Empire';
+  } else {
+    hud.style.display = 'none';
+  }
+  // Render screen contents
+  if (id === 'map')          renderMap();
+  if (id === 'portfolio')    renderPortfolio();
+  if (id === 'clients')      renderClients();
+  if (id === 'achievements') renderAchievements();
+  if (id === 'finance')      renderFinance();
+  if (id === 'menu')         renderMenu();
+}
+
+function hudBack() {
+  const cur = document.querySelector('.screen.active');
+  if (!cur) return;
+  const id = cur.id.replace('screen-', '');
+  if (id === 'build') {
+    if (confirm('Leave build mode? Your property progress is saved.')) showScreen('portfolio');
+  } else {
+    showScreen(HUD_BACK_MAP[id] || 'menu');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// MENU
+// ═══════════════════════════════════════════════════════════
+function renderMenu() {
+  const pending = calcTotalPendingRent();
+  document.getElementById('rent-available-text').textContent = pending > 0 ? `Collect ${fmt(pending)}` : 'No rent due';
+  const rep = REP_TITLES[Math.min(Math.floor(G.level/2), REP_TITLES.length-1)];
+  document.getElementById('welcome-msg').textContent = `${rep} · Level ${G.level} · ${fmt(G.money)} available`;
+}
+
+// ═══════════════════════════════════════════════════════════
+// WORLD MAP
+// ═══════════════════════════════════════════════════════════
+function renderMap() {
+  const grid = document.getElementById('location-grid');
+  grid.innerHTML = '';
+  LOCATIONS.forEach(loc => {
+    const locked = G.level < loc.unlockLevel;
+    const card = document.createElement('div');
+    card.className = 'location-card' + (locked ? ' locked' : '');
+    card.style.background = `linear-gradient(135deg, ${loc.bg[0]}, ${loc.bg[1]})`;
+    card.innerHTML = `
+      ${locked ? `<div class="loc-unlock">🔒 Level ${loc.unlockLevel}</div>` : ''}
+      <div class="loc-bg">
+        <span class="loc-emoji">${loc.emoji}</span>
+        <div class="loc-name">${loc.name}</div>
+        <div class="loc-desc">${loc.desc}</div>
+        <div class="loc-price">From ${fmt(loc.plots[0].cost)} · ${loc.multiplier}× value</div>
+      </div>`;
+    if (!locked) card.onclick = () => openPlotModal(loc.id);
+    grid.appendChild(card);
+  });
+}
+
+let modalLocationId = null;
+function openPlotModal(locationId) {
+  modalLocationId = locationId;
+  const loc = LOCATIONS.find(l => l.id === locationId);
+  document.getElementById('modal-title').textContent = loc.emoji + ' ' + loc.name;
+  document.getElementById('modal-desc').textContent = 'Choose your plot size. Larger plots = more rooms possible.';
+  const opts = document.getElementById('plot-options');
+  opts.innerHTML = '';
+  loc.plots.forEach((plot, i) => {
+    const canAfford   = G.money >= plot.cost;
+    const downPmt     = Math.round(plot.cost * 0.3);
+    const canMortgage = G.money >= downPmt;
+    const btn = document.createElement('div');
+    btn.className = 'plot-btn' + (canAfford || canMortgage ? '' : ' disabled');
+    btn.innerHTML = `
+      <div class="plot-size">${plot.emoji}</div>
+      <div class="plot-label">${plot.label}</div>
+      <div class="plot-cost">${fmt(plot.cost)}</div>
+      <div style="font-size:10px;color:var(--text-dim);margin-top:2px;">${plot.gridW}×${plot.gridH} grid</div>
+      ${canAfford ? `<div style="font-size:10px;color:var(--green);margin-top:5px;">✅ Buy Outright</div>` : ''}
+      ${canMortgage ? `<div class="plot-mortgage-link" onclick="event.stopPropagation();closeModal();buyLand('${locationId}',${i},true);">🏦 Mortgage: ${fmt(downPmt)} down</div>` : ''}
+      ${!canMortgage ? `<div style="font-size:10px;color:var(--red);margin-top:5px;">Need ${fmt(downPmt)} min</div>` : ''}`;
+    if (canAfford) btn.onclick = () => { closeModal(); buyLand(locationId, i, false); };
+    else if (canMortgage) btn.onclick = () => { closeModal(); buyLand(locationId, i, true); };
+    opts.appendChild(btn);
+  });
+  document.getElementById('modal-overlay').style.display = 'flex';
+}
+
+function closeModal(e) {
+  if (e && e.target !== document.getElementById('modal-overlay')) return;
+  document.getElementById('modal-overlay').style.display = 'none';
+}
+
+// ═══════════════════════════════════════════════════════════
+// LAND PURCHASE & PROPERTY CREATION
+// ═══════════════════════════════════════════════════════════
+function buyLand(locationId, plotIdx, useMortgage = false) {
+  const loc = LOCATIONS.find(l => l.id === locationId);
+  const plot = loc.plots[plotIdx];
+  const downPayment = useMortgage ? Math.round(plot.cost * 0.3) : plot.cost;
+  const mortgageAmt  = useMortgage ? Math.round((plot.cost - Math.round(plot.cost * 0.3)) * 1.08) : 0;
+  if (G.money < downPayment) { toast('Not enough money!', '', '💸'); return; }
+  addMoney(-downPayment);
+  const prop = createProperty(locationId, plot);
+  prop.mortgage = mortgageAmt;
+  if (mortgageAmt > 0) {
+    G.totalDebt += mortgageAmt;
+    toast(`🏦 Mortgage taken: ${fmt(mortgageAmt)} owed at 8% interest. Repaid from rent.`, '', '🏦');
+  }
+  G.properties.push(prop);
+  addXP(50);
+  toast(`${plot.label} purchased in ${loc.name}!`, 'gold', loc.emoji);
+  activePropId = prop.id;
+  openBuildMode(prop.id);
+}
+
+function createProperty(locationId, plot) {
+  const loc = LOCATIONS.find(l => l.id === locationId);
+  const id = nextPropId++;
+  const grid = [];
+  for (let r = 0; r < plot.gridH; r++) { grid.push([]); for (let c = 0; c < plot.gridW; c++) grid[r].push(-1); }
+  return {
+    id, locationId, name: `${plot.label} #${id}`,
+    landCost: plot.cost, gridW: plot.gridW, gridH: plot.gridH,
+    grid,  // -1 = empty, otherwise = room index
+    rooms: [],
+    status: 'building',
+    isRented: false,
+    rentalStartTime: null,
+    totalSpentOnRooms: 0,
+    mortgage: 0,
+    tenantTypeId: null,
+  };
+}
+
+// ═══════════════════════════════════════════════════════════
+// PORTFOLIO
+// ═══════════════════════════════════════════════════════════
+function renderPortfolio() {
+  const list = document.getElementById('property-list');
+  const stats = document.getElementById('portfolio-stats');
+  const totalVal = G.properties.reduce((a, p) => a + calcPropertyValue(p), 0);
+  const rented = G.properties.filter(p => p.isRented).length;
+  stats.innerHTML = `
+    <div class="stat-chip">Properties: <span>${G.properties.length}</span></div>
+    <div class="stat-chip">Portfolio: <span>${fmtShort(totalVal)}</span></div>
+    <div class="stat-chip">Rented: <span>${rented}</span></div>
+  `;
+  if (!G.properties.length) {
+    list.innerHTML = `<div class="empty-portfolio"><span class="big-emoji">🏗️</span><p>No properties yet. Buy some land!</p><br><button class="btn-primary" onclick="showScreen('map')" style="margin-top:12px;">🗺️ Browse Locations</button></div>`;
+    return;
+  }
+  list.innerHTML = '';
+  G.properties.forEach(prop => {
+    const loc = LOCATIONS.find(l => l.id === prop.locationId);
+    const val = calcPropertyValue(prop);
+    const rooms = prop.rooms.length;
+    const pending = calcPendingRent(prop);
+    const card = document.createElement('div');
+    card.className = 'property-card';
+    const tenant = prop.tenantTypeId ? TENANT_TYPES.find(t => t.id === prop.tenantTypeId) : null;
+    const statusLabel = prop.isRented
+      ? (tenant ? `${tenant.emoji} ${tenant.name}` : '🏷 Rented')
+      : prop.status === 'building' ? '🔧 Building' : '✅ Ready';
+    card.innerHTML = `
+      <div class="prop-banner" style="background:linear-gradient(135deg,${loc.bg[0]},${loc.bg[1]})">
+        <span class="prop-banner-emoji">${loc.emoji}</span>
+        <div class="prop-banner-info"><h3>${prop.name}</h3><p>${loc.name}</p></div>
+        <span class="prop-status ${prop.isRented?'rented':prop.status}">${statusLabel}</span>
+      </div>
+      <div class="prop-stats">
+        <div class="prop-stat"><div class="prop-stat-val">${fmtShort(val)}</div><div class="prop-stat-lbl">Value</div></div>
+        <div class="prop-stat"><div class="prop-stat-val">${rooms}</div><div class="prop-stat-lbl">Rooms</div></div>
+        <div class="prop-stat"><div class="prop-stat-val">${getDesignRating(prop)}%</div><div class="prop-stat-lbl">Design</div></div>
+        ${pending > 0 ? `<div class="prop-stat"><div class="prop-stat-val" style="color:var(--green)">${fmtShort(pending)}</div><div class="prop-stat-lbl">Rent Due</div></div>` : ''}
+        ${prop.mortgage > 0 ? `<div class="prop-stat"><div class="prop-stat-val" style="color:#ff7675;">${fmtShort(prop.mortgage)}</div><div class="prop-stat-lbl">Mortgage</div></div>` : ''}
+      </div>`;
+    card.onclick = () => { activePropId = prop.id; openBuildMode(prop.id); };
+    list.appendChild(card);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+// PROPERTY VALUE CALCULATION
+// ═══════════════════════════════════════════════════════════
+function calcPropertyValue(prop) {
+  const loc = LOCATIONS.find(l => l.id === prop.locationId);
+  let base = 0;
+  prop.rooms.forEach(room => {
+    const rt = ROOM_TYPES.find(r => r.id === room.typeId);
+    const tier = FURNITURE_TIERS.find(t => t.id === room.tier);
+    const style = STYLES.find(s => s.id === room.style);
+    base += rt.value * tier.valueMult * (1 + style.bonus);
+  });
+  return Math.round(base * loc.multiplier * getEventMult(prop) * (G.marketHealth / 100));
+}
+
+function calcRoomValue(room) {
+  const rt = ROOM_TYPES.find(r => r.id === room.typeId);
+  const tier = FURNITURE_TIERS.find(t => t.id === room.tier);
+  const style = STYLES.find(s => s.id === room.style);
+  return Math.round(rt.value * tier.valueMult * (1 + style.bonus));
+}
+
+function getDesignRating(prop) {
+  if (!prop.rooms.length) return 0;
+  const luxRooms = prop.rooms.filter(r => r.tier === 'luxury').length;
+  const premRooms = prop.rooms.filter(r => r.tier === 'premium').length;
+  const styledRooms = prop.rooms.filter(r => r.style !== 'modern').length;
+  const score = (luxRooms * 3 + premRooms * 2 + styledRooms) / (prop.rooms.length * 3) * 100;
+  return Math.round(Math.min(100, score));
+}
+
+// ═══════════════════════════════════════════════════════════
+// BUILD MODE
+// ═══════════════════════════════════════════════════════════
+function openBuildMode(propId) {
+  activePropId = propId;
+  placingRoomType = null;
+  selectedRoomIdx = null;
+  closeDesignPanel();
+  showScreen('build');
+  renderBuildMode();
+}
+
+function renderBuildMode() {
+  const prop = G.properties.find(p => p.id === activePropId);
+  if (!prop) return;
+  const val = calcPropertyValue(prop);
+  document.getElementById('bi-value').textContent = fmtShort(val);
+  document.getElementById('bi-rooms').textContent = prop.rooms.length;
+  document.getElementById('bi-design').textContent = '⭐' + getDesignRating(prop) + '%';
+  renderGrid(prop);
+  renderRoomPicker(prop);
+  renderBuildActions(prop);
+}
+
+function renderGrid(prop) {
+  const grid = document.getElementById('property-grid');
+  grid.style.gridTemplateColumns = `repeat(${prop.gridW}, 62px)`;
+  grid.style.gridTemplateRows    = `repeat(${prop.gridH}, 56px)`;
+  grid.innerHTML = '';
+
+  for (let r = 0; r < prop.gridH; r++) {
+    for (let c = 0; c < prop.gridW; c++) {
+      const cell = document.createElement('div');
+      const roomIdx = prop.grid[r][c];
+      if (roomIdx === -1) {
+        cell.className = 'grid-cell';
+        if (placingRoomType) {
+          cell.style.border = '1px dashed rgba(247,201,72,0.4)';
+          cell.innerHTML = '<span style="font-size:18px;opacity:0.3;">+</span>';
+        }
+        cell.onclick = () => handleCellClick(r, c);
+      } else {
+        const room = prop.rooms[roomIdx];
+        const rt = ROOM_TYPES.find(x => x.id === room.typeId);
+        const tier = FURNITURE_TIERS.find(t => t.id === room.tier);
+        const isAnchor = (prop.grid[r][c] === roomIdx && isAnchorCell(prop, r, c, roomIdx));
+        cell.className = 'grid-cell occupied' + (isAnchor ? ' room-anchor' : ' room-fill') + (selectedRoomIdx === roomIdx ? ' room-selected' : '');
+        cell.style.background = hexToRgba(rt.color, 0.25);
+        cell.style.border = `1px solid ${hexToRgba(rt.color, 0.5)}`;
+        if (isAnchor) {
+          cell.innerHTML = `<span class="cell-emoji">${rt.emoji}</span><span class="cell-name">${rt.name}</span>`;
+        } else {
+          cell.style.background = hexToRgba(rt.color, 0.15);
+        }
+        cell.onclick = () => selectRoom(roomIdx);
+      }
+      grid.appendChild(cell);
+    }
+  }
+}
+
+function isAnchorCell(prop, r, c, roomIdx) {
+  for (let rr = 0; rr < r; rr++) if (prop.grid[rr][c] === roomIdx) return false;
+  for (let cc = 0; cc < c; cc++) if (prop.grid[r][cc] === roomIdx) return false;
+  return true;
+}
+
+function hexToRgba(hex, alpha) {
+  const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+
+function handleCellClick(row, col) {
+  if (!placingRoomType) {
+    // No room selected for placement — do nothing (picker handles it)
+    return;
+  }
+  placeRoom(activePropId, row, col, placingRoomType);
+}
+
+function placeRoom(propId, row, col, roomTypeId) {
+  const prop = G.properties.find(p => p.id === propId);
+  const rt = ROOM_TYPES.find(r => r.id === roomTypeId);
+  if (!rt) return;
+
+  // Check bounds
+  if (row + rt.h > prop.gridH || col + rt.w > prop.gridW) {
+    toast('Room does not fit here!', '', '⚠️');
+    const el = document.getElementById('property-grid');
+    el.classList.add('shake'); setTimeout(() => el.classList.remove('shake'), 300);
+    return;
+  }
+
+  // Check all cells free
+  for (let r = row; r < row + rt.h; r++) {
+    for (let c = col; c < col + rt.w; c++) {
+      if (prop.grid[r][c] !== -1) {
+        toast('Space already occupied!', '', '🚫');
+        return;
+      }
+    }
+  }
+
+  // Check cost
+  const effectiveCost = getEffectiveRoomCost(rt);
+  if (G.money < effectiveCost) { toast('Not enough money!', '', '💸'); return; }
+  addMoney(-effectiveCost);
+
+  const roomIdx = prop.rooms.length;
+  prop.rooms.push({ typeId: roomTypeId, tier: 'basic', style: 'modern', cells: [] });
+
+  for (let r = row; r < row + rt.h; r++) {
+    for (let c = col; c < col + rt.w; c++) {
+      prop.grid[r][c] = roomIdx;
+      prop.rooms[roomIdx].cells.push({r, c});
+    }
+  }
+
+  G.totalRoomsBuilt++;
+  prop.totalSpentOnRooms += effectiveCost;
+  addXP(20);
+  toast(`${rt.name} built!`, 'success', rt.emoji);
+
+  placingRoomType = null;
+  document.getElementById('cancel-place').style.display = 'none';
+  renderBuildMode();
+  selectRoom(roomIdx);
+}
+
+function renderRoomPicker(prop) {
+  const list = document.getElementById('room-picker-list');
+  list.innerHTML = '';
+  ROOM_TYPES.forEach(rt => {
+    const effectiveCost = getEffectiveRoomCost(rt);
+    const canAfford = G.money >= effectiveCost;
+    const btn = document.createElement('div');
+    btn.className = 'room-pick-btn' + (canAfford ? '' : ' disabled');
+    const onSale = effectiveCost < rt.cost;
+    const costHtml = onSale
+      ? `<span style="text-decoration:line-through;opacity:0.45;font-size:9px;">${fmtShort(rt.cost)}</span> <span style="color:#55efc4;">${fmtShort(effectiveCost)}</span>`
+      : fmtShort(effectiveCost);
+    btn.innerHTML = `<span class="rpb-emoji">${rt.emoji}</span><span class="rpb-name">${rt.name}</span><span class="rpb-cost">${costHtml}</span>`;
+    if (canAfford) btn.onclick = () => startPlacement(rt.id);
+    list.appendChild(btn);
+  });
+}
+
+function startPlacement(roomTypeId) {
+  placingRoomType = roomTypeId;
+  const rt = ROOM_TYPES.find(r => r.id === roomTypeId);
+  document.getElementById('cancel-place').style.display = 'block';
+  document.getElementById('room-picker').querySelector('.picker-title').textContent = `📍 TAP GRID TO PLACE: ${rt.name} (${rt.w}×${rt.h}) — ${fmtShort(rt.cost)}`;
+  closeDesignPanel();
+  selectedRoomIdx = null;
+  renderGrid(G.properties.find(p => p.id === activePropId));
+}
+
+function cancelPlacement() {
+  placingRoomType = null;
+  document.getElementById('cancel-place').style.display = 'none';
+  document.getElementById('room-picker').querySelector('.picker-title').textContent = 'TAP A ROOM TO PLACE IT  ·  Tap empty cell to build';
+  renderGrid(G.properties.find(p => p.id === activePropId));
+}
+
+function renderBuildActions(prop) {
+  const bar = document.getElementById('build-actions');
+  bar.innerHTML = '';
+  if (prop.isRented) {
+    const pending = calcPendingRent(prop);
+    if (pending > 0) {
+      const btn = document.createElement('button');
+      btn.className = 'ba-collect'; btn.textContent = `💵 Collect Rent ${fmtShort(pending)}`;
+      btn.onclick = () => collectRent(prop.id);
+      bar.appendChild(btn);
+    }
+    const stopBtn = document.createElement('button');
+    stopBtn.className = 'ba-sell'; stopBtn.textContent = '🏠 Stop Renting';
+    stopBtn.onclick = () => stopRenting(prop.id);
+    bar.appendChild(stopBtn);
+  } else {
+    if (prop.rooms.length >= 2) {
+      const val = calcPropertyValue(prop);
+      const salePrice = Math.round(val * 0.9);
+      const sellBtn = document.createElement('button');
+      sellBtn.className = 'ba-sell'; sellBtn.textContent = `🔨 Auction (est. ${fmtShort(Math.round(val * 0.9))}+)`;
+      sellBtn.onclick = () => sellProperty(prop.id);
+      bar.appendChild(sellBtn);
+
+      const rentBtn = document.createElement('button');
+      rentBtn.className = 'ba-rent'; rentBtn.textContent = `🏷 Find Tenant →`;
+      rentBtn.onclick = () => rentProperty(prop.id);
+      bar.appendChild(rentBtn);
+    } else {
+      const hint = document.createElement('button');
+      hint.className = 'ba-complete'; hint.style.opacity = '0.5'; hint.textContent = '🏗️ Keep Building...';
+      hint.disabled = true;
+      bar.appendChild(hint);
+    }
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// DESIGN PANEL
+// ═══════════════════════════════════════════════════════════
+function selectRoom(roomIdx) {
+  selectedRoomIdx = roomIdx;
+  placingRoomType = null;
+  document.getElementById('cancel-place').style.display = 'none';
+  openDesignPanel(roomIdx);
+  renderGrid(G.properties.find(p => p.id === activePropId));
+}
+
+function openDesignPanel(roomIdx) {
+  const prop = G.properties.find(p => p.id === activePropId);
+  const room = prop.rooms[roomIdx];
+  const rt = ROOM_TYPES.find(r => r.id === room.typeId);
+
+  document.getElementById('dp-room-name').textContent = rt.emoji + ' ' + rt.name;
+  document.getElementById('dp-room-desc').textContent = rt.desc;
+  updateDesignPanelValue();
+
+  // Tiers
+  const tiersEl = document.getElementById('dp-tiers');
+  tiersEl.innerHTML = '';
+  FURNITURE_TIERS.forEach(tier => {
+    const upgradeCost = Math.round(rt.cost * tier.costMult);
+    const canAfford = G.money >= upgradeCost || tier.id === 'basic';
+    const btn = document.createElement('div');
+    btn.className = 'tier-btn' + (room.tier === tier.id ? ' active' : '') + (canAfford ? '' : ' disabled');
+    btn.style.opacity = canAfford ? '1' : '0.4';
+    btn.innerHTML = `<span class="tb-emoji">${tier.emoji}</span><span class="tb-name">${tier.name}</span><span class="tb-cost">${upgradeCost > 0 ? fmtShort(upgradeCost) : 'Free'}</span>`;
+    if (canAfford) btn.onclick = () => setTier(tier.id);
+    tiersEl.appendChild(btn);
+  });
+
+  // Styles
+  const stylesEl = document.getElementById('dp-styles');
+  stylesEl.innerHTML = '';
+  STYLES.forEach(s => {
+    const btn = document.createElement('div');
+    btn.className = 'style-btn' + (room.style === s.id ? ' active' : '');
+    btn.innerHTML = `<span class="sb-emoji">${s.emoji}</span><span class="sb-name">${s.name}</span>`;
+    btn.onclick = () => setStyle(s.id);
+    stylesEl.appendChild(btn);
+  });
+
+  document.getElementById('design-panel').classList.add('open');
+}
+
+function closeDesignPanel() {
+  document.getElementById('design-panel').classList.remove('open');
+  selectedRoomIdx = null;
+}
+
+function setTier(tierId) {
+  const prop = G.properties.find(p => p.id === activePropId);
+  const room = prop.rooms[selectedRoomIdx];
+  const rt = ROOM_TYPES.find(r => r.id === room.typeId);
+  const tier = FURNITURE_TIERS.find(t => t.id === tierId);
+  const oldTier = FURNITURE_TIERS.find(t => t.id === room.tier);
+  const upgradeCost = Math.round(rt.cost * (tier.costMult - oldTier.costMult));
+  if (upgradeCost > 0 && G.money < upgradeCost) { toast('Not enough money!', '', '💸'); return; }
+  if (upgradeCost > 0) addMoney(-upgradeCost);
+  if (upgradeCost < 0) addMoney(-upgradeCost);  // Downgrade = refund
+  room.tier = tierId;
+  if (tierId === 'luxury') G.luxuryRooms++;
+  if (tierId === 'premium' || tierId === 'luxury') G.premiumRooms++;
+  toast(`${tier.name} furnishing applied!`, 'gold', tier.emoji);
+  addXP(10);
+  updateDesignPanelValue();
+  renderBuildMode();
+  openDesignPanel(selectedRoomIdx);
+}
+
+function setStyle(styleId) {
+  const prop = G.properties.find(p => p.id === activePropId);
+  prop.rooms[selectedRoomIdx].style = styleId;
+  const s = STYLES.find(x => x.id === styleId);
+  toast(`${s.emoji} ${s.name} style applied!`, 'success');
+  addXP(5);
+  updateDesignPanelValue();
+  renderBuildMode();
+  openDesignPanel(selectedRoomIdx);
+}
+
+function updateDesignPanelValue() {
+  const prop = G.properties.find(p => p.id === activePropId);
+  if (selectedRoomIdx === null || !prop) return;
+  const room = prop.rooms[selectedRoomIdx];
+  document.getElementById('dp-room-val').textContent = fmtShort(calcRoomValue(room));
+}
+
+function deleteRoom() {
+  if (selectedRoomIdx === null) return;
+  if (!confirm('Remove this room? You will receive a partial refund.')) return;
+  const prop = G.properties.find(p => p.id === activePropId);
+  const room = prop.rooms[selectedRoomIdx];
+  const rt = ROOM_TYPES.find(r => r.id === room.typeId);
+  const refund = Math.round(rt.cost * 0.5);
+  prop.rooms.splice(selectedRoomIdx, 1);
+  // Rebuild grid from scratch using remaining rooms' cell lists
+  for (let r = 0; r < prop.gridH; r++) for (let c = 0; c < prop.gridW; c++) prop.grid[r][c] = -1;
+  prop.rooms.forEach((rm, idx) => rm.cells.forEach(({r, c}) => { prop.grid[r][c] = idx; }));
+  addMoney(refund);
+  closeDesignPanel();
+  toast(`Room removed. Refund: ${fmtShort(refund)}`, '', '🔨');
+  renderBuildMode();
+}
+
+// ═══════════════════════════════════════════════════════════
+// SELL / RENT PROPERTIES
+// ═══════════════════════════════════════════════════════════
+function sellProperty(propId) {
+  startAuction(propId);
+}
+
+function rentProperty(propId) {
+  showTenantModal(propId);
+}
+
+function stopRenting(propId) {
+  const prop = G.properties.find(p => p.id === propId);
+  collectRent(propId);
+  prop.isRented = false;
+  prop.rentalStartTime = null;
+  prop.status = 'complete';
+  toast('Rental stopped.', '', '🏠');
+  renderBuildMode();
+}
+
+function calcPendingRent(prop) {
+  if (!prop.isRented || !prop.rentalStartTime) return 0;
+  const val = calcPropertyValue(prop);
+  const tenant = prop.tenantTypeId ? TENANT_TYPES.find(t => t.id === prop.tenantTypeId) : null;
+  const tenantMult = tenant ? tenant.rentMult : 1.0;
+  const dailyRate = val * 0.004 * tenantMult;
+  const daysPassed = (Date.now() - prop.rentalStartTime) / (1000 * 60);
+  return Math.round(dailyRate * Math.min(daysPassed, 30) * getRentMult());
+}
+
+function calcTotalPendingRent() {
+  return G.properties.reduce((a, p) => a + calcPendingRent(p), 0);
+}
+
+function collectRent(propId) {
+  const prop = G.properties.find(p => p.id === propId);
+  const pending = calcPendingRent(prop);
+  if (pending <= 0) { toast('No rent to collect yet!', '', '⏳'); return; }
+  let mortgagePayment = 0;
+  if (prop.mortgage > 0) {
+    mortgagePayment = Math.min(prop.mortgage, Math.round(pending * 0.25));
+    prop.mortgage = Math.max(0, prop.mortgage - mortgagePayment);
+    G.totalDebt = Math.max(0, G.totalDebt - mortgagePayment);
+    if (prop.mortgage === 0) toast('Mortgage fully paid off!', 'gold', '🏦');
+  }
+  const net = pending - mortgagePayment;
+  G.money += net; G.totalEarned += pending; G.totalSpent += mortgagePayment;
+  moneyFly(net, true); updateHud();
+  const msg = mortgagePayment > 0
+    ? `Rent ${fmt(pending)} − Mortgage ${fmt(mortgagePayment)} = ${fmt(net)}`
+    : `Rental income: ${fmt(pending)}!`;
+  toast(msg, 'gold', '💵');
+  prop.rentalStartTime = Date.now();
+  addXP(Math.floor(pending / 1000));
+  renderBuildMode();
+}
+
+function collectAllRent() {
+  let totalRent = 0, totalMortgage = 0;
+  G.properties.forEach(p => {
+    const pending = calcPendingRent(p);
+    if (pending > 0) {
+      let mp = 0;
+      if (p.mortgage > 0) {
+        mp = Math.min(p.mortgage, Math.round(pending * 0.25));
+        p.mortgage = Math.max(0, p.mortgage - mp);
+        G.totalDebt = Math.max(0, G.totalDebt - mp);
+      }
+      const net = pending - mp;
+      G.money += net; G.totalEarned += pending; G.totalSpent += mp;
+      totalRent += pending; totalMortgage += mp;
+      p.rentalStartTime = Date.now();
+    }
+  });
+  if (totalRent > 0) {
+    moneyFly(totalRent - totalMortgage, true); updateHud();
+    const net = totalRent - totalMortgage;
+    toast(totalMortgage > 0
+      ? `Rent ${fmt(totalRent)} − Mortgages ${fmt(totalMortgage)} = ${fmt(net)}`
+      : `Collected ${fmt(totalRent)} in rent!`, 'gold', '💵');
+  } else {
+    toast('No rent to collect.', '', '⏳');
+  }
+  renderMenu();
+}
+
+// ═══════════════════════════════════════════════════════════
+// CLIENTS
+// ═══════════════════════════════════════════════════════════
+function renderClients() {
+  const container = document.getElementById('client-cards');
+  container.innerHTML = '';
+  CLIENT_TEMPLATES.forEach(client => {
+    const completed = G.completedAchievements.includes('client_' + client.id);
+    const card = document.createElement('div');
+    card.className = 'client-card' + (completed ? ' completed' : '');
+    card.style.borderTopColor = client.color;
+    card.style.borderTopWidth = '3px';
+
+    const reqs = client.requirements;
+    const chips = [
+      `🏠 ${reqs.minRooms}+ rooms`,
+      `🛏 ${reqs.minBedrooms}+ bedrooms`,
+      ...reqs.preferredStyles.map(s => STYLES.find(x=>x.id===s).emoji + ' ' + s),
+      ...reqs.preferredLocations.map(l => LOCATIONS.find(x=>x.id===l).emoji + ' ' + LOCATIONS.find(x=>x.id===l).name),
+    ].map(r => `<span class="req-chip">${r}</span>`).join('');
+
+    const match = findBestMatchingProperty(client);
+    const canComplete = match !== null;
+
+    card.innerHTML = `
+      <div class="cc-top">
+        <div class="cc-avatar" style="background:${client.color}22;">${client.emoji}</div>
+        <div class="cc-info">
+          <h3>${client.name}</h3>
+          <div class="cc-title">${client.title}</div>
+          <div class="cc-budget">Budget: ${fmt(client.budget)}</div>
+        </div>
+      </div>
+      <div class="cc-desc">${client.description}</div>
+      <div class="cc-reqs">${chips}</div>
+      <div class="cc-bottom">
+        <div class="cc-reward">🏆 Reward: +${fmt(client.reward)} &nbsp; ⭐+${client.xpReward}xp</div>
+        ${completed ? '<span style="color:var(--green);font-weight:700;">✅ Completed</span>' :
+          `<button class="cc-match-btn" onclick="attemptClientMatch('${client.id}')" ${canComplete?'':'disabled'}>${canComplete ? '✅ Complete!' : '🔍 No Match'}</button>`}
+      </div>`;
+    container.appendChild(card);
+  });
+}
+
+function checkPropertyMatchesClient(prop, client) {
+  const req = client.requirements;
+  if (prop.isRented) return false;
+  if (prop.status === 'building' && prop.rooms.length < req.minRooms) return false;
+  const loc = LOCATIONS.find(l => l.id === prop.locationId);
+  if (!req.preferredLocations.includes(prop.locationId)) return false;
+  const bedrooms = prop.rooms.filter(r => ['bedroom','master'].includes(r.typeId)).length;
+  if (bedrooms < req.minBedrooms) return false;
+  if (prop.rooms.length < req.minRooms) return false;
+  const hasAllRequired = req.requiredRooms.every(rId => prop.rooms.some(r => r.typeId === rId));
+  if (!hasAllRequired) return false;
+  const hasStyle = req.preferredStyles.some(s => prop.rooms.some(r => r.style === s));
+  if (!hasStyle) return false;
+  const val = calcPropertyValue(prop);
+  if (val < client.budget * 0.3) return false;
+  return true;
+}
+
+function findBestMatchingProperty(client) {
+  return G.properties.find(p => checkPropertyMatchesClient(p, client)) || null;
+}
+
+function attemptClientMatch(clientId) {
+  const client = CLIENT_TEMPLATES.find(c => c.id === clientId);
+  const prop = findBestMatchingProperty(client);
+  if (!prop) { toast('No matching property found!', '', '❌'); return; }
+  if (!confirm(`Complete request from ${client.name}?\nProperty: "${prop.name}"\nReward: ${fmt(client.reward)} + ${client.xpReward}xp`)) return;
+  addMoney(client.reward);
+  addXP(client.xpReward);
+  G.clientsCompleted++;
+  G.completedAchievements.push('client_' + client.id);
+  // Mark property as sold to this client
+  const idx = G.properties.indexOf(prop);
+  G.properties.splice(idx, 1);
+  G.propertiesSold++;
+  toast(`${client.name} is thrilled! +${fmt(client.reward)}`, 'gold', '🎉');
+  checkAchievements();
+  renderClients();
+}
+
+// ═══════════════════════════════════════════════════════════
+// ACHIEVEMENTS
+// ═══════════════════════════════════════════════════════════
+function checkAchievements() {
+  ACHIEVEMENTS_DATA.forEach(ach => {
+    if (!G.completedAchievements.includes(ach.id) && ach.check(G)) {
+      G.completedAchievements.push(ach.id);
+      addXP(ach.xp);
+      toast(`Achievement unlocked: ${ach.name}!`, 'levelup', ach.emoji);
+    }
+  });
+}
+
+function renderAchievements() {
+  const grid = document.getElementById('ach-grid');
+  const count = G.completedAchievements.length;
+  document.getElementById('ach-progress-text').textContent = `${count} / ${ACHIEVEMENTS_DATA.length} unlocked`;
+  grid.innerHTML = '';
+  ACHIEVEMENTS_DATA.forEach(ach => {
+    const unlocked = G.completedAchievements.includes(ach.id);
+    const card = document.createElement('div');
+    card.className = 'ach-card' + (unlocked ? ' unlocked' : '');
+    card.innerHTML = `<span class="ach-emoji">${ach.emoji}</span><h4>${ach.name}</h4><p>${ach.desc}</p><div class="ach-xp">+${ach.xp} XP</div>`;
+    grid.appendChild(card);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+// FINANCE
+// ═══════════════════════════════════════════════════════════
+function renderFinance() {
+  const totalVal = G.properties.reduce((a, p) => a + calcPropertyValue(p), 0);
+  const rented = G.properties.filter(p => p.isRented);
+  const dailyIncome = rented.reduce((a, p) => a + Math.round(calcPropertyValue(p) * 0.004), 0);
+  const pendingRent = calcTotalPendingRent();
+  const rep = REP_TITLES[Math.min(Math.floor(G.level/2), REP_TITLES.length-1)];
+  document.getElementById('fin-balance').textContent = fmt(G.money);
+  document.getElementById('fin-earned').textContent  = fmt(G.totalEarned);
+  document.getElementById('fin-spent').textContent   = fmt(G.totalSpent);
+  document.getElementById('fin-props').textContent   = G.properties.length;
+  document.getElementById('fin-portval').textContent = fmt(totalVal);
+  document.getElementById('fin-rented').textContent  = rented.length;
+  document.getElementById('fin-daily').textContent   = fmt(dailyIncome) + '/day';
+  document.getElementById('fin-pending').textContent = fmt(pendingRent);
+  document.getElementById('fin-sold').textContent    = G.propertiesSold;
+  document.getElementById('fin-clients').textContent = G.clientsCompleted;
+  document.getElementById('fin-rooms').textContent   = G.totalRoomsBuilt;
+  document.getElementById('fin-rep').textContent     = rep;
+  const mh = Math.round(G.marketHealth);
+  const mhIcon = mh >= 110 ? '📈' : mh <= 85 ? '📉' : '📊';
+  const finMkt = document.getElementById('fin-market');
+  if (finMkt) { finMkt.textContent = `${mhIcon} ${mh}%`; finMkt.style.color = mh >= 110 ? '#55efc4' : mh <= 85 ? '#ff7675' : 'var(--text)'; }
+  const finDebt = document.getElementById('fin-debt');
+  if (finDebt) finDebt.textContent = fmt(G.totalDebt);
+  const finLoans = document.getElementById('fin-loans-used');
+  if (finLoans) finLoans.textContent = `${G.emergencyLoansUsed} / 3`;
+  const loanSection = document.getElementById('emergency-loan-section');
+  if (loanSection) loanSection.style.opacity = G.emergencyLoansUsed >= 3 ? '0.4' : '1';
+}
+
+// ═══════════════════════════════════════════════════════════
+// PASSIVE RENT TICK (every 60 seconds real time = 1 "day")
+// ═══════════════════════════════════════════════════════════
+setInterval(() => {
+  const pending = calcTotalPendingRent();
+  if (pending > 500) {
+    document.getElementById('rent-available-text').textContent = `Collect ${fmt(pending)}`;
+  }
+}, 10000);
+
+// ═══════════════════════════════════════════════════════════
+// MARKET HEALTH
+// ═══════════════════════════════════════════════════════════
+function updateMarketHealth() {
+  const drift = (Math.random() - 0.48) * 3.5;
+  G.marketHealth = Math.max(65, Math.min(135, G.marketHealth + drift));
+  updateHud();
+}
+
+// ═══════════════════════════════════════════════════════════
+// UTILITY
+// ═══════════════════════════════════════════════════════════
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+let lowMoneyWarned = false;
+
+// ═══════════════════════════════════════════════════════════
+// TENANT SELECTION
+// ═══════════════════════════════════════════════════════════
+let tenantModalPropId = null;
+
+function showTenantModal(propId) {
+  tenantModalPropId = propId;
+  const prop = G.properties.find(p => p.id === propId);
+  const val = calcPropertyValue(prop);
+  const baseDailyRate = Math.round(val * 0.004);
+  const options = shuffle(TENANT_TYPES).slice(0, 3);
+  const container = document.getElementById('tenant-cards');
+  container.innerHTML = '';
+  options.forEach(tenant => {
+    const dailyRent = Math.round(baseDailyRate * tenant.rentMult);
+    const card = document.createElement('div');
+    card.className = 'tenant-card';
+    card.innerHTML = `
+      <div class="tenant-avatar">${tenant.emoji}</div>
+      <div class="tenant-info">
+        <h4>${tenant.name}</h4>
+        <p>${tenant.desc}</p>
+        <span class="tenant-risk ${tenant.riskClass}">${tenant.riskLabel}</span>
+      </div>
+      <div style="text-align:right;flex-shrink:0;">
+        <div class="tenant-rent">${fmt(dailyRent)}</div>
+        <div style="font-size:10px;color:var(--text-dim);">per day</div>
+      </div>`;
+    card.onclick = () => selectTenant(propId, tenant.id);
+    container.appendChild(card);
+  });
+  document.getElementById('tenant-modal').style.display = 'flex';
+}
+
+function closeTenantModal(e) {
+  if (e && e.target !== document.getElementById('tenant-modal')) return;
+  document.getElementById('tenant-modal').style.display = 'none';
+}
+
+function selectTenant(propId, tenantTypeId) {
+  document.getElementById('tenant-modal').style.display = 'none';
+  const prop = G.properties.find(p => p.id === propId);
+  const tenant = TENANT_TYPES.find(t => t.id === tenantTypeId);
+  prop.isRented = true;
+  prop.rentalStartTime = Date.now();
+  prop.status = 'rented';
+  prop.tenantTypeId = tenantTypeId;
+  const val = calcPropertyValue(prop);
+  const daily = Math.round(val * 0.004 * tenant.rentMult);
+  toast(`${tenant.emoji} ${tenant.name} moved in! ${fmt(daily)}/day`, 'gold', '🏷️');
+  addXP(50);
+  renderBuildMode();
+}
+
+// ═══════════════════════════════════════════════════════════
+// AUCTION SYSTEM
+// ═══════════════════════════════════════════════════════════
+const AUCTION_BIDDERS = ['Mike R.','Sarah L.','Dev Corp.','The Kims','LuxGroup','NestCo','Hira M.','James T.','Capital Inv.','BuildRight LLC'];
+let auctionState = null;
+
+function startAuction(propId) {
+  const prop = G.properties.find(p => p.id === propId);
+  if (!prop) return;
+  const val = calcPropertyValue(prop);
+  const bidders = shuffle([...AUCTION_BIDDERS]).slice(0, 2 + Math.floor(Math.random() * 4));
+  auctionState = { propId, currentBid: Math.round(val * 0.82), baseValue: val, bidders, activeBidder: -1, timeLeft: 18 };
+  document.getElementById('auction-prop-name').textContent = `"${prop.name}" — Market Value: ${fmt(val)}`;
+  document.getElementById('auction-bid-display').textContent = fmt(auctionState.currentBid);
+  document.getElementById('auction-bid-label').textContent = '🔔 Bidding opens…';
+  document.getElementById('auction-timer-fill').style.width = '100%';
+  renderAuctionBidders();
+  document.getElementById('auction-modal').style.display = 'flex';
+  auctionState.interval = setInterval(auctionTick, 1600);
+}
+
+function auctionTick() {
+  if (!auctionState) return;
+  auctionState.timeLeft -= 1.6;
+  document.getElementById('auction-timer-fill').style.width = Math.max(0, (auctionState.timeLeft / 18) * 100) + '%';
+  auctionState.currentBid = Math.round(auctionState.currentBid * (1 + 0.03 + Math.random() * 0.07));
+  auctionState.activeBidder = Math.floor(Math.random() * auctionState.bidders.length);
+  const bidEl = document.getElementById('auction-bid-display');
+  bidEl.textContent = fmt(auctionState.currentBid);
+  bidEl.classList.remove('pop'); void bidEl.offsetWidth; bidEl.classList.add('pop');
+  document.getElementById('auction-bid-label').textContent = `🔥 ${auctionState.bidders[auctionState.activeBidder]} just bid!`;
+  renderAuctionBidders();
+  if (auctionState.timeLeft <= 0) autoAcceptAuction();
+}
+
+function renderAuctionBidders() {
+  document.getElementById('auction-bidders').innerHTML = auctionState.bidders.map((b, i) =>
+    `<span class="bidder-chip${i === auctionState.activeBidder ? ' active' : ''}">${b}</span>`).join('');
+}
+
+function acceptAuction() {
+  if (!auctionState) return;
+  clearInterval(auctionState.interval);
+  const { propId, currentBid } = auctionState;
+  auctionState = null;
+  document.getElementById('auction-modal').style.display = 'none';
+  completeSale(propId, currentBid);
+}
+
+function autoAcceptAuction() {
+  clearInterval(auctionState.interval);
+  const { propId, currentBid } = auctionState;
+  auctionState = null;
+  document.getElementById('auction-modal').style.display = 'none';
+  toast('Auction ended — best bid accepted!', 'gold', '🔨');
+  completeSale(propId, currentBid);
+}
+
+function cancelAuction() {
+  if (!auctionState) return;
+  clearInterval(auctionState.interval);
+  auctionState = null;
+  document.getElementById('auction-modal').style.display = 'none';
+  toast('Auction cancelled.', '', '❌');
+}
+
+function completeSale(propId, salePrice) {
+  const prop = G.properties.find(p => p.id === propId);
+  const mortgage = prop.mortgage || 0;
+  const net = salePrice - mortgage;
+  if (mortgage > 0) {
+    G.totalDebt = Math.max(0, G.totalDebt - mortgage);
+    toast(`Mortgage ${fmt(mortgage)} repaid from sale.`, '', '🏦');
+  }
+  addMoney(net);
+  addXP(100 + prop.rooms.length * 10);
+  G.propertiesSold++;
+  G.properties.splice(G.properties.indexOf(prop), 1);
+  toast(`Sold for ${fmt(salePrice)}! Net: ${fmt(net)}`, 'gold', '💰');
+  checkAchievements();
+  showScreen('portfolio');
+}
+
+// ═══════════════════════════════════════════════════════════
+// EMERGENCY LOAN
+// ═══════════════════════════════════════════════════════════
+function getEmergencyLoan() {
+  if (G.emergencyLoansUsed >= 3) { toast('Emergency loan limit reached! (3/3)', '', '🏦'); return; }
+  const loanAmt = 75000, totalOwed = 90000;
+  if (!confirm(`🏦 Emergency Loan\n\nReceive: $75,000 now\nYou owe: $90,000 (20% interest)\nAuto-repaid when you sell a property.\nLoans used: ${G.emergencyLoansUsed}/3\n\nProceed?`)) return;
+  G.money += loanAmt;
+  G.totalDebt += totalOwed;
+  G.totalEarned += loanAmt;
+  G.emergencyLoansUsed++;
+  lowMoneyWarned = false;
+  updateHud();
+  toast(`Emergency loan of $75,000 received!`, 'gold', '🏦');
+  renderFinance();
+}
+
+// Market event: first fires after 60s, then every ~2.5 min
+setTimeout(triggerMarketEvent, 60000);
+setInterval(() => {
+  if (!G.activeEvent || Date.now() >= G.eventEndTime) triggerMarketEvent();
+}, 150000);
+setInterval(updateEventCountdown, 1000);
+setInterval(updateMarketHealth, 30000);
+
+// ═══════════════════════════════════════════════════════════
+// SPLASH SCREEN & INIT
+// ═══════════════════════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', () => {
+  let p = 0;
+  const prog = document.getElementById('splash-prog');
+  const interval = setInterval(() => {
+    p += Math.random() * 15 + 8;
+    prog.style.width = Math.min(p, 100) + '%';
+    if (p >= 100) { clearInterval(interval); setTimeout(launchGame, 300); }
+  }, 80);
+});
+
+function launchGame() {
+  updateHud();
+  showScreen('menu');
+}
+</script>
+</body>
+</html>
