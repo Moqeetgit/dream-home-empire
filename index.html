@@ -478,6 +478,55 @@ html,body { height:100%; background:var(--bg); font-family:'Segoe UI',system-ui,
 }
 
 /* ═══════════════════════════════════════════
+   WELCOME & CHALLENGE SCREENS
+═══════════════════════════════════════════ */
+#screen-welcome, #screen-challenge {
+  align-items:center; justify-content:center;
+  background:radial-gradient(ellipse at 30% 60%, #1a1a4e 0%, #0f0f1a 60%);
+  overflow-y:auto;
+}
+.welcome-logo { font-size:72px; animation:float 3s ease-in-out infinite; margin-bottom:16px; }
+.welcome-title { font-size:32px; font-weight:900; margin-bottom:8px; text-align:center;
+  background:linear-gradient(135deg,#f7c948,#ff6b6b,#a29bfe); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
+.welcome-sub { color:var(--text-dim); font-size:15px; margin-bottom:28px; }
+.name-input { width:100%; padding:14px 18px; background:var(--surface); border:2px solid var(--border);
+  border-radius:30px; color:var(--text); font-size:16px; outline:none; text-align:center;
+  transition:border-color 0.2s; margin-bottom:12px; }
+.name-input:focus { border-color:var(--gold); }
+.name-input::placeholder { color:var(--text-dim); }
+.welcome-actions { display:flex; flex-direction:column; gap:10px; width:100%; align-items:center; }
+.continue-section { margin-top:22px; padding-top:22px; border-top:1px solid var(--border); width:100%; text-align:center; }
+.continue-section p { color:var(--text-dim); font-size:13px; margin-bottom:10px; }
+.challenge-options { display:flex; flex-direction:column; gap:10px; width:100%; max-width:360px; padding:0 16px 40px; }
+.challenge-option { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+  padding:16px 20px; cursor:pointer; display:flex; align-items:center; gap:14px;
+  transition:transform 0.15s, border-color 0.15s; touch-action:manipulation; }
+.challenge-option:hover, .challenge-option:active { transform:translateX(5px); border-color:var(--gold); }
+.co-emoji { font-size:28px; flex-shrink:0; }
+.co-info h4 { font-size:15px; font-weight:800; }
+.co-info p { font-size:12px; color:var(--text-dim); margin-top:2px; }
+.co-badge { margin-left:auto; font-size:11px; padding:3px 10px; border-radius:12px; font-weight:700; flex-shrink:0; }
+.co-badge-green { background:rgba(46,204,113,0.15); color:#55efc4; }
+.co-badge-gold  { background:rgba(247,201,72,0.15); color:var(--gold); }
+.co-badge-red   { background:rgba(231,76,60,0.15); color:#ff7675; }
+.hud-timer { color:#ff9f43; font-weight:800; }
+.hud-timer.urgent { color:#ff7675; animation:pulse 0.7s ease infinite; }
+
+/* Results screen */
+#screen-results { align-items:center; justify-content:flex-start; overflow-y:auto;
+  background:radial-gradient(ellipse at 50% 20%, #1a2a1a 0%, #0f0f1a 60%); }
+.results-content { padding:40px 20px; width:100%; max-width:420px; text-align:center; }
+.results-trophy { font-size:80px; animation:popIn 0.5s ease; display:block; margin-bottom:12px; }
+.results-title { font-size:28px; font-weight:900; margin-bottom:4px;
+  background:linear-gradient(135deg,#f7c948,#55efc4); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
+.results-sub { color:var(--text-dim); font-size:14px; margin-bottom:24px; }
+.results-stats { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:20px; margin-bottom:20px; text-align:left; }
+.rs-row { display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--border); font-size:14px; }
+.rs-row:last-child { border-bottom:none; }
+.rs-val { font-weight:700; color:var(--gold); }
+.results-actions { display:flex; flex-direction:column; gap:10px; }
+
+/* ═══════════════════════════════════════════
    TENANT & AUCTION MODALS
 ═══════════════════════════════════════════ */
 .tenant-cards { display:flex; flex-direction:column; gap:10px; margin:10px 0; }
@@ -528,6 +577,7 @@ html,body { height:100%; background:var(--bg); font-family:'Segoe UI',system-ui,
     <button id="hud-back" onclick="hudBack()">← Back</button>
     <span id="hud-title">Dream Home Empire</span>
     <div class="hud-stat" id="hud-money">💰 <span id="hud-money-val">$50,000</span></div>
+    <div class="hud-stat hud-timer" id="hud-timer" style="display:none;font-size:13px;">⏰ 00:00</div>
     <div class="hud-stat" id="hud-market" style="font-size:12px;color:var(--text-dim);">📊 100%</div>
     <div class="hud-stat" style="flex-direction:column;gap:2px;padding:6px 12px;">
       <span id="hud-level">Lv.1</span>
@@ -551,6 +601,75 @@ html,body { height:100%; background:var(--bg); font-family:'Segoe UI',system-ui,
     <div class="splash-title">Dream Home Empire</div>
     <div class="splash-sub">Design • Build • Rule</div>
     <div class="splash-bar"><div class="splash-progress" id="splash-prog" style="width:0%"></div></div>
+  </div>
+
+  <!-- WELCOME -->
+  <div id="screen-welcome" class="screen">
+    <span class="welcome-logo">🏠</span>
+    <div class="welcome-title">Dream Home Empire</div>
+    <div class="welcome-sub">Design • Build • Rule</div>
+    <div style="width:100%;max-width:300px;padding:0 20px;">
+      <input type="text" class="name-input" id="player-name-input" placeholder="Enter your name…" maxlength="20" onkeydown="if(event.key==='Enter')startWithName()" />
+      <div class="welcome-actions">
+        <button class="btn-primary" onclick="startWithName()" style="width:100%;">🚀 Let's Play!</button>
+        <button class="btn-secondary" onclick="playAnonymous()" style="width:100%;">🎭 Play Anonymous</button>
+      </div>
+      <div class="continue-section" id="continue-section" style="display:none;">
+        <p>You have a saved game!</p>
+        <button class="btn-primary" id="continue-btn" onclick="continueGame()" style="width:100%;background:linear-gradient(135deg,#00b894,#00cec9);">▶ Continue</button>
+        <button class="btn-secondary" onclick="discardSave()" style="width:100%;margin-top:8px;font-size:12px;">🗑 Start Fresh</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHALLENGE SELECT -->
+  <div id="screen-challenge" class="screen">
+    <div style="padding:50px 0 20px;text-align:center;">
+      <div style="font-size:22px;font-weight:800;" id="challenge-greeting">Hi there! 👋</div>
+      <div style="color:var(--text-dim);font-size:14px;margin-top:6px;">Choose how you want to play</div>
+    </div>
+    <div class="challenge-options">
+      <div class="challenge-option" onclick="selectChallenge(0)">
+        <span class="co-emoji">🕹️</span>
+        <div class="co-info"><h4>Free Play</h4><p>No time limit — build at your own pace</p></div>
+        <span class="co-badge co-badge-green">Relaxed</span>
+      </div>
+      <div class="challenge-option" onclick="selectChallenge(5)">
+        <span class="co-emoji">⚡</span>
+        <div class="co-info"><h4>5 Min Sprint</h4><p>Quick fire — move fast!</p></div>
+        <span class="co-badge co-badge-gold">Easy</span>
+      </div>
+      <div class="challenge-option" onclick="selectChallenge(10)">
+        <span class="co-emoji">🏆</span>
+        <div class="co-info"><h4>10 Min Challenge</h4><p>The classic — balanced and fun</p></div>
+        <span class="co-badge co-badge-gold">Medium</span>
+      </div>
+      <div class="challenge-option" onclick="selectChallenge(15)">
+        <span class="co-emoji">⚔️</span>
+        <div class="co-info"><h4>15 Min Expert</h4><p>For serious empire builders</p></div>
+        <span class="co-badge co-badge-red">Hard</span>
+      </div>
+      <div class="challenge-option" onclick="selectChallenge(30)">
+        <span class="co-emoji">🌟</span>
+        <div class="co-info"><h4>30 Min Marathon</h4><p>Build the ultimate empire</p></div>
+        <span class="co-badge co-badge-red">Epic</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div id="screen-results" class="screen">
+    <div class="results-content">
+      <span class="results-trophy" id="results-trophy">🏆</span>
+      <div class="results-title" id="results-title">Time's Up!</div>
+      <div class="results-sub" id="results-sub"></div>
+      <div class="results-stats" id="results-stats"></div>
+      <div class="results-actions">
+        <button class="btn-primary" onclick="shareScore()" style="width:100%;">📤 Share Score</button>
+        <button class="btn-primary" onclick="playAgain()" style="width:100%;background:linear-gradient(135deg,#6c5ce7,#a29bfe);">🔄 Play Again</button>
+        <button class="btn-secondary" onclick="continueFreePlay()" style="width:100%;">🕹️ Continue in Free Play</button>
+      </div>
+    </div>
   </div>
 
   <!-- MENU -->
@@ -881,6 +1000,8 @@ let G = {
   activeEvent: null, eventEndTime: 0,
   marketHealth: 100,
   totalDebt: 0, emergencyLoansUsed: 0,
+  playerName: 'Anonymous', isAnonymous: true,
+  challengeEndTime: 0, challengeDuration: 0,
   lastRentTime: Date.now(),
 };
 let nextPropId = 1;
@@ -1078,7 +1199,8 @@ function renderMenu() {
   const pending = calcTotalPendingRent();
   document.getElementById('rent-available-text').textContent = pending > 0 ? `Collect ${fmt(pending)}` : 'No rent due';
   const rep = REP_TITLES[Math.min(Math.floor(G.level/2), REP_TITLES.length-1)];
-  document.getElementById('welcome-msg').textContent = `${rep} · Level ${G.level} · ${fmt(G.money)} available`;
+  const nameTag = G.isAnonymous ? '🎭 Anonymous' : `👋 ${G.playerName}`;
+  document.getElementById('welcome-msg').textContent = `${nameTag} · ${rep} · Level ${G.level} · ${fmt(G.money)}`;
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -1623,6 +1745,7 @@ function collectRent(propId) {
   toast(msg, 'gold', '💵');
   prop.rentalStartTime = Date.now();
   addXP(Math.floor(pending / 1000));
+  saveGame();
   renderBuildMode();
 }
 
@@ -1810,6 +1933,163 @@ setInterval(() => {
 }, 10000);
 
 // ═══════════════════════════════════════════════════════════
+// SAVE / LOAD
+// ═══════════════════════════════════════════════════════════
+function saveGame() {
+  try { localStorage.setItem('dhe_save', JSON.stringify({ G, nextPropId })); } catch(e) {}
+}
+
+function loadGame() {
+  try {
+    const raw = localStorage.getItem('dhe_save');
+    if (!raw) return false;
+    const save = JSON.parse(raw);
+    Object.assign(G, save.G);
+    if (save.nextPropId) nextPropId = save.nextPropId;
+    G.challengeEndTime = 0; G.challengeDuration = 0;
+    return true;
+  } catch(e) { return false; }
+}
+
+function hasSave() { return !!localStorage.getItem('dhe_save'); }
+function clearSave() { localStorage.removeItem('dhe_save'); }
+
+function getSavedName() {
+  try { return JSON.parse(localStorage.getItem('dhe_save'))?.G?.playerName || 'Player'; } catch(e) { return 'Player'; }
+}
+
+// ═══════════════════════════════════════════════════════════
+// WELCOME / NAME / CHALLENGE FLOW
+// ═══════════════════════════════════════════════════════════
+function initWelcome() {
+  const sec = document.getElementById('continue-section');
+  if (hasSave()) {
+    sec.style.display = 'block';
+    document.getElementById('continue-btn').textContent = `▶ Continue as ${getSavedName()}`;
+  } else {
+    sec.style.display = 'none';
+  }
+}
+
+function startWithName() {
+  const input = document.getElementById('player-name-input');
+  const name = input.value.trim();
+  if (!name) { input.style.borderColor = 'var(--red)'; input.focus(); return; }
+  input.style.borderColor = '';
+  G.playerName = name; G.isAnonymous = false;
+  showChallengeSelect();
+}
+
+function playAnonymous() {
+  G.playerName = 'Anonymous'; G.isAnonymous = true;
+  showChallengeSelect();
+}
+
+function continueGame() {
+  if (!loadGame()) { clearSave(); initWelcome(); return; }
+  updateHud(); showScreen('menu'); renderMenu();
+  toast(`Welcome back, ${G.playerName}! 👋`, 'gold', '🏠');
+}
+
+function discardSave() {
+  if (!confirm('Delete saved game and start fresh?')) return;
+  clearSave();
+  document.getElementById('continue-section').style.display = 'none';
+}
+
+function showChallengeSelect() {
+  document.getElementById('challenge-greeting').textContent =
+    G.isAnonymous ? 'Hey there! 👋' : `Hey ${G.playerName}! 👋`;
+  showScreen('challenge');
+}
+
+function selectChallenge(minutes) {
+  if (minutes > 0) {
+    G.challengeEndTime = Date.now() + minutes * 60 * 1000;
+    G.challengeDuration = minutes;
+    document.getElementById('hud-timer').style.display = 'flex';
+  } else {
+    G.challengeEndTime = 0; G.challengeDuration = 0;
+    document.getElementById('hud-timer').style.display = 'none';
+  }
+  showScreen('menu'); renderMenu(); updateHud();
+  if (minutes > 0) toast(`${minutes}-minute challenge — GO!`, 'gold', '⏰');
+}
+
+// ═══════════════════════════════════════════════════════════
+// CHALLENGE TIMER & RESULTS
+// ═══════════════════════════════════════════════════════════
+function updateChallengeTimer() {
+  if (!G.challengeEndTime) return;
+  const remaining = Math.max(0, G.challengeEndTime - Date.now());
+  if (remaining <= 0) { endChallenge(); return; }
+  const mins = Math.floor(remaining / 60000);
+  const secs = Math.floor((remaining % 60000) / 1000);
+  const el = document.getElementById('hud-timer');
+  if (el) {
+    el.textContent = `⏰ ${mins}:${secs.toString().padStart(2, '0')}`;
+    el.className = 'hud-stat hud-timer' + (mins === 0 ? ' urgent' : '');
+  }
+  if (remaining <= 60000 && remaining > 59000) toast('1 minute left!', '', '⏰');
+}
+
+function endChallenge() {
+  G.challengeEndTime = 0;
+  document.getElementById('hud-timer').style.display = 'none';
+  saveGame();
+  renderResults();
+  showScreen('results');
+}
+
+function renderResults() {
+  const totalVal = G.properties.reduce((a, p) => a + calcPropertyValue(p), 0);
+  const score = totalVal + G.money;
+  const trophy = score >= 2000000 ? '🏆' : score >= 1000000 ? '🥇' : score >= 500000 ? '🥈' : '🥉';
+  const title  = score >= 2000000 ? 'Empire Tycoon!' : score >= 1000000 ? 'Millionaire!' : score >= 500000 ? 'Great Work!' : 'Keep Building!';
+  const name = G.isAnonymous ? 'Anonymous' : G.playerName;
+  document.getElementById('results-trophy').textContent = trophy;
+  document.getElementById('results-title').textContent = title;
+  document.getElementById('results-sub').textContent = `${G.challengeDuration}-min challenge · ${name}`;
+  document.getElementById('results-stats').innerHTML = `
+    <div class="rs-row"><span>💰 Final Balance</span><span class="rs-val">${fmt(G.money)}</span></div>
+    <div class="rs-row"><span>🏘️ Portfolio Value</span><span class="rs-val">${fmt(totalVal)}</span></div>
+    <div class="rs-row"><span>💎 Total Score</span><span class="rs-val">${fmt(score)}</span></div>
+    <div class="rs-row"><span>🏠 Properties Sold</span><span class="rs-val">${G.propertiesSold}</span></div>
+    <div class="rs-row"><span>🔨 Rooms Built</span><span class="rs-val">${G.totalRoomsBuilt}</span></div>
+    <div class="rs-row"><span>⭐ Level Reached</span><span class="rs-val">Level ${G.level}</span></div>`;
+}
+
+function shareScore() {
+  const totalVal = G.properties.reduce((a, p) => a + calcPropertyValue(p), 0);
+  const score = fmt(totalVal + G.money);
+  const name = G.isAnonymous ? 'An anonymous player' : G.playerName;
+  const text = `🏠 ${name} scored ${score} in a ${G.challengeDuration}-min Dream Home Empire challenge!\nCan you beat it? 👉 https://moqeetgit.github.io/dream-home-empire`;
+  navigator.clipboard?.writeText(text)
+    .then(() => toast('Copied to clipboard! Share with friends.', 'gold', '📤'))
+    .catch(() => toast('Score: ' + score, 'gold', '🏆'));
+}
+
+function playAgain() {
+  clearSave();
+  Object.assign(G, {
+    money:200000, xp:0, level:1, totalEarned:200000, totalSpent:0,
+    propertiesSold:0, clientsCompleted:0, totalRoomsBuilt:0,
+    luxuryRooms:0, premiumRooms:0, properties:[], completedAchievements:[],
+    activeEvent:null, eventEndTime:0, marketHealth:100,
+    totalDebt:0, emergencyLoansUsed:0, challengeEndTime:0, challengeDuration:0,
+    playerName:G.playerName, isAnonymous:G.isAnonymous, lastRentTime:Date.now(),
+  });
+  nextPropId = 1; lowMoneyWarned = false;
+  showChallengeSelect();
+}
+
+function continueFreePlay() {
+  G.challengeEndTime = 0; G.challengeDuration = 0;
+  document.getElementById('hud-timer').style.display = 'none';
+  showScreen('menu'); renderMenu();
+}
+
+// ═══════════════════════════════════════════════════════════
 // MARKET HEALTH
 // ═══════════════════════════════════════════════════════════
 function updateMarketHealth() {
@@ -1965,6 +2245,7 @@ function completeSale(propId, salePrice) {
   G.properties.splice(G.properties.indexOf(prop), 1);
   toast(`Sold for ${fmt(salePrice)}! Net: ${fmt(net)}`, 'gold', '💰');
   checkAchievements();
+  saveGame();
   showScreen('portfolio');
 }
 
@@ -1992,6 +2273,8 @@ setInterval(() => {
 }, 150000);
 setInterval(updateEventCountdown, 1000);
 setInterval(updateMarketHealth, 30000);
+setInterval(updateChallengeTimer, 1000);
+setInterval(saveGame, 60000);
 
 // ═══════════════════════════════════════════════════════════
 // SPLASH SCREEN & INIT
@@ -2008,7 +2291,8 @@ window.addEventListener('DOMContentLoaded', () => {
 
 function launchGame() {
   updateHud();
-  showScreen('menu');
+  initWelcome();
+  showScreen('welcome');
 }
 </script>
 </body>
