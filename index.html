@@ -197,9 +197,12 @@ html,body { height:100%; background:var(--bg); font-family:'Segoe UI',system-ui,
 .room-pick-btn:hover { transform:scale(1.06); border-color:var(--gold); }
 .room-pick-btn.disabled { opacity:0.35; cursor:not-allowed; }
 .room-pick-btn.disabled:hover { transform:none; border-color:var(--border); }
+.room-pick-btn.locked { opacity:0.4; cursor:not-allowed; border-color:rgba(255,255,255,0.06); background:rgba(255,255,255,0.02); }
+.room-pick-btn.locked:hover { transform:none; border-color:rgba(255,255,255,0.1); }
 .rpb-emoji { font-size:22px; display:block; }
 .rpb-name { font-size:10px; margin-top:3px; font-weight:600; }
 .rpb-cost { font-size:10px; color:var(--gold); margin-top:1px; }
+.rpb-level { font-size:10px; color:#74b9ff; margin-top:1px; }
 #cancel-place { display:none; font-size:12px; color:var(--text-dim); padding:8px 14px; background:rgba(255,255,255,0.05); border:1px solid var(--border); border-radius:20px; cursor:pointer; margin-bottom:6px; }
 
 /* Design sidebar */
@@ -891,21 +894,45 @@ const LOCATIONS = [
 ];
 
 const ROOM_TYPES = [
-  { id:'living',   name:'Living Room',     emoji:'🛋️', cost:15000, value:20000, w:2, h:2, color:'#3498db', cat:'main',    desc:'The heart of the home' },
-  { id:'kitchen',  name:'Kitchen',         emoji:'🍳', cost:20000, value:25000, w:2, h:1, color:'#e67e22', cat:'main',    desc:'Gourmet cooking space' },
-  { id:'bedroom',  name:'Bedroom',         emoji:'🛏️', cost:10000, value:13000, w:2, h:1, color:'#9b59b6', cat:'main',    desc:'Restful sleeping space' },
-  { id:'bathroom', name:'Bathroom',        emoji:'🚿', cost:8000,  value:10000, w:1, h:1, color:'#1abc9c', cat:'main',    desc:'Essential bath facility' },
-  { id:'master',   name:'Master Suite',    emoji:'👑', cost:35000, value:50000, w:2, h:2, color:'#f39c12', cat:'luxury',  desc:'Opulent master bedroom' },
-  { id:'dining',   name:'Dining Room',     emoji:'🍽️', cost:12000, value:16000, w:2, h:1, color:'#e74c3c', cat:'main',    desc:'Elegant dining area' },
-  { id:'office',   name:'Home Office',     emoji:'💼', cost:10000, value:14000, w:1, h:1, color:'#2980b9', cat:'main',    desc:'Productive work space' },
-  { id:'gym',      name:'Gym',             emoji:'🏋️', cost:25000, value:32000, w:2, h:1, color:'#c0392b', cat:'luxury',  desc:'Private fitness center' },
-  { id:'theater',  name:'Home Theater',    emoji:'🎬', cost:40000, value:60000, w:2, h:2, color:'#8e44ad', cat:'luxury',  desc:'Cinema-quality entertainment' },
-  { id:'pool',     name:'Swimming Pool',   emoji:'🏊', cost:50000, value:80000, w:2, h:2, color:'#00b4d8', cat:'luxury',  desc:'Stunning private pool' },
-  { id:'garden',   name:'Garden',          emoji:'🌿', cost:15000, value:22000, w:2, h:2, color:'#27ae60', cat:'exterior',desc:'Beautiful landscaped garden' },
-  { id:'garage',   name:'Garage',          emoji:'🚗', cost:18000, value:24000, w:2, h:1, color:'#7f8c8d', cat:'exterior',desc:'Multi-car garage' },
-  { id:'library',  name:'Library',         emoji:'📚', cost:22000, value:30000, w:2, h:1, color:'#8B4513', cat:'luxury',  desc:'Personal book collection' },
-  { id:'wine',     name:'Wine Cellar',     emoji:'🍷', cost:30000, value:45000, w:1, h:1, color:'#922b21', cat:'luxury',  desc:'Temperature-controlled cellar' },
-  { id:'terrace',  name:'Rooftop Terrace', emoji:'☀️', cost:20000, value:32000, w:2, h:2, color:'#f1c40f', cat:'exterior',desc:'Stunning outdoor lounge' },
+  // ── Level 1: Starter ──────────────────────────────────────
+  { id:'living',   name:'Living Room',      emoji:'🛋️', cost:15000,  value:20000,  w:2, h:2, color:'#3498db', cat:'main',    unlockLevel:1,  desc:'The heart of the home' },
+  { id:'kitchen',  name:'Kitchen',          emoji:'🍳', cost:20000,  value:25000,  w:2, h:1, color:'#e67e22', cat:'main',    unlockLevel:1,  desc:'Gourmet cooking space' },
+  { id:'bedroom',  name:'Bedroom',          emoji:'🛏️', cost:10000,  value:13000,  w:2, h:1, color:'#9b59b6', cat:'main',    unlockLevel:1,  desc:'Restful sleeping space' },
+  { id:'bathroom', name:'Bathroom',         emoji:'🚿', cost:8000,   value:10000,  w:1, h:1, color:'#1abc9c', cat:'main',    unlockLevel:1,  desc:'Essential bath facility' },
+  // ── Level 2 ───────────────────────────────────────────────
+  { id:'dining',   name:'Dining Room',      emoji:'🍽️', cost:12000,  value:16000,  w:2, h:1, color:'#e74c3c', cat:'main',    unlockLevel:2,  desc:'Elegant dining area' },
+  { id:'office',   name:'Home Office',      emoji:'💼', cost:10000,  value:14000,  w:1, h:1, color:'#2980b9', cat:'main',    unlockLevel:2,  desc:'Productive work space' },
+  { id:'garden',   name:'Garden',           emoji:'🌿', cost:15000,  value:22000,  w:2, h:2, color:'#27ae60', cat:'exterior',unlockLevel:2,  desc:'Beautiful landscaped garden' },
+  // ── Level 3 ───────────────────────────────────────────────
+  { id:'garage',   name:'Garage',           emoji:'🚗', cost:18000,  value:24000,  w:2, h:1, color:'#7f8c8d', cat:'exterior',unlockLevel:3,  desc:'Multi-car garage' },
+  { id:'master',   name:'Master Suite',     emoji:'👑', cost:35000,  value:50000,  w:2, h:2, color:'#f39c12', cat:'luxury',  unlockLevel:3,  desc:'Opulent master bedroom' },
+  // ── Level 4 ───────────────────────────────────────────────
+  { id:'gym',      name:'Gym',              emoji:'🏋️', cost:25000,  value:32000,  w:2, h:1, color:'#c0392b', cat:'luxury',  unlockLevel:4,  desc:'Private fitness center' },
+  { id:'library',  name:'Library',          emoji:'📚', cost:22000,  value:30000,  w:2, h:1, color:'#8B4513', cat:'luxury',  unlockLevel:4,  desc:'Personal book collection' },
+  { id:'terrace',  name:'Rooftop Terrace',  emoji:'☀️', cost:20000,  value:32000,  w:2, h:2, color:'#f1c40f', cat:'exterior',unlockLevel:4,  desc:'Stunning outdoor lounge' },
+  // ── Level 5 ───────────────────────────────────────────────
+  { id:'theater',  name:'Home Theater',     emoji:'🎬', cost:40000,  value:60000,  w:2, h:2, color:'#8e44ad', cat:'luxury',  unlockLevel:5,  desc:'Cinema-quality entertainment' },
+  { id:'wine',     name:'Wine Cellar',      emoji:'🍷', cost:30000,  value:45000,  w:1, h:1, color:'#922b21', cat:'luxury',  unlockLevel:5,  desc:'Temperature-controlled cellar' },
+  // ── Level 6 ───────────────────────────────────────────────
+  { id:'pool',     name:'Swimming Pool',    emoji:'🏊', cost:50000,  value:80000,  w:2, h:2, color:'#00b4d8', cat:'luxury',  unlockLevel:6,  desc:'Stunning private pool' },
+  { id:'spa',      name:'Spa & Sauna',      emoji:'🧖', cost:28000,  value:40000,  w:1, h:1, color:'#fd79a8', cat:'luxury',  unlockLevel:6,  desc:'Luxury wellness retreat' },
+  // ── Level 7 ───────────────────────────────────────────────
+  { id:'games',    name:'Game Room',        emoji:'🎮', cost:30000,  value:42000,  w:2, h:1, color:'#0984e3', cat:'luxury',  unlockLevel:7,  desc:'Ultimate gaming entertainment' },
+  // ── Level 8 ───────────────────────────────────────────────
+  { id:'yoga',     name:'Yoga Studio',      emoji:'🧘', cost:20000,  value:28000,  w:2, h:1, color:'#00cec9', cat:'luxury',  unlockLevel:8,  desc:'Peaceful wellness space' },
+  // ── Level 9 ───────────────────────────────────────────────
+  { id:'studio',   name:'Recording Studio', emoji:'🎵', cost:35000,  value:52000,  w:2, h:1, color:'#6c5ce7', cat:'luxury',  unlockLevel:9,  desc:'Professional music studio' },
+  // ── Level 10 ──────────────────────────────────────────────
+  { id:'bar',      name:'Rooftop Bar',      emoji:'🍸', cost:45000,  value:68000,  w:2, h:1, color:'#e17055', cat:'luxury',  unlockLevel:10, desc:'Chic rooftop entertainment' },
+  { id:'gallery',  name:'Art Gallery',      emoji:'🎨', cost:38000,  value:58000,  w:2, h:2, color:'#a29bfe', cat:'luxury',  unlockLevel:10, desc:'Private fine art collection' },
+  // ── Level 12 ──────────────────────────────────────────────
+  { id:'jacuzzi',  name:'Jacuzzi Suite',    emoji:'🛁', cost:40000,  value:60000,  w:1, h:1, color:'#74b9ff', cat:'luxury',  unlockLevel:12, desc:'Premium relaxation suite' },
+  { id:'bowling',  name:'Bowling Alley',    emoji:'🎳', cost:65000,  value:95000,  w:2, h:2, color:'#fdcb6e', cat:'luxury',  unlockLevel:12, desc:'Private bowling lanes' },
+  // ── Level 15 ──────────────────────────────────────────────
+  { id:'helipad',  name:'Helicopter Pad',   emoji:'🚁', cost:100000, value:160000, w:2, h:2, color:'#b2bec3', cat:'exterior',unlockLevel:15, desc:'Private rooftop helipad' },
+  { id:'skylounge',name:'Sky Lounge',       emoji:'🌃', cost:80000,  value:120000, w:2, h:2, color:'#636e72', cat:'luxury',  unlockLevel:15, desc:'Ultra-premium penthouse lounge' },
+  // ── Level 18 ──────────────────────────────────────────────
+  { id:'infpool',  name:'Infinity Pool',    emoji:'🌊', cost:120000, value:180000, w:2, h:2, color:'#0652DD', cat:'exterior',unlockLevel:18, desc:'Edge-of-world luxury pool' },
 ];
 
 const FURNITURE_TIERS = [
@@ -1087,7 +1114,11 @@ function updateHud() {
 
 function checkUnlocks() {
   const loc = LOCATIONS.find(l => l.unlockLevel === G.level);
-  if (loc) toast(`New location unlocked: ${loc.name}!`, 'gold', loc.emoji);
+  if (loc) toast(`📍 Location unlocked: ${loc.name}!`, 'gold', loc.emoji);
+  const newRooms = ROOM_TYPES.filter(r => r.unlockLevel === G.level);
+  newRooms.forEach((r, i) => {
+    setTimeout(() => toast(`🔓 New room: ${r.name}!`, 'gold', r.emoji), 600 + i * 700);
+  });
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -1465,6 +1496,7 @@ function placeRoom(propId, row, col, roomTypeId) {
   const prop = G.properties.find(p => p.id === propId);
   const rt = ROOM_TYPES.find(r => r.id === roomTypeId);
   if (!rt) return;
+  if (G.level < (rt.unlockLevel || 1)) { toast(`Reach Level ${rt.unlockLevel} to build this!`, '', '🔒'); return; }
 
   // Check bounds
   if (row + rt.h > prop.gridH || col + rt.w > prop.gridW) {
@@ -1513,17 +1545,30 @@ function placeRoom(propId, row, col, roomTypeId) {
 function renderRoomPicker(prop) {
   const list = document.getElementById('room-picker-list');
   list.innerHTML = '';
-  ROOM_TYPES.forEach(rt => {
-    const effectiveCost = getEffectiveRoomCost(rt);
-    const canAfford = G.money >= effectiveCost;
+  const sorted = [...ROOM_TYPES].sort((a, b) => {
+    const aLocked = G.level < (a.unlockLevel || 1);
+    const bLocked = G.level < (b.unlockLevel || 1);
+    if (aLocked !== bLocked) return aLocked ? 1 : -1;
+    return (a.unlockLevel || 1) - (b.unlockLevel || 1);
+  });
+  sorted.forEach(rt => {
+    const isLocked = G.level < (rt.unlockLevel || 1);
     const btn = document.createElement('div');
-    btn.className = 'room-pick-btn' + (canAfford ? '' : ' disabled');
-    const onSale = effectiveCost < rt.cost;
-    const costHtml = onSale
-      ? `<span style="text-decoration:line-through;opacity:0.45;font-size:9px;">${fmtShort(rt.cost)}</span> <span style="color:#55efc4;">${fmtShort(effectiveCost)}</span>`
-      : fmtShort(effectiveCost);
-    btn.innerHTML = `<span class="rpb-emoji">${rt.emoji}</span><span class="rpb-name">${rt.name}</span><span class="rpb-cost">${costHtml}</span>`;
-    if (canAfford) btn.onclick = () => startPlacement(rt.id);
+    if (isLocked) {
+      btn.className = 'room-pick-btn locked';
+      btn.title = `Reach Level ${rt.unlockLevel} to unlock`;
+      btn.innerHTML = `<span class="rpb-emoji">${rt.emoji}</span><span class="rpb-name">${rt.name}</span><span class="rpb-level">🔒 Lv.${rt.unlockLevel}</span>`;
+    } else {
+      const effectiveCost = getEffectiveRoomCost(rt);
+      const canAfford = G.money >= effectiveCost;
+      btn.className = 'room-pick-btn' + (canAfford ? '' : ' disabled');
+      const onSale = effectiveCost < rt.cost;
+      const costHtml = onSale
+        ? `<span style="text-decoration:line-through;opacity:0.45;font-size:9px;">${fmtShort(rt.cost)}</span> <span style="color:#55efc4;">${fmtShort(effectiveCost)}</span>`
+        : fmtShort(effectiveCost);
+      btn.innerHTML = `<span class="rpb-emoji">${rt.emoji}</span><span class="rpb-name">${rt.name}</span><span class="rpb-cost">${costHtml}</span>`;
+      if (canAfford) btn.onclick = () => startPlacement(rt.id);
+    }
     list.appendChild(btn);
   });
 }
