@@ -531,6 +531,110 @@ html,body { height:100%; background:var(--bg); font-family:'Segoe UI',system-ui,
   background:radial-gradient(ellipse at 30% 60%, #1a1a4e 0%, #0f0f1a 60%);
   overflow-y:auto;
 }
+
+/* ═══════════════════════════════════════════
+   TUTORIAL
+═══════════════════════════════════════════ */
+#screen-tutorial {
+  align-items:center; justify-content:flex-start;
+  overflow:hidden; padding-top:60px;
+}
+.tut-bg {
+  position:absolute; inset:0; z-index:0;
+  transition:background 0.45s ease;
+}
+.tut-skip {
+  position:absolute; top:70px; right:16px; z-index:20;
+  background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2);
+  color:rgba(255,255,255,0.65); border-radius:20px;
+  padding:6px 14px; font-size:13px; cursor:pointer;
+}
+.tut-skip:hover { background:rgba(255,255,255,0.2); color:#fff; }
+.tut-slide-wrap {
+  position:relative; z-index:5;
+  width:100%; max-width:380px;
+  padding:0 28px;
+  text-align:center;
+  display:flex; flex-direction:column; align-items:center;
+}
+@keyframes tutSlideIn {
+  from { opacity:0; transform:translateX(28px); }
+  to   { opacity:1; transform:translateX(0); }
+}
+.tut-slide-wrap.animating { animation:tutSlideIn 0.32s ease; }
+.tut-graphic-box {
+  height:170px; width:100%;
+  display:flex; align-items:center; justify-content:center;
+  margin-bottom:22px;
+}
+.tut-step-label {
+  font-size:11px; font-weight:800; letter-spacing:2px;
+  color:rgba(255,255,255,0.45); text-transform:uppercase; margin-bottom:8px;
+}
+.tut-title {
+  font-size:22px; font-weight:900; color:#fff;
+  line-height:1.25; margin-bottom:12px;
+}
+.tut-desc {
+  font-size:15px; color:rgba(255,255,255,0.8);
+  line-height:1.6; margin-bottom:0;
+}
+.tut-footer {
+  position:absolute; bottom:36px; left:0; right:0; z-index:5;
+  display:flex; flex-direction:column; align-items:center; gap:16px;
+}
+.tut-dots { display:flex; gap:8px; }
+.tut-dot {
+  width:8px; height:8px; border-radius:50%;
+  background:rgba(255,255,255,0.25);
+  transition:background 0.3s, transform 0.3s;
+}
+.tut-dot.active { background:#fff; transform:scale(1.4); }
+.tut-next {
+  padding:13px 40px; border-radius:30px;
+  border:2px solid rgba(255,255,255,0.35);
+  background:rgba(255,255,255,0.12);
+  color:#fff; font-size:16px; font-weight:800;
+  cursor:pointer; transition:background 0.2s, transform 0.15s;
+}
+.tut-next:hover { background:rgba(255,255,255,0.22); transform:scale(1.04); }
+.tut-next.go { background:var(--gold); border-color:var(--gold); color:#1a1a2e; }
+
+/* ── Tutorial graphic pieces ── */
+.tg-map { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.tg-loc {
+  background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.12);
+  border-radius:10px; padding:10px 8px;
+  font-size:12px; text-align:center; line-height:1.5; color:#fff;
+}
+.tg-loc.tg-hot { background:rgba(247,201,72,0.18); border-color:rgba(247,201,72,0.5); }
+.tg-grid-demo {
+  display:grid;
+  grid-template-columns:repeat(3,52px);
+  grid-template-rows:repeat(2,52px);
+  gap:4px;
+}
+.tgc { border-radius:7px; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+.tgc-room { border:2px solid rgba(255,255,255,0.4); font-weight:700; }
+.tgc-empty { border:1px dashed rgba(255,255,255,0.25); color:rgba(255,255,255,0.3); font-size:20px; }
+.tg-earn { display:flex; align-items:center; gap:14px; }
+.tge-card {
+  background:rgba(255,255,255,0.09); border:1px solid rgba(255,255,255,0.15);
+  border-radius:14px; padding:14px 16px; text-align:center;
+  font-size:13px; font-weight:700; color:#fff; line-height:1.6;
+}
+.tge-or { font-size:15px; font-weight:900; color:rgba(255,255,255,0.4); }
+.tge-green { color:#55efc4; font-size:12px; }
+.tge-gold  { color:var(--gold); font-size:12px; }
+.tg-levels { display:flex; flex-direction:column; gap:7px; width:100%; }
+.tgl-row {
+  display:flex; align-items:center; gap:10px;
+  background:rgba(255,255,255,0.07); border-radius:9px; padding:9px 12px;
+}
+.tgl-lv { font-size:11px; font-weight:800; color:var(--gold); min-width:36px; }
+.tgl-rooms { font-size:17px; flex:1; }
+.tgl-label { font-size:11px; color:rgba(255,255,255,0.5); }
+.tgl-dim { opacity:0.45; }
 .welcome-logo { font-size:72px; animation:float 3s ease-in-out infinite; margin-bottom:16px; }
 .welcome-title { font-size:32px; font-weight:900; margin-bottom:8px; text-align:center;
   background:linear-gradient(135deg,#f7c948,#ff6b6b,#a29bfe); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
@@ -665,6 +769,22 @@ html,body { height:100%; background:var(--bg); font-family:'Segoe UI',system-ui,
         <button class="btn-primary" id="continue-btn" onclick="continueGame()" style="width:100%;background:linear-gradient(135deg,#00b894,#00cec9);">▶ Continue</button>
         <button class="btn-secondary" onclick="discardSave()" style="width:100%;margin-top:8px;font-size:12px;">🗑 Start Fresh</button>
       </div>
+    </div>
+  </div>
+
+  <!-- TUTORIAL -->
+  <div id="screen-tutorial" class="screen">
+    <div class="tut-bg" id="tut-bg"></div>
+    <button class="tut-skip" onclick="endTutorial()">Skip ›</button>
+    <div class="tut-slide-wrap" id="tut-slide-wrap">
+      <div class="tut-graphic-box" id="tut-graphic"></div>
+      <div class="tut-step-label" id="tut-step-label"></div>
+      <div class="tut-title" id="tut-title"></div>
+      <div class="tut-desc"  id="tut-desc"></div>
+    </div>
+    <div class="tut-footer">
+      <div class="tut-dots" id="tut-dots"></div>
+      <button class="tut-next" id="tut-next" onclick="tutNext()">Next →</button>
     </div>
   </div>
 
@@ -2051,6 +2171,109 @@ setInterval(() => {
 }, 10000);
 
 // ═══════════════════════════════════════════════════════════
+// TUTORIAL
+// ═══════════════════════════════════════════════════════════
+const TUTORIAL_SLIDES = [
+  {
+    bg: 'radial-gradient(ellipse at 40% 55%, #1a1a6e 0%, #080820 70%)',
+    graphic: `<div class="tg-map">
+      <div class="tg-loc">🏙️<br><b>Downtown</b><br><small>💰💰💰</small></div>
+      <div class="tg-loc tg-hot">🌴<br><b>Beach</b><br><small>💰💰💰💰 ✨</small></div>
+      <div class="tg-loc">🌿<br><b>Suburbs</b><br><small>💰💰</small></div>
+      <div class="tg-loc">⛷️<br><b>Mountains</b><br><small>💰💰💰</small></div>
+    </div>`,
+    step: 'Step 1 of 5',
+    title: 'Buy a Plot of Land 🗺️',
+    desc: 'Tap the map and pick a location. Fancy spots like the Beach cost more upfront — but make you WAY more money! 🤑',
+  },
+  {
+    bg: 'radial-gradient(ellipse at 60% 40%, #1a3a5c 0%, #060f18 70%)',
+    graphic: `<div class="tg-grid-demo">
+      <div class="tgc tgc-room" style="grid-column:1/span 2;grid-row:1/span 2;background:rgba(52,152,219,0.35);border-color:#3498db;font-size:30px;flex-direction:column;gap:2px;">🛋️<span style="font-size:9px;color:rgba(255,255,255,0.8);">Living Room</span></div>
+      <div class="tgc tgc-room" style="grid-column:3;grid-row:1;background:rgba(155,89,182,0.35);border-color:#9b59b6;font-size:22px;">🛏️</div>
+      <div class="tgc tgc-room" style="grid-column:3;grid-row:2;background:rgba(26,188,156,0.35);border-color:#1abc9c;font-size:22px;">🚿</div>
+    </div>`,
+    step: 'Step 2 of 5',
+    title: 'Build Your Rooms! 🔨',
+    desc: 'Tap an empty square to drop a room. BIG rooms like the Living Room fill 4 squares at once! Bigger = more valuable! 💎',
+  },
+  {
+    bg: 'radial-gradient(ellipse at 50% 60%, #1a3a1a 0%, #060f06 70%)',
+    graphic: `<div class="tg-earn">
+      <div class="tge-card">🏠<br><br>RENT IT<br><span class="tge-green">+💵 every minute</span></div>
+      <div class="tge-or">or</div>
+      <div class="tge-card">🔨<br><br>SELL IT<br><span class="tge-gold">Huge payout! 💰</span></div>
+    </div>`,
+    step: 'Step 3 of 5',
+    title: 'Earn Money! 💰',
+    desc: 'Rent your home to earn cash every single minute — or sell it at AUCTION and watch the bids fly! 🏷️',
+  },
+  {
+    bg: 'radial-gradient(ellipse at 40% 50%, #3d1a5c 0%, #100a1e 70%)',
+    graphic: `<div class="tg-levels">
+      <div class="tgl-row"><span class="tgl-lv">Lv 1</span><span class="tgl-rooms">🛋️🍳🛏️🚿</span><span class="tgl-label">Starter rooms</span></div>
+      <div class="tgl-row"><span class="tgl-lv">Lv 3</span><span class="tgl-rooms">🚗👑</span><span class="tgl-label">Garage & Master Suite</span></div>
+      <div class="tgl-row"><span class="tgl-lv">Lv 6</span><span class="tgl-rooms">🏊🧖</span><span class="tgl-label">Pool & Spa!</span></div>
+      <div class="tgl-row tgl-dim"><span class="tgl-lv">Lv 15</span><span class="tgl-rooms">🚁</span><span class="tgl-label">Helicopter Pad!! 😮</span></div>
+    </div>`,
+    step: 'Step 4 of 5',
+    title: 'Level Up & Unlock! ⭐',
+    desc: 'Build and sell to earn XP and level up. Higher levels unlock epic rooms all the way to a 🚁 Helicopter Pad!',
+  },
+  {
+    bg: 'radial-gradient(ellipse at 50% 40%, #5c3d00 0%, #1a1000 70%)',
+    graphic: `<div style="text-align:center;">
+      <div style="font-size:80px;animation:float 2s ease-in-out infinite;display:block;line-height:1;">🏆</div>
+      <div style="font-size:22px;margin-top:10px;letter-spacing:4px;">🏠 💰 🏠</div>
+      <div style="font-size:12px;color:rgba(255,255,255,0.5);margin-top:6px;">Most money wins!</div>
+    </div>`,
+    step: 'Step 5 of 5',
+    title: "You're Ready! Let's Go! 🚀",
+    desc: 'Build smart, earn big, and unlock everything. May the best empire win — good luck! 🍀',
+  },
+];
+
+let tutStep = 0;
+
+function showTutorial() {
+  tutStep = 0;
+  renderTutSlide(false);
+  showScreen('tutorial');
+}
+
+function renderTutSlide(animate) {
+  const s = TUTORIAL_SLIDES[tutStep];
+  const isLast = tutStep === TUTORIAL_SLIDES.length - 1;
+  document.getElementById('tut-bg').style.background = s.bg;
+  document.getElementById('tut-graphic').innerHTML = s.graphic;
+  document.getElementById('tut-step-label').textContent = s.step;
+  document.getElementById('tut-title').textContent = s.title;
+  document.getElementById('tut-desc').textContent = s.desc;
+  const btn = document.getElementById('tut-next');
+  btn.textContent = isLast ? '🚀 Start Building!' : 'Next →';
+  btn.className = 'tut-next' + (isLast ? ' go' : '');
+  document.getElementById('tut-dots').innerHTML =
+    TUTORIAL_SLIDES.map((_, i) => `<div class="tut-dot${i === tutStep ? ' active' : ''}"></div>`).join('');
+  if (animate) {
+    const wrap = document.getElementById('tut-slide-wrap');
+    wrap.classList.remove('animating');
+    void wrap.offsetWidth;
+    wrap.classList.add('animating');
+  }
+}
+
+function tutNext() {
+  if (tutStep < TUTORIAL_SLIDES.length - 1) {
+    tutStep++;
+    renderTutSlide(true);
+  } else {
+    endTutorial();
+  }
+}
+
+function endTutorial() { showChallengeSelect(); }
+
+// ═══════════════════════════════════════════════════════════
 // SAVE / LOAD
 // ═══════════════════════════════════════════════════════════
 function saveGame() {
@@ -2095,12 +2318,12 @@ function startWithName() {
   if (!name) { input.style.borderColor = 'var(--red)'; input.focus(); return; }
   input.style.borderColor = '';
   G.playerName = name; G.isAnonymous = false;
-  showChallengeSelect();
+  showTutorial();
 }
 
 function playAnonymous() {
   G.playerName = 'Anonymous'; G.isAnonymous = true;
-  showChallengeSelect();
+  showTutorial();
 }
 
 function continueGame() {
