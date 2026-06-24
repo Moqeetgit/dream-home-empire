@@ -526,10 +526,46 @@ html,body { height:100%; background:var(--bg); font-family:'Segoe UI',system-ui,
 /* ═══════════════════════════════════════════
    WELCOME & CHALLENGE SCREENS
 ═══════════════════════════════════════════ */
-#screen-welcome, #screen-challenge {
+#screen-welcome, #screen-challenge, #screen-choice {
   align-items:center; justify-content:center;
   background:radial-gradient(ellipse at 30% 60%, #1a1a4e 0%, #0f0f1a 60%);
   overflow-y:auto;
+}
+
+/* ── Choice screen (tutorial or play) ────────────────────── */
+#screen-choice { flex-direction:column; gap:0; }
+.choice-greeting {
+  font-size:26px; font-weight:900; color:#fff;
+  text-align:center; margin-bottom:6px; padding:0 20px;
+}
+.choice-sub { font-size:14px; color:rgba(255,255,255,0.5); text-align:center; margin-bottom:32px; }
+.choice-cards {
+  display:flex; flex-direction:column; gap:14px;
+  width:100%; max-width:340px; padding:0 20px;
+}
+.choice-card {
+  border-radius:20px; padding:24px 20px; cursor:pointer;
+  text-align:center; transition:transform 0.15s, box-shadow 0.15s;
+  user-select:none; touch-action:manipulation;
+}
+.choice-card:hover  { transform:translateY(-4px); }
+.choice-card:active { transform:scale(0.97); }
+.choice-tut  {
+  background:linear-gradient(135deg,#6c5ce7,#a29bfe);
+  box-shadow:0 8px 28px rgba(108,92,231,0.45);
+}
+.choice-play {
+  background:linear-gradient(135deg,#f7c948,#e17055);
+  box-shadow:0 8px 28px rgba(247,120,72,0.35);
+}
+.choice-icon  { font-size:44px; display:block; margin-bottom:10px; line-height:1; }
+.choice-card h3  { font-size:19px; font-weight:900; color:#fff; margin-bottom:6px; }
+.choice-card p   { font-size:13px; color:rgba(255,255,255,0.82); line-height:1.5; margin:0; }
+.choice-rec {
+  display:inline-block; margin-top:11px;
+  font-size:10px; font-weight:700; letter-spacing:0.5px;
+  color:rgba(255,255,255,0.75); background:rgba(255,255,255,0.18);
+  padding:3px 12px; border-radius:20px;
 }
 
 /* ═══════════════════════════════════════════
@@ -772,10 +808,29 @@ html,body { height:100%; background:var(--bg); font-family:'Segoe UI',system-ui,
     </div>
   </div>
 
+  <!-- CHOICE: tutorial or play -->
+  <div id="screen-choice" class="screen">
+    <div class="choice-greeting" id="choice-greeting">Hey there! 👋</div>
+    <div class="choice-sub">Want a quick tour before you start?</div>
+    <div class="choice-cards">
+      <div class="choice-card choice-tut" onclick="showTutorial()">
+        <span class="choice-icon">📖</span>
+        <h3>Show Me How to Play</h3>
+        <p>5 quick slides covering everything you need — takes about 1 minute!</p>
+        <span class="choice-rec">✨ Recommended for new players</span>
+      </div>
+      <div class="choice-card choice-play" onclick="showChallengeSelect()">
+        <span class="choice-icon">🚀</span>
+        <h3>Jump Straight In!</h3>
+        <p>Skip the tutorial and start building your empire right now!</p>
+      </div>
+    </div>
+  </div>
+
   <!-- TUTORIAL -->
   <div id="screen-tutorial" class="screen">
     <div class="tut-bg" id="tut-bg"></div>
-    <button class="tut-skip" onclick="endTutorial()">Skip ›</button>
+    <button class="tut-skip" onclick="endTutorial()">Skip Tutorial ›</button>
     <div class="tut-slide-wrap" id="tut-slide-wrap">
       <div class="tut-graphic-box" id="tut-graphic"></div>
       <div class="tut-step-label" id="tut-step-label"></div>
@@ -2318,12 +2373,18 @@ function startWithName() {
   if (!name) { input.style.borderColor = 'var(--red)'; input.focus(); return; }
   input.style.borderColor = '';
   G.playerName = name; G.isAnonymous = false;
-  showTutorial();
+  showChoice();
 }
 
 function playAnonymous() {
   G.playerName = 'Anonymous'; G.isAnonymous = true;
-  showTutorial();
+  showChoice();
+}
+
+function showChoice() {
+  const el = document.getElementById('choice-greeting');
+  el.textContent = G.isAnonymous ? 'Hey there! 👋' : `Hey ${G.playerName}! 👋`;
+  showScreen('choice');
 }
 
 function continueGame() {
