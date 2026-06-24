@@ -163,11 +163,11 @@ html,body { height:100%; background:var(--bg); font-family:'Segoe UI',system-ui,
    BUILD MODE
 ═══════════════════════════════════════════ */
 #screen-build { padding-top:56px; flex-direction:row; overflow:hidden; }
-.build-left { flex:1; display:flex; flex-direction:column; overflow:hidden; }
-.build-info-bar { padding:10px 14px; background:var(--surface); border-bottom:1px solid var(--border); display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+.build-left { flex:1; display:flex; flex-direction:column; overflow:hidden; min-height:0; }
+.build-info-bar { padding:10px 14px; background:var(--surface); border-bottom:1px solid var(--border); display:flex; gap:10px; flex-wrap:wrap; align-items:center; flex-shrink:0; }
 .build-info-bar .bi-stat { font-size:13px; }
 .build-info-bar .bi-val { font-weight:700; color:var(--gold); }
-.grid-container { flex:1; overflow:auto; display:flex; align-items:center; justify-content:center; padding:10px; }
+.grid-container { flex:1; overflow:auto; display:flex; align-items:center; justify-content:center; padding:10px; min-height:0; }
 #property-grid { display:grid; gap:3px; background:var(--surface2); padding:10px; border-radius:var(--radius-sm); border:1px solid var(--border); }
 .grid-cell {
   width:62px; height:56px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06);
@@ -339,6 +339,28 @@ html,body { height:100%; background:var(--bg); font-family:'Segoe UI',system-ui,
 .gap-8 { gap:8px; }
 
 /* ═══════════════════════════════════════════
+   TABLET / IPAD — build mode vertical stack
+═══════════════════════════════════════════ */
+@media (max-width: 900px) {
+  #screen-build { flex-direction:column; }
+  .grid-container { align-items:flex-start; justify-content:center; padding:6px; }
+  #design-panel {
+    position:fixed !important;
+    bottom:0; left:0; right:0; top:auto !important;
+    width:100% !important;
+    max-height:70vh;
+    border-left:none !important;
+    border-top:2px solid var(--border);
+    border-radius:var(--radius) var(--radius) 0 0;
+    transform:translateY(100%) !important;
+    z-index:160;
+    overflow-y:auto;
+    box-shadow:0 -8px 32px rgba(0,0,0,0.6);
+  }
+  #design-panel.open { transform:translateY(0) !important; }
+}
+
+/* ═══════════════════════════════════════════
    MOBILE RESPONSIVE
 ═══════════════════════════════════════════ */
 @media (max-width: 480px) {
@@ -373,12 +395,9 @@ html,body { height:100%; background:var(--bg); font-family:'Segoe UI',system-ui,
   .loc-unlock { font-size:10px; padding:2px 8px; }
   .plot-options { grid-template-columns:1fr 1fr; }
 
-  /* Build mode — stack vertically, design panel = bottom sheet */
-  #screen-build { flex-direction:column; }
-  .build-left { overflow:hidden; display:flex; flex-direction:column; }
+  /* Build mode — mobile tweaks (stacking already handled at 900px) */
   .build-info-bar { padding:7px 10px; gap:8px; }
   .build-info-bar .bi-stat { font-size:12px; }
-  .grid-container { padding:6px; align-items:flex-start; justify-content:center; }
   #property-grid { gap:2px; padding:6px; }
   .grid-cell { width:52px; height:46px; }
   .grid-cell.room-anchor .cell-emoji { font-size:16px; }
@@ -394,21 +413,7 @@ html,body { height:100%; background:var(--bg); font-family:'Segoe UI',system-ui,
   .build-actions { padding:8px 10px; gap:8px; }
   .build-actions button { font-size:12px; padding:10px 6px; }
 
-  /* Design panel → bottom sheet on mobile */
-  #design-panel {
-    position:fixed !important;
-    bottom:0; left:0; right:0; top:auto !important;
-    width:100% !important;
-    max-height:66vh;
-    border-left:none !important;
-    border-top:2px solid var(--border);
-    border-radius:var(--radius) var(--radius) 0 0;
-    transform:translateY(100%) !important;
-    z-index:160;
-    overflow-y:auto;
-    box-shadow:0 -8px 32px rgba(0,0,0,0.6);
-  }
-  #design-panel.open { transform:translateY(0) !important; }
+  /* Design panel — mobile-specific overrides (bottom sheet already set at 900px) */
   .dp-section { padding:10px 14px; }
   .style-grid { grid-template-columns:1fr 1fr 1fr; }
   .dp-actions { padding:10px 14px 20px; }
