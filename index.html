@@ -173,6 +173,7 @@ html,body { height:100%; background:var(--bg); font-family:'Segoe UI',system-ui,
   width:62px; height:56px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06);
   border-radius:6px; display:flex; align-items:center; justify-content:center;
   cursor:pointer; transition:background 0.12s; font-size:11px; position:relative; overflow:hidden;
+  touch-action:manipulation; user-select:none;
 }
 .grid-cell:hover { background:rgba(255,255,255,0.08); border-color:rgba(247,201,72,0.4); }
 .grid-cell.occupied { cursor:pointer; }
@@ -335,6 +336,148 @@ html,body { height:100%; background:var(--bg); font-family:'Segoe UI',system-ui,
 .gap-8 { gap:8px; }
 
 /* ═══════════════════════════════════════════
+   MOBILE RESPONSIVE
+═══════════════════════════════════════════ */
+@media (max-width: 480px) {
+  /* HUD — hide title & market to save space */
+  #hud { padding:8px 10px; gap:6px; min-height:50px; }
+  #hud-title { display:none; }
+  #hud-market { display:none !important; }
+  #hud-back { padding:6px 10px; font-size:13px; }
+  .hud-stat { padding:5px 8px; font-size:13px; gap:4px; }
+  #event-banner { top:50px; padding:8px 12px; }
+  #event-banner .eb-name { font-size:12px; }
+
+  /* Menu */
+  .menu-hero { padding:36px 16px 22px; }
+  .menu-hero-emoji { font-size:52px; }
+  .menu-hero h1 { font-size:26px; }
+  .menu-hero p { font-size:14px; margin-bottom:22px; }
+  .menu-cards { grid-template-columns:1fr 1fr; gap:10px; padding:0 12px 24px; }
+  .menu-card { padding:16px 12px; }
+  .menu-card .card-emoji { font-size:28px; }
+  .menu-card h3 { font-size:13px; }
+  .menu-card p { font-size:11px; }
+
+  /* Map */
+  .map-header { padding:16px 12px 10px; }
+  .location-grid { grid-template-columns:1fr 1fr; gap:10px; padding:0 12px 24px; }
+  .loc-bg { min-height:105px; padding:16px 12px; }
+  .loc-emoji { font-size:28px; top:10px; right:10px; }
+  .loc-name { font-size:14px; }
+  .loc-desc { font-size:11px; }
+  .loc-price { font-size:11px; }
+  .loc-unlock { font-size:10px; padding:2px 8px; }
+  .plot-options { grid-template-columns:1fr 1fr; }
+
+  /* Build mode — stack vertically, design panel = bottom sheet */
+  #screen-build { flex-direction:column; }
+  .build-left { overflow:hidden; display:flex; flex-direction:column; }
+  .build-info-bar { padding:7px 10px; gap:8px; }
+  .build-info-bar .bi-stat { font-size:12px; }
+  .grid-container { padding:6px; align-items:flex-start; justify-content:center; }
+  #property-grid { gap:2px; padding:6px; }
+  .grid-cell { width:52px; height:46px; }
+  .grid-cell.room-anchor .cell-emoji { font-size:16px; }
+  .grid-cell.room-anchor .cell-name { font-size:8px; }
+  #room-picker { padding:9px 8px; }
+  #room-picker .picker-title { font-size:11px; margin-bottom:6px; }
+  #room-picker-list { gap:6px; }
+  .room-pick-btn { min-width:62px; padding:7px 7px; border-radius:8px; }
+  .rpb-emoji { font-size:19px; }
+  .rpb-name { font-size:9px; }
+  .rpb-cost { font-size:9px; }
+  #cancel-place { font-size:11px; padding:6px 10px; }
+  .build-actions { padding:8px 10px; gap:8px; }
+  .build-actions button { font-size:12px; padding:10px 6px; }
+
+  /* Design panel → bottom sheet on mobile */
+  #design-panel {
+    position:fixed !important;
+    bottom:0; left:0; right:0; top:auto !important;
+    width:100% !important;
+    max-height:66vh;
+    border-left:none !important;
+    border-top:2px solid var(--border);
+    border-radius:var(--radius) var(--radius) 0 0;
+    transform:translateY(100%) !important;
+    z-index:160;
+    overflow-y:auto;
+    box-shadow:0 -8px 32px rgba(0,0,0,0.6);
+  }
+  #design-panel.open { transform:translateY(0) !important; }
+  .dp-section { padding:10px 14px; }
+  .style-grid { grid-template-columns:1fr 1fr 1fr; }
+  .dp-actions { padding:10px 14px 20px; }
+
+  /* Portfolio */
+  .portfolio-header { padding:16px 12px 10px; }
+  .stat-chips { padding:0 12px 10px; gap:6px; }
+  .property-list { padding:0 12px 24px; gap:10px; }
+  .prop-banner { height:78px; padding:0 12px; gap:10px; }
+  .prop-banner-emoji { font-size:36px; }
+  .prop-banner-info h3 { font-size:15px; }
+  .prop-stat { padding:10px 8px; }
+  .prop-stat-val { font-size:14px; }
+  .prop-stat-lbl { font-size:10px; }
+
+  /* Clients */
+  .clients-header { padding:16px 12px 10px; }
+  .client-cards { padding:0 12px 24px; gap:10px; }
+  .cc-avatar { width:48px; height:48px; font-size:28px; flex-shrink:0; }
+  .cc-info h3 { font-size:15px; }
+  .cc-budget { font-size:13px; }
+  .cc-desc { font-size:12px; }
+
+  /* Achievements */
+  .ach-header { padding:16px 12px 10px; }
+  .ach-grid { gap:10px; padding:0 12px 24px; }
+  .ach-card { padding:14px 10px; }
+  .ach-card .ach-emoji { font-size:26px; }
+  .ach-card h4 { font-size:12px; }
+  .ach-card p { font-size:10px; }
+  .ach-card .ach-xp { font-size:11px; }
+
+  /* Finance */
+  .finance-content { padding:12px; }
+  .finance-card { padding:16px; margin-bottom:10px; }
+  .finance-card h3 { font-size:15px; }
+  .finance-row { font-size:13px; padding:7px 0; }
+
+  /* Modals */
+  .modal-panel { padding:20px 14px 28px; }
+  .modal-panel h3 { font-size:18px; }
+  .modal-panel p { font-size:13px; }
+  .tenant-card { padding:12px; gap:10px; }
+  .tenant-avatar { font-size:28px; }
+  .tenant-info h4 { font-size:13px; }
+  .tenant-info p { font-size:11px; }
+  .tenant-rent { font-size:14px; }
+  .auction-bid { font-size:30px; }
+  .auction-bid-label { font-size:12px; }
+  .bidder-chip { font-size:11px; padding:3px 9px; }
+
+  /* Toasts */
+  #toast-container { right:8px; top:60px; }
+  .toast { font-size:12px; padding:8px 12px; max-width:200px; }
+
+  /* Buttons */
+  .btn-primary { padding:12px 20px; font-size:14px; }
+  .btn-secondary { padding:10px 16px; font-size:13px; }
+}
+
+/* Landscape phones */
+@media (max-height:500px) and (orientation:landscape) {
+  #hud { min-height:44px; padding:5px 10px; }
+  .grid-cell { width:46px; height:40px; }
+  #room-picker { padding:6px 8px; }
+  .room-pick-btn { min-width:56px; padding:5px 6px; }
+  .build-actions { padding:5px 10px; }
+  .build-actions button { padding:8px; }
+  #design-panel { max-height:80vh; }
+}
+
+/* ═══════════════════════════════════════════
    TENANT & AUCTION MODALS
 ═══════════════════════════════════════════ */
 .tenant-cards { display:flex; flex-direction:column; gap:10px; margin:10px 0; }
@@ -491,7 +634,10 @@ html,body { height:100%; background:var(--bg); font-family:'Segoe UI',system-ui,
     </div>
     <div id="design-panel">
       <div class="dp-header">
-        <h3 id="dp-room-name">Room</h3>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <h3 id="dp-room-name">Room</h3>
+          <button onclick="closeDesignPanel()" style="background:none;border:none;color:var(--text-dim);font-size:20px;cursor:pointer;padding:0 0 0 10px;line-height:1;" title="Close">✕</button>
+        </div>
         <p id="dp-room-desc">Select tier & style</p>
       </div>
       <div class="dp-section">
