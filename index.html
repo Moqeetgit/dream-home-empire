@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Dream Home Empire 🏠</title>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <style>
 /* ═══════════════════════════════════════════
    BASE & VARIABLES
@@ -930,6 +932,42 @@ html,body { height:100%; background:var(--bg); font-family:'Segoe UI',system-ui,
 .eb-name { font-size:13px; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .eb-desc { font-size:11px; opacity:0.85; }
 .eb-timer { font-size:12px; font-weight:700; background:rgba(0,0,0,0.35); padding:4px 10px; border-radius:20px; white-space:nowrap; flex-shrink:0; }
+
+/* ═══════════════════════════════════════════
+   MULTIPLAYER
+═══════════════════════════════════════════ */
+#mp-section { width:100%; max-width:440px; padding:0 16px 24px; }
+.mp-heading { font-size:12px; font-weight:700; color:var(--text-dim); text-transform:uppercase; letter-spacing:1px; margin-bottom:10px; display:flex; align-items:center; gap:8px; }
+.mp-heading .mp-pulse { width:8px; height:8px; background:var(--green); border-radius:50%; animation:pulse 1.5s ease infinite; flex-shrink:0; }
+.mp-player-row { display:flex; align-items:center; gap:10px; background:var(--surface); border:1px solid var(--border); border-radius:30px; padding:8px 8px 8px 16px; margin-bottom:8px; }
+.mp-player-dot { color:var(--green); font-size:10px; }
+.mp-player-name { flex:1; font-size:14px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.mp-challenge-btn { background:linear-gradient(135deg,#6c5ce7,#a29bfe); color:#fff; border:none; border-radius:20px; padding:7px 14px; font-size:12px; font-weight:700; cursor:pointer; white-space:nowrap; flex-shrink:0; }
+.mp-challenge-btn:hover { opacity:0.88; transform:scale(1.04); }
+.mp-empty { color:var(--text-dim); font-size:13px; text-align:center; padding:10px 0; }
+
+#invite-modal { position:fixed; inset:0; background:rgba(0,0,0,0.82); z-index:300; display:none; align-items:center; justify-content:center; padding:20px; }
+.invite-panel { background:var(--surface); border:2px solid rgba(108,92,231,0.55); border-radius:var(--radius); padding:32px 24px; text-align:center; max-width:340px; width:100%; animation:popIn 0.3s ease; }
+.invite-icon { font-size:56px; display:block; margin-bottom:12px; }
+.invite-title { font-size:21px; font-weight:900; margin-bottom:6px; }
+.invite-sub { font-size:14px; color:var(--text-dim); line-height:1.5; margin-bottom:24px; }
+.invite-btns { display:flex; gap:10px; }
+.invite-btns button { flex:1; padding:13px; border-radius:30px; border:none; font-weight:700; font-size:14px; cursor:pointer; }
+.invite-accept  { background:linear-gradient(135deg,#00b894,#00cec9); color:#fff; }
+.invite-decline { background:rgba(255,255,255,0.07); color:var(--text-dim); border:1px solid var(--border) !important; }
+
+#screen-mp-wait { background:radial-gradient(ellipse at 50% 40%,#1a0a4e 0%,#0f0f1a 70%); align-items:center; justify-content:center; gap:16px; }
+#mp-countdown { font-size:100px; font-weight:900; color:#fff; animation:popIn 0.3s ease; line-height:1; }
+#mp-countdown-sub { font-size:16px; color:rgba(255,255,255,0.7); text-align:center; max-width:300px; line-height:1.5; }
+
+#mp-vs-badge { display:none; background:rgba(108,92,231,0.25); border:1px solid rgba(108,92,231,0.5); color:#a29bfe; border-radius:20px; padding:5px 12px; font-size:12px; font-weight:700; white-space:nowrap; }
+
+.mp-result-banner { padding:14px; border-radius:var(--radius-sm); margin-bottom:14px; font-size:18px; font-weight:900; text-align:center; }
+.mp-win  { background:rgba(46,204,113,0.15); color:#55efc4; border:1px solid rgba(46,204,113,0.3); }
+.mp-lose { background:rgba(231,76,60,0.15); color:#ff7675; border:1px solid rgba(231,76,60,0.3); }
+
+@media (min-width:901px) { #mp-section { max-width:780px; padding:0 24px 28px; } }
+@media (max-width:480px) { .mp-challenge-btn { padding:6px 10px; font-size:11px; } }
 </style>
 </head>
 <body>
@@ -942,6 +980,7 @@ html,body { height:100%; background:var(--bg); font-family:'Segoe UI',system-ui,
     <div class="hud-stat" id="hud-money">💰 <span id="hud-money-val">$50,000</span></div>
     <div class="hud-stat hud-timer" id="hud-timer" style="display:none;font-size:13px;">⏰ 00:00</div>
     <div class="hud-stat" id="hud-market" style="font-size:12px;color:var(--text-dim);">📊 100%</div>
+    <div id="mp-vs-badge"></div>
     <div class="hud-stat" style="flex-direction:column;gap:2px;padding:6px 12px;">
       <span id="hud-level">Lv.1</span>
       <div class="xp-bar"><div class="xp-fill" id="xp-fill" style="width:0%"></div></div>
@@ -1109,7 +1148,12 @@ html,body { height:100%; background:var(--bg); font-family:'Segoe UI',system-ui,
         <p id="rent-available-text">No rent due</p>
       </div>
     </div>
-    <p id="welcome-msg" style="color:var(--text-dim);font-size:13px;padding:0 20px 20px;text-align:center;"></p>
+    <p id="welcome-msg" style="color:var(--text-dim);font-size:13px;padding:0 20px 12px;text-align:center;"></p>
+    <!-- Online players (shown when Firebase is connected) -->
+    <div id="mp-section" style="display:none;">
+      <div class="mp-heading"><span class="mp-pulse"></span> Online Players</div>
+      <div id="mp-online-list"></div>
+    </div>
   </div>
 
   <!-- WORLD MAP -->
@@ -1274,6 +1318,25 @@ html,body { height:100%; background:var(--bg); font-family:'Segoe UI',system-ui,
 
   <!-- Toast container -->
   <div id="toast-container"></div>
+
+  <!-- INVITE RECEIVED MODAL -->
+  <div id="invite-modal">
+    <div class="invite-panel">
+      <span class="invite-icon">⚔️</span>
+      <div class="invite-title"><span id="invite-from-name">Player</span> challenged you!</div>
+      <div class="invite-sub">A <span id="invite-duration">5</span>-minute match. Build the highest-value empire to win! 🏆</div>
+      <div class="invite-btns">
+        <button class="invite-accept"  onclick="mpAcceptInvite()">✅ Accept!</button>
+        <button class="invite-decline" onclick="mpDeclineInvite()">✕ Decline</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MULTIPLAYER COUNTDOWN / WAITING SCREEN -->
+  <div id="screen-mp-wait" class="screen">
+    <div id="mp-countdown">3</div>
+    <div id="mp-countdown-sub">Get ready…</div>
+  </div>
 
 </div>
 <script>
@@ -2651,6 +2714,7 @@ function startWithName() {
   if (!name) { input.style.borderColor = 'var(--red)'; input.focus(); return; }
   input.style.borderColor = '';
   G.playerName = name; G.isAnonymous = false;
+  mpRegister(name);
   showChoice();
 }
 
@@ -2667,6 +2731,7 @@ function showChoice() {
 
 function continueGame() {
   if (!loadGame()) { clearSave(); initWelcome(); return; }
+  if (!G.isAnonymous) mpRegister(G.playerName);
   updateHud(); showScreen('menu'); renderMenu();
   toast(`Welcome back, ${G.playerName}! 👋`, 'gold', '🏠');
 }
@@ -2717,8 +2782,12 @@ function endChallenge() {
   G.challengeEndTime = 0;
   document.getElementById('hud-timer').style.display = 'none';
   saveGame();
-  renderResults();
-  showScreen('results');
+  if (mpSessionId && db) {
+    mpPostScore();
+  } else {
+    renderResults();
+    showScreen('results');
+  }
 }
 
 function renderResults() {
@@ -2963,6 +3032,7 @@ setInterval(saveGame, 60000);
 // SPLASH SCREEN & INIT
 // ═══════════════════════════════════════════════════════════
 window.addEventListener('DOMContentLoaded', () => {
+  mpInit();
   document.addEventListener('keydown', handleUndoShortcut);
   let p = 0;
   const prog = document.getElementById('splash-prog');
@@ -2977,6 +3047,252 @@ function launchGame() {
   updateHud();
   initWelcome();
   showScreen('welcome');
+}
+
+// ═══════════════════════════════════════════════════════════
+// FIREBASE CONFIG
+// ─────────────────────────────────────────────────────────
+// Replace every PASTE_YOUR_... value below with your own.
+// How to get these values → see the step-by-step guide below.
+// ═══════════════════════════════════════════════════════════
+const FIREBASE_CONFIG = {
+  apiKey:            "PASTE_YOUR_API_KEY_HERE",
+  authDomain:        "PASTE_YOUR_PROJECT_ID.firebaseapp.com",
+  databaseURL:       "https://PASTE_YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
+  projectId:         "PASTE_YOUR_PROJECT_ID",
+  storageBucket:     "PASTE_YOUR_PROJECT_ID.appspot.com",
+  messagingSenderId: "PASTE_YOUR_MESSAGING_SENDER_ID",
+  appId:             "PASTE_YOUR_APP_ID"
+};
+
+// ═══════════════════════════════════════════════════════════
+// MULTIPLAYER STATE & INIT
+// ═══════════════════════════════════════════════════════════
+let db             = null;
+let mpPlayerId     = null;
+let mpSessionId    = null;
+let mpOpponentName = null;
+let mpHeartbeat    = null;
+
+function mpGetPlayerId() {
+  let id = localStorage.getItem('dhe_player_id');
+  if (!id) {
+    id = 'p_' + Math.random().toString(36).substr(2, 9);
+    localStorage.setItem('dhe_player_id', id);
+  }
+  return id;
+}
+
+function mpInit() {
+  try {
+    if (typeof firebase === 'undefined') return;
+    if (FIREBASE_CONFIG.apiKey === 'PASTE_YOUR_API_KEY_HERE') return;
+    firebase.initializeApp(FIREBASE_CONFIG);
+    db = firebase.database();
+    mpPlayerId = mpGetPlayerId();
+  } catch(e) { console.warn('Firebase init:', e); }
+}
+
+// ═══════════════════════════════════════════════════════════
+// PRESENCE — register / heartbeat / listen
+// ═══════════════════════════════════════════════════════════
+function mpRegister(name) {
+  if (!db) return;
+  const ref = db.ref('online/' + mpPlayerId);
+  ref.set({ name, lastSeen: Date.now() });
+  ref.onDisconnect().remove();
+  if (mpHeartbeat) clearInterval(mpHeartbeat);
+  mpHeartbeat = setInterval(() => ref.update({ lastSeen: Date.now() }), 30000);
+  mpListenOnline();
+  mpListenInvites();
+}
+
+function mpListenOnline() {
+  db.ref('online').on('value', snap => {
+    const now = Date.now(), players = [];
+    snap.forEach(child => {
+      const p = child.val();
+      if (child.key !== mpPlayerId && (now - p.lastSeen) < 120000)
+        players.push({ id: child.key, name: p.name });
+    });
+    mpRenderOnline(players);
+  });
+}
+
+function mpRenderOnline(players) {
+  const section = document.getElementById('mp-section');
+  const list    = document.getElementById('mp-online-list');
+  if (!section || !list) return;
+  section.style.display = 'block';
+  list.innerHTML = players.length === 0
+    ? '<div class="mp-empty">No other players online right now.</div>'
+    : players.map(p => `
+        <div class="mp-player-row">
+          <span class="mp-player-dot">●</span>
+          <span class="mp-player-name">${mpX(p.name)}</span>
+          <button class="mp-challenge-btn" onclick="mpSendInvite('${p.id}','${mpX(p.name)}')">⚔️ Challenge</button>
+        </div>`).join('');
+}
+
+function mpX(s) {
+  return String(s).replace(/[&<>"']/g,
+    c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' })[c]);
+}
+
+// ═══════════════════════════════════════════════════════════
+// INVITES — send, watch for acceptance, receive, accept/decline
+// ═══════════════════════════════════════════════════════════
+function mpSendInvite(toId, toName) {
+  if (!db) return;
+  if (G.isAnonymous) { toast('Enter your name to challenge friends!', '', '✏️'); return; }
+  const sessionId = 'ses_' + Date.now();
+  db.ref('invites/' + toId).push().set({
+    from: mpPlayerId, fromName: G.playerName,
+    sessionId, duration: 5, timestamp: Date.now()
+  });
+  db.ref('sessions/' + sessionId).set({
+    p1Id: mpPlayerId, p1Name: G.playerName,
+    p2Id: toId, p2Name: toName,
+    duration: 5, startAt: 0
+  });
+  toast('Challenge sent to ' + toName + '! Waiting…', 'gold', '⚔️');
+  mpWatchAcceptance(sessionId, toName, 5);
+}
+
+function mpWatchAcceptance(sessionId, toName, duration) {
+  const ref = db.ref('sessions/' + sessionId + '/startAt');
+  const cancel = setTimeout(() => {
+    ref.off();
+    if (!mpSessionId) toast(toName + ' didn\'t respond.', '', '😕');
+  }, 60000);
+  ref.on('value', snap => {
+    const startAt = snap.val();
+    if (!startAt || startAt <= 0) return;
+    ref.off();
+    clearTimeout(cancel);
+    mpSessionId    = sessionId;
+    mpOpponentName = toName;
+    mpShowCountdown(duration, toName, startAt);
+  });
+}
+
+function mpListenInvites() {
+  db.ref('invites/' + mpPlayerId).on('child_added', snap => {
+    const inv = snap.val();
+    if (!inv || (Date.now() - inv.timestamp) > 60000) { snap.ref.remove(); return; }
+    const modal = document.getElementById('invite-modal');
+    document.getElementById('invite-from-name').textContent = mpX(inv.fromName);
+    document.getElementById('invite-duration').textContent  = inv.duration;
+    modal.dataset.inviteId  = snap.key;
+    modal.dataset.sessionId = inv.sessionId;
+    modal.dataset.duration  = inv.duration;
+    modal.style.display = 'flex';
+  });
+}
+
+function mpAcceptInvite() {
+  const modal     = document.getElementById('invite-modal');
+  const inviteId  = modal.dataset.inviteId;
+  const sessionId = modal.dataset.sessionId;
+  const duration  = parseInt(modal.dataset.duration);
+  const fromName  = document.getElementById('invite-from-name').textContent;
+  modal.style.display = 'none';
+  db.ref('invites/' + mpPlayerId + '/' + inviteId).remove();
+  const startAt = Date.now() + 3500;
+  db.ref('sessions/' + sessionId).update({ startAt });
+  mpSessionId    = sessionId;
+  mpOpponentName = fromName;
+  mpShowCountdown(duration, fromName, startAt);
+}
+
+function mpDeclineInvite() {
+  const modal     = document.getElementById('invite-modal');
+  const inviteId  = modal.dataset.inviteId;
+  const sessionId = modal.dataset.sessionId;
+  modal.style.display = 'none';
+  db.ref('invites/' + mpPlayerId + '/' + inviteId).remove();
+  db.ref('sessions/' + sessionId).remove();
+}
+
+// ═══════════════════════════════════════════════════════════
+// COUNTDOWN → GAME START
+// ═══════════════════════════════════════════════════════════
+function mpShowCountdown(duration, opponentName, startAt) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-mp-wait').classList.add('active');
+  document.getElementById('hud').style.display = 'none';
+  document.getElementById('mp-countdown-sub').textContent =
+    'vs ' + opponentName + ' · ' + duration + '-min match';
+  const el = document.getElementById('mp-countdown');
+  (function tick() {
+    const rem = startAt - Date.now();
+    if (rem > 0) { el.textContent = Math.ceil(rem / 1000); setTimeout(tick, 150); }
+    else { el.textContent = '🏁'; setTimeout(() => mpBeginGame(duration, opponentName), 400); }
+  })();
+}
+
+function mpBeginGame(duration, opponentName) {
+  clearSave(); clearUndoHistory();
+  Object.assign(G, {
+    money:200000, xp:0, level:1, totalEarned:200000, totalSpent:0,
+    propertiesSold:0, clientsCompleted:0, totalRoomsBuilt:0,
+    luxuryRooms:0, premiumRooms:0, properties:[], completedAchievements:[],
+    activeEvent:null, eventEndTime:0, marketHealth:100,
+    totalDebt:0, emergencyLoansUsed:0, lastRentTime:Date.now(),
+    playerName:G.playerName, isAnonymous:false,
+  });
+  nextPropId = 1; lowMoneyWarned = false;
+  G.challengeEndTime  = Date.now() + duration * 60 * 1000;
+  G.challengeDuration = duration;
+  const badge = document.getElementById('mp-vs-badge');
+  if (badge) { badge.textContent = '⚔️ vs ' + opponentName; badge.style.display = 'flex'; }
+  updateHud();
+  showScreen('map');
+  document.getElementById('hud-timer').style.display = 'flex';
+  toast('⚔️ vs ' + opponentName + ' — ' + duration + ' min! Build fast!', 'gold', '🏁');
+}
+
+// ═══════════════════════════════════════════════════════════
+// SCORE SUBMISSION & RESULTS COMPARISON
+// ═══════════════════════════════════════════════════════════
+function mpPostScore() {
+  const totalVal = G.properties.reduce((a, p) => a + calcPropertyValue(p), 0);
+  const myScore  = totalVal + G.money;
+  const badge    = document.getElementById('mp-vs-badge');
+  if (badge) badge.style.display = 'none';
+  db.ref('sessions/' + mpSessionId + '/scores/' + mpPlayerId).set(myScore);
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-mp-wait').classList.add('active');
+  document.getElementById('hud').style.display = 'none';
+  document.getElementById('mp-countdown').textContent = '⏳';
+  document.getElementById('mp-countdown-sub').textContent =
+    'Waiting for ' + mpOpponentName + '\'s score…';
+  const ref    = db.ref('sessions/' + mpSessionId + '/scores');
+  const cancel = setTimeout(() => { ref.off(); mpShowResults(myScore, null); }, 30000);
+  ref.on('value', snap => {
+    const scores = snap.val() || {};
+    if (Object.keys(scores).length >= 2) {
+      clearTimeout(cancel); ref.off();
+      const oppScore = scores[Object.keys(scores).find(id => id !== mpPlayerId)];
+      mpShowResults(myScore, oppScore);
+    }
+  });
+}
+
+function mpShowResults(myScore, oppScore) {
+  const sid  = mpSessionId;
+  const opp  = mpOpponentName || 'Opponent';
+  mpSessionId = null; mpOpponentName = null;
+  if (db && sid) setTimeout(() => db.ref('sessions/' + sid).remove(), 5000);
+  renderResults();
+  const statsEl = document.getElementById('results-stats');
+  const youWon  = oppScore === null || myScore >= oppScore;
+  statsEl.insertAdjacentHTML('afterbegin',
+    `<div class="mp-result-banner ${youWon ? 'mp-win' : 'mp-lose'}">${youWon ? '🏆 YOU WIN!' : '😤 You lost — good effort!'}</div>`);
+  statsEl.insertAdjacentHTML('beforeend', oppScore !== null
+    ? `<div class="rs-row"><span>⚔️ ${mpX(opp)}</span><span class="rs-val" style="color:${oppScore < myScore ? 'var(--green)' : 'var(--red)'};">${fmt(oppScore)}</span></div>`
+    : `<div class="rs-row"><span>⚔️ ${mpX(opp)}</span><span class="rs-val" style="color:var(--text-dim);">No response</span></div>`);
+  showScreen('results');
 }
 </script>
 </body>
