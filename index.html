@@ -279,6 +279,9 @@ html,body { height:100%; background:var(--bg); font-family:'Segoe UI',system-ui,
 .ba-sell { background:linear-gradient(135deg, #e17055, #d63031); color:#fff; }
 .ba-rent { background:linear-gradient(135deg, #6c5ce7, #a29bfe); color:#fff; }
 .ba-collect { background:linear-gradient(135deg, var(--gold-dark), var(--gold)); color:#111; }
+.ba-undo { background:rgba(255,255,255,0.07); color:var(--text); border:1px solid rgba(247,201,72,0.35) !important; }
+.ba-undo:disabled { opacity:0.4; cursor:not-allowed; }
+.undo-kbd { opacity:0.7; font-size:11px; font-weight:800; margin-left:4px; }
 
 /* ═══════════════════════════════════════════
    CLIENTS SCREEN
@@ -1256,6 +1259,8 @@ let activePropId = null;
 let selectedCell  = null;   // {row, col} being targeted for placement
 let placingRoomType = null; // room type id being placed
 let selectedRoomIdx = null; // room index selected for design
+let undoStack = [];
+const MAX_UNDO_STEPS = 25;
 
 // ═══════════════════════════════════════════════════════════
 // UTILITIES
@@ -1328,6 +1333,73 @@ function updateHud() {
     mhEl.textContent = `${icon} ${mh}%`;
     mhEl.style.color = mh >= 110 ? '#55efc4' : mh <= 85 ? '#ff7675' : 'var(--text-dim)';
   }
+}
+
+function clonePlain(obj) {
+  return JSON.parse(JSON.stringify(obj));
+}
+
+function pushUndo(label) {
+  undoStack.push({
+    label,
+    G: clonePlain(G),
+    nextPropId,
+    activePropId,
+    selectedRoomIdx,
+    placingRoomType,
+  });
+  if (undoStack.length > MAX_UNDO_STEPS) undoStack.shift();
+}
+
+function undoLastAction() {
+  const snap = undoStack.pop();
+  if (!snap) { toast('Nothing to undo.'); return; }
+
+  G = clonePlain(snap.G);
+  nextPropId = snap.nextPropId;
+  activePropId = snap.activePropId;
+  selectedRoomIdx = snap.selectedRoomIdx;
+  placingRoomType = snap.placingRoomType;
+
+  updateHud();
+  const prop = G.properties.find(p => p.id === activePropId);
+  const cur = document.querySelector('.screen.active');
+  const screenId = cur ? cur.id.replace('screen-', '') : '';
+
+  if (screenId === 'build') {
+    if (prop) {
+      closeDesignPanel();
+      renderBuildMode();
+    } else {
+      activePropId = null;
+      closeDesignPanel();
+      showScreen('portfolio');
+    }
+  } else if (screenId === 'portfolio') {
+    renderPortfolio();
+  } else if (screenId === 'map') {
+    renderMap();
+  }
+
+  saveGame();
+  toast(`Undid: ${snap.label}`, 'success');
+}
+
+function clearUndoHistory() {
+  undoStack = [];
+}
+
+function handleUndoShortcut(e) {
+  const tag = (e.target?.tagName || '').toLowerCase();
+  if (tag === 'input' || tag === 'textarea' || e.target?.isContentEditable) return;
+  if (!(e.ctrlKey || e.metaKey) || e.shiftKey || e.key.toLowerCase() !== 'z') return;
+
+  const cur = document.querySelector('.screen.active');
+  const screenId = cur ? cur.id.replace('screen-', '') : '';
+  if (!['build', 'portfolio', 'map'].includes(screenId)) return;
+
+  e.preventDefault();
+  undoLastAction();
 }
 
 function checkUnlocks() {
@@ -1519,6 +1591,7 @@ function buyLand(locationId, plotIdx, useMortgage = false) {
   const downPayment = useMortgage ? Math.round(plot.cost * 0.3) : plot.cost;
   const mortgageAmt  = useMortgage ? Math.round((plot.cost - Math.round(plot.cost * 0.3)) * 1.08) : 0;
   if (G.money < downPayment) { toast('Not enough money!', '', '💸'); return; }
+  pushUndo(`Buy ${plot.label} land`);
   addMoney(-downPayment);
   const prop = createProperty(locationId, plot);
   prop.mortgage = mortgageAmt;
@@ -1531,6 +1604,7 @@ function buyLand(locationId, plotIdx, useMortgage = false) {
   toast(`${plot.label} purchased in ${loc.name}!`, 'gold', loc.emoji);
   activePropId = prop.id;
   openBuildMode(prop.id);
+  saveGame();
 }
 
 function createProperty(locationId, plot) {
@@ -1651,6 +1725,7 @@ function renderBuildMode() {
   document.getElementById('bi-design').textContent = '⭐' + getDesignRating(prop) + '%';
   renderGrid(prop);
   renderRoomPicker(prop);
+  syncPlacementControls();
   renderBuildActions(prop);
 }
 
@@ -1767,6 +1842,7 @@ function placeRoom(propId, row, col, roomTypeId) {
   // Check cost
   const effectiveCost = getEffectiveRoomCost(rt);
   if (G.money < effectiveCost) { toast('Not enough money!', '', '💸'); return; }
+  pushUndo(`Build ${rt.name}`);
   addMoney(-effectiveCost);
 
   const roomIdx = prop.rooms.length;
@@ -1788,6 +1864,7 @@ function placeRoom(propId, row, col, roomTypeId) {
   document.getElementById('cancel-place').style.display = 'none';
   renderBuildMode();
   selectRoom(roomIdx);
+  saveGame();
 }
 
 function renderRoomPicker(prop) {
@@ -1821,11 +1898,22 @@ function renderRoomPicker(prop) {
   });
 }
 
+function syncPlacementControls() {
+  const cancelBtn = document.getElementById('cancel-place');
+  const title = document.getElementById('room-picker').querySelector('.picker-title');
+  if (placingRoomType) {
+    const rt = ROOM_TYPES.find(r => r.id === placingRoomType);
+    cancelBtn.style.display = 'block';
+    if (rt) title.textContent = `TAP GRID TO PLACE: ${rt.name} (${rt.w}x${rt.h}) - ${fmtShort(getEffectiveRoomCost(rt))}`;
+  } else {
+    cancelBtn.style.display = 'none';
+    title.textContent = 'TAP A ROOM TO PLACE IT  -  Tap empty cell to build';
+  }
+}
+
 function startPlacement(roomTypeId) {
   placingRoomType = roomTypeId;
-  const rt = ROOM_TYPES.find(r => r.id === roomTypeId);
-  document.getElementById('cancel-place').style.display = 'block';
-  document.getElementById('room-picker').querySelector('.picker-title').textContent = `📍 TAP GRID TO PLACE: ${rt.name} (${rt.w}×${rt.h}) — ${fmtShort(rt.cost)}`;
+  syncPlacementControls();
   closeDesignPanel();
   selectedRoomIdx = null;
   renderGrid(G.properties.find(p => p.id === activePropId));
@@ -1833,14 +1921,22 @@ function startPlacement(roomTypeId) {
 
 function cancelPlacement() {
   placingRoomType = null;
-  document.getElementById('cancel-place').style.display = 'none';
-  document.getElementById('room-picker').querySelector('.picker-title').textContent = 'TAP A ROOM TO PLACE IT  ·  Tap empty cell to build';
+  syncPlacementControls();
   renderGrid(G.properties.find(p => p.id === activePropId));
 }
 
 function renderBuildActions(prop) {
   const bar = document.getElementById('build-actions');
   bar.innerHTML = '';
+  const undoBtn = document.createElement('button');
+  undoBtn.className = 'ba-undo';
+  undoBtn.innerHTML = undoStack.length
+    ? `Undo ${undoStack[undoStack.length - 1].label} <span class="undo-kbd">Ctrl+Z</span>`
+    : `Undo <span class="undo-kbd">Ctrl+Z</span>`;
+  undoBtn.disabled = undoStack.length === 0;
+  undoBtn.onclick = undoLastAction;
+  bar.appendChild(undoBtn);
+
   if (prop.isRented) {
     const pending = calcPendingRent(prop);
     if (pending > 0) {
@@ -1969,6 +2065,7 @@ function updateDesignPanelValue() {
 function deleteRoom() {
   if (selectedRoomIdx === null) return;
   if (!confirm('Remove this room? You will receive a partial refund.')) return;
+  clearUndoHistory();
   const prop = G.properties.find(p => p.id === activePropId);
   const room = prop.rooms[selectedRoomIdx];
   const rt = ROOM_TYPES.find(r => r.id === room.typeId);
@@ -1995,6 +2092,7 @@ function rentProperty(propId) {
 }
 
 function stopRenting(propId) {
+  clearUndoHistory();
   const prop = G.properties.find(p => p.id === propId);
   collectRent(propId);
   prop.isRented = false;
@@ -2343,6 +2441,7 @@ function loadGame() {
     Object.assign(G, save.G);
     if (save.nextPropId) nextPropId = save.nextPropId;
     G.challengeEndTime = 0; G.challengeDuration = 0;
+    clearUndoHistory();
     return true;
   } catch(e) { return false; }
 }
@@ -2473,6 +2572,7 @@ function shareScore() {
 
 function playAgain() {
   clearSave();
+  clearUndoHistory();
   Object.assign(G, {
     money:200000, xp:0, level:1, totalEarned:200000, totalSpent:0,
     propertiesSold:0, clientsCompleted:0, totalRoomsBuilt:0,
@@ -2553,6 +2653,7 @@ function closeTenantModal(e) {
 }
 
 function selectTenant(propId, tenantTypeId) {
+  clearUndoHistory();
   document.getElementById('tenant-modal').style.display = 'none';
   const prop = G.properties.find(p => p.id === propId);
   const tenant = TENANT_TYPES.find(t => t.id === tenantTypeId);
@@ -2634,6 +2735,7 @@ function cancelAuction() {
 }
 
 function completeSale(propId, salePrice) {
+  clearUndoHistory();
   const prop = G.properties.find(p => p.id === propId);
   const mortgage = prop.mortgage || 0;
   const net = salePrice - mortgage;
@@ -2682,6 +2784,7 @@ setInterval(saveGame, 60000);
 // SPLASH SCREEN & INIT
 // ═══════════════════════════════════════════════════════════
 window.addEventListener('DOMContentLoaded', () => {
+  document.addEventListener('keydown', handleUndoShortcut);
   let p = 0;
   const prog = document.getElementById('splash-prog');
   const interval = setInterval(() => {
