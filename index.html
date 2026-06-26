@@ -389,7 +389,8 @@ html,body { height:100%; background:var(--bg); font-family:'Segoe UI',system-ui,
   .hud-stat { padding: 7px 18px; font-size: 15px; }
   .xp-bar { width: 90px; height: 6px; }
   #screen-map, #screen-portfolio, #screen-build,
-  #screen-clients, #screen-achievements, #screen-finance { padding-top: 60px; }
+  #screen-clients, #screen-achievements, #screen-finance,
+  #screen-leaderboard { padding-top: 60px; }
 
   /* Map */
   .map-header { max-width: 1100px; margin: 0 auto; padding: 28px 32px 16px; }
@@ -934,6 +935,53 @@ html,body { height:100%; background:var(--bg); font-family:'Segoe UI',system-ui,
 .eb-timer { font-size:12px; font-weight:700; background:rgba(0,0,0,0.35); padding:4px 10px; border-radius:20px; white-space:nowrap; flex-shrink:0; }
 
 /* ═══════════════════════════════════════════
+   LEADERBOARD
+═══════════════════════════════════════════ */
+#screen-leaderboard { padding-top:56px; overflow-y:auto; }
+.lb-header { padding:20px 16px 10px; display:flex; flex-wrap:wrap; align-items:center; gap:10px; }
+.lb-header-text { flex:1; }
+.lb-header-text h2 { font-size:22px; font-weight:800; }
+.lb-header-text p  { color:var(--text-dim); font-size:14px; margin-top:4px; }
+.lb-refresh { font-size:12px; padding:8px 14px; }
+.lb-list { padding:0 16px 30px; display:flex; flex-direction:column; gap:10px; }
+.lb-row {
+  background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+  padding:14px 16px; display:flex; align-items:center; gap:14px;
+}
+.lb-row.lb-gold   { border-color:rgba(247,201,72,0.45); background:linear-gradient(135deg,rgba(247,201,72,0.06),var(--surface)); }
+.lb-row.lb-silver { border-color:rgba(180,180,200,0.35); }
+.lb-row.lb-bronze { border-color:rgba(205,127,50,0.35); }
+.lb-row.lb-you    { border-color:rgba(108,92,231,0.5); background:linear-gradient(135deg,rgba(108,92,231,0.07),var(--surface)); }
+.lb-rank { font-size:22px; width:38px; text-align:center; flex-shrink:0; line-height:1; }
+.lb-rank-num { font-size:14px; font-weight:800; color:var(--text-dim); }
+.lb-info { flex:1; min-width:0; }
+.lb-name { font-size:15px; font-weight:700; display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+.lb-you-tag    { font-size:10px; background:rgba(108,92,231,0.2); color:#a29bfe; border-radius:10px; padding:2px 8px; font-weight:700; flex-shrink:0; }
+.lb-online-dot { width:7px; height:7px; background:var(--green); border-radius:50%; display:inline-block; flex-shrink:0; animation:pulse 2s ease infinite; }
+.lb-when { font-size:11px; color:var(--text-dim); margin-top:3px; }
+.lb-score { font-size:16px; font-weight:800; color:var(--gold); flex-shrink:0; }
+.lb-empty  { text-align:center; padding:40px 20px; color:var(--text-dim); font-size:15px; }
+.lb-no-fb  { margin:0 16px 24px; background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:var(--radius); padding:20px; text-align:center; color:var(--text-dim); font-size:13px; line-height:1.7; }
+.lb-no-fb strong { color:var(--text); }
+
+@media (min-width:901px) {
+  .lb-header { max-width:720px; margin:0 auto; padding:24px 32px 14px; }
+  .lb-list   { max-width:720px; margin:0 auto; padding:0 32px 48px; gap:12px; }
+  .lb-row    { padding:16px 20px; }
+  .lb-rank   { font-size:26px; width:42px; }
+  .lb-name   { font-size:16px; }
+  .lb-score  { font-size:18px; }
+  .lb-no-fb  { max-width:720px; margin:0 auto 24px; }
+}
+@media (max-width:480px) {
+  .lb-header { padding:16px 12px 10px; }
+  .lb-list   { padding:0 12px 24px; gap:8px; }
+  .lb-row    { padding:12px 12px; gap:10px; }
+  .lb-rank   { font-size:18px; width:32px; }
+  .lb-score  { font-size:14px; }
+}
+
+/* ═══════════════════════════════════════════
    MUSIC BUTTON (fixed, always visible)
 ═══════════════════════════════════════════ */
 #music-btn {
@@ -1138,6 +1186,11 @@ html,body { height:100%; background:var(--bg); font-family:'Segoe UI',system-ui,
         <h3>Buy Land</h3>
         <p>Find your perfect location</p>
       </div>
+      <div class="menu-card" onclick="showScreen('leaderboard')" style="border-color:rgba(247,201,72,0.25);">
+        <span class="card-emoji">🏆</span>
+        <h3>Leaderboard</h3>
+        <p>Top 10 richest builders</p>
+      </div>
       <div class="menu-card" onclick="showScreen('portfolio')">
         <span class="card-emoji">🏘️</span>
         <h3>My Properties</h3>
@@ -1292,6 +1345,23 @@ html,body { height:100%; background:var(--bg); font-family:'Segoe UI',system-ui,
         <div style="margin-top:14px;"><button class="btn-primary" onclick="getEmergencyLoan()" style="width:100%;background:linear-gradient(135deg,#e17055,#d63031);">🏦 Get Emergency Loan</button></div>
       </div>
     </div>
+  </div>
+
+  <!-- LEADERBOARD -->
+  <div id="screen-leaderboard" class="screen">
+    <div class="lb-header">
+      <div class="lb-header-text">
+        <h2>🏆 Leaderboard</h2>
+        <p>Top 10 richest empire builders — online &amp; offline</p>
+      </div>
+      <button class="btn-secondary lb-refresh" onclick="renderLeaderboard()">🔄 Refresh</button>
+    </div>
+    <div id="lb-no-fb" class="lb-no-fb" style="display:none;">
+      <strong>Global leaderboard requires Firebase.</strong><br>
+      Follow the Firebase setup guide to see all players' scores here.<br>
+      Your current score is shown below.
+    </div>
+    <div id="lb-list" class="lb-list"></div>
   </div>
 
   <!-- Plot Picker Modal -->
@@ -1562,6 +1632,7 @@ function addMoney(amount) {
   }
   if (G.money >= 20000) lowMoneyWarned = false;
   updateHud();
+  if (amount > 0) lbMaybeUpdate();
 }
 
 function addXP(amount) {
@@ -1740,9 +1811,9 @@ function updateEventCountdown() {
 // ═══════════════════════════════════════════════════════════
 // SCREEN NAVIGATION
 // ═══════════════════════════════════════════════════════════
-const SCREENS_WITH_HUD = ['map','portfolio','build','clients','achievements','finance'];
-const HUD_BACK_MAP = { map:'menu', portfolio:'menu', build:'portfolio', clients:'menu', achievements:'menu', finance:'menu' };
-const HUD_TITLES = { map:'🗺️ World Map', portfolio:'🏘️ My Properties', build:'🏗️ Build Mode', clients:'🤝 Clients', achievements:'🏆 Achievements', finance:'💹 Finance' };
+const SCREENS_WITH_HUD = ['map','portfolio','build','clients','achievements','finance','leaderboard'];
+const HUD_BACK_MAP = { map:'menu', portfolio:'menu', build:'portfolio', clients:'menu', achievements:'menu', finance:'menu', leaderboard:'menu' };
+const HUD_TITLES = { map:'🗺️ World Map', portfolio:'🏘️ My Properties', build:'🏗️ Build Mode', clients:'🤝 Clients', achievements:'🏆 Achievements', finance:'💹 Finance', leaderboard:'🏆 Leaderboard' };
 
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -1761,6 +1832,7 @@ function showScreen(id) {
   if (id === 'achievements') renderAchievements();
   if (id === 'finance')      renderFinance();
   if (id === 'menu')         renderMenu();
+  if (id === 'leaderboard') renderLeaderboard();
 }
 
 function hudBack() {
@@ -3189,6 +3261,104 @@ const Music = (() => {
 })();
 
 function musicToggle() { Music.toggle(); }
+
+// ═══════════════════════════════════════════════════════════
+// LEADERBOARD
+// ═══════════════════════════════════════════════════════════
+let _lbBest     = parseInt(localStorage.getItem('dhe_lb_score') || '0');
+let _lbDebounce = null;
+
+function lbMaybeUpdate() {
+  if (!db || !mpPlayerId || G.isAnonymous) return;
+  const score = G.properties.reduce((a,p) => a + calcPropertyValue(p), 0) + G.money;
+  if (score <= _lbBest) return;
+  clearTimeout(_lbDebounce);
+  _lbDebounce = setTimeout(() => {
+    _lbBest = score;
+    localStorage.setItem('dhe_lb_score', score);
+    db.ref('leaderboard/' + mpPlayerId).set({
+      name: G.playerName, score, updatedAt: Date.now()
+    });
+  }, 5000);
+}
+
+function renderLeaderboard() {
+  const list  = document.getElementById('lb-list');
+  const noFb  = document.getElementById('lb-no-fb');
+  if (!list) return;
+
+  lbMaybeUpdate();
+
+  if (!db) {
+    if (noFb) noFb.style.display = 'block';
+    const score = G.properties.reduce((a,p) => a + calcPropertyValue(p), 0) + G.money;
+    list.innerHTML = `
+      <div class="lb-row lb-gold lb-you">
+        <div class="lb-rank">🥇</div>
+        <div class="lb-info">
+          <div class="lb-name">${mpX(G.playerName)} <span class="lb-you-tag">YOU</span></div>
+          <div class="lb-when">Local score · not synced</div>
+        </div>
+        <div class="lb-score">${fmtShort(score)}</div>
+      </div>`;
+    return;
+  }
+
+  if (noFb) noFb.style.display = 'none';
+  list.innerHTML = '<div class="lb-empty">⏳ Loading scores…</div>';
+
+  db.ref('leaderboard').orderByChild('score').limitToLast(10).once('value', snap => {
+    const rows = [];
+    snap.forEach(c => rows.push({ id: c.key, ...c.val() }));
+    rows.sort((a,b) => b.score - a.score);
+
+    db.ref('online').once('value', onSnap => {
+      const online = new Set();
+      onSnap.forEach(c => online.add(c.key));
+      lbDraw(rows, online);
+    });
+  });
+}
+
+function lbDraw(rows, online) {
+  const list = document.getElementById('lb-list');
+  if (!list) return;
+  if (!rows.length) {
+    list.innerHTML = '<div class="lb-empty">No scores yet — be the first! 🏆</div>';
+    return;
+  }
+  const medals = ['🥇','🥈','🥉'];
+  list.innerHTML = rows.slice(0,10).map((e, i) => {
+    const isYou    = e.id === mpPlayerId;
+    const isOnline = online && online.has(e.id);
+    const rankEl   = i < 3
+      ? `<div class="lb-rank">${medals[i]}</div>`
+      : `<div class="lb-rank"><span class="lb-rank-num">#${i+1}</span></div>`;
+    const rowClass = i===0 ? 'lb-gold' : i===1 ? 'lb-silver' : i===2 ? 'lb-bronze' : '';
+    return `
+      <div class="lb-row ${rowClass} ${isYou ? 'lb-you' : ''}">
+        ${rankEl}
+        <div class="lb-info">
+          <div class="lb-name">
+            ${mpX(e.name)}
+            ${isYou    ? '<span class="lb-you-tag">YOU</span>' : ''}
+            ${isOnline ? '<span class="lb-online-dot" title="Online now"></span>' : ''}
+          </div>
+          <div class="lb-when">${lbAgo(e.updatedAt)}</div>
+        </div>
+        <div class="lb-score">${fmtShort(e.score)}</div>
+      </div>`;
+  }).join('');
+}
+
+function lbAgo(ts) {
+  if (!ts) return 'unknown';
+  const d = Date.now() - ts;
+  if (d < 60000)    return 'just now';
+  if (d < 3600000)  return Math.floor(d / 60000) + 'm ago';
+  if (d < 86400000) return Math.floor(d / 3600000) + 'h ago';
+  return Math.floor(d / 86400000) + 'd ago';
+}
 
 // ═══════════════════════════════════════════════════════════
 // FIREBASE CONFIG
