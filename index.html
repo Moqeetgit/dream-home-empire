@@ -1065,7 +1065,7 @@ html,body { height:100%; background:var(--bg); font-family:'Segoe UI',system-ui,
 .mp-empty { color:var(--text-dim); font-size:13px; text-align:center; padding:10px 0; }
 /* Spinner (prize wheel) screen */
 #screen-spinner {
-  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  flex-direction:column; align-items:center; justify-content:center;
   min-height:100vh; padding:20px 16px;
   background:radial-gradient(ellipse at 50% 20%, rgba(108,92,231,0.25), transparent 65%), var(--bg);
   overflow-y:auto;
@@ -1499,8 +1499,7 @@ html,body { height:100%; background:var(--bg); font-family:'Segoe UI',system-ui,
         <span class="auction-bid" id="auction-bid-display">$0</span>
         <div class="auction-bid-label" id="auction-bid-label">Opening bid…</div>
       </div>
-      <div class="auction-timer-bar"><div class="auction-timer-fill" id="auction-timer-fill" style="width:100%"></div></div>
-      <div class="auction-bidders" id="auction-bidders"></div>
+      <div id="auction-activity" style="font-size:13px;color:var(--text-dim);text-align:center;min-height:20px;margin:8px 0;"></div>
       <div style="display:flex;gap:10px;margin-top:14px;">
         <button class="btn-primary" onclick="acceptAuction()" style="flex:1;">✅ Accept Bid</button>
         <button class="btn-secondary" onclick="cancelAuction()" style="flex:1;">✕ Cancel</button>
@@ -3189,35 +3188,63 @@ let auctionState = null;
 function startAuction(propId) {
   const prop = G.properties.find(p => p.id === propId);
   if (!prop) return;
-  const val = calcPropertyValue(prop);
-  const bidders = shuffle([...AUCTION_BIDDERS]).slice(0, 2 + Math.floor(Math.random() * 4));
-  auctionState = { propId, currentBid: Math.round(val * 0.82), baseValue: val, bidders, activeBidder: -1, timeLeft: 18 };
+  const val      = calcPropertyValue(prop);
+  const bidders  = shuffle([...AUCTION_BIDDERS]);
+  // Duration is random and hidden from the player — 14 to 32 seconds
+  const timeLeft = 14 + Math.floor(Math.random() * 19);
+  auctionState = { propId, currentBid: Math.round(val * 0.82), baseValue: val, bidders, timeLeft };
   document.getElementById('auction-prop-name').textContent = `"${prop.name}" — Market Value: ${fmt(val)}`;
   document.getElementById('auction-bid-display').textContent = fmt(auctionState.currentBid);
   document.getElementById('auction-bid-label').textContent = '🔔 Bidding opens…';
-  document.getElementById('auction-timer-fill').style.width = '100%';
-  renderAuctionBidders();
+  document.getElementById('auction-activity').textContent  = '👀 Buyers are gathering…';
   document.getElementById('auction-modal').style.display = 'flex';
   auctionState.interval = setInterval(auctionTick, 1600);
 }
 
+const _auctionMsgs = [
+  n => `🔥 ${n} just placed a bid!`,
+  n => `⚡ ${n} raised the price!`,
+  n => `💰 ${n} wants it bad!`,
+  n => `🎯 ${n} won't give up!`,
+  n => `😤 ${n} is determined!`,
+];
+const _auctionActivity = [
+  '👀 Interest is picking up…',
+  '🔥 Bidding is heating up!',
+  '😮 The crowd is watching!',
+  '💼 Serious buyers are competing…',
+  '⚡ The bids are flying!',
+  '🤫 Someone is bidding quietly…',
+  '🎲 Unexpected interest from buyers!',
+];
+
 function auctionTick() {
   if (!auctionState) return;
   auctionState.timeLeft -= 1.6;
-  document.getElementById('auction-timer-fill').style.width = Math.max(0, (auctionState.timeLeft / 18) * 100) + '%';
-  auctionState.currentBid = Math.round(auctionState.currentBid * (1 + 0.03 + Math.random() * 0.07));
-  auctionState.activeBidder = Math.floor(Math.random() * auctionState.bidders.length);
-  const bidEl = document.getElementById('auction-bid-display');
+
+  // Variable bid jumps — sometimes a tiny nudge, sometimes a surge, sometimes a shock
+  const roll = Math.random();
+  let bump;
+  if      (roll < 0.12) bump = 0.10 + Math.random() * 0.15;  // rare big surge  (10–25%)
+  else if (roll < 0.25) bump = 0.005 + Math.random() * 0.01;  // suspense pause  (0.5–1.5%)
+  else                  bump = 0.025 + Math.random() * 0.06;   // normal          (2.5–8.5%)
+
+  auctionState.currentBid = Math.round(auctionState.currentBid * (1 + bump));
+
+  const bidder = auctionState.bidders[Math.floor(Math.random() * auctionState.bidders.length)];
+  const bidEl  = document.getElementById('auction-bid-display');
   bidEl.textContent = fmt(auctionState.currentBid);
   bidEl.classList.remove('pop'); void bidEl.offsetWidth; bidEl.classList.add('pop');
-  document.getElementById('auction-bid-label').textContent = `🔥 ${auctionState.bidders[auctionState.activeBidder]} just bid!`;
-  renderAuctionBidders();
-  if (auctionState.timeLeft <= 0) autoAcceptAuction();
-}
 
-function renderAuctionBidders() {
-  document.getElementById('auction-bidders').innerHTML = auctionState.bidders.map((b, i) =>
-    `<span class="bidder-chip${i === auctionState.activeBidder ? ' active' : ''}">${b}</span>`).join('');
+  document.getElementById('auction-bid-label').textContent =
+    _auctionMsgs[Math.floor(Math.random() * _auctionMsgs.length)](bidder);
+
+  // Occasionally swap in a mysterious atmosphere line
+  if (Math.random() < 0.35)
+    document.getElementById('auction-activity').textContent =
+      _auctionActivity[Math.floor(Math.random() * _auctionActivity.length)];
+
+  if (auctionState.timeLeft <= 0) autoAcceptAuction();
 }
 
 function acceptAuction() {
