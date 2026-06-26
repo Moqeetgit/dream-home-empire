@@ -1358,8 +1358,8 @@ html,body { height:100%; background:var(--bg); font-family:'Segoe UI',system-ui,
     </div>
     <div id="lb-no-fb" class="lb-no-fb" style="display:none;">
       <strong>Global leaderboard requires Firebase.</strong><br>
-      Follow the Firebase setup guide to see all players' scores here.<br>
-      Your current score is shown below.
+      Once Firebase is set up, scores from <em>every device worldwide</em> are saved here automatically — even when players are offline.<br>
+      Your local score is shown below.
     </div>
     <div id="lb-list" class="lb-list"></div>
   </div>
@@ -1816,6 +1816,7 @@ const HUD_BACK_MAP = { map:'menu', portfolio:'menu', build:'portfolio', clients:
 const HUD_TITLES = { map:'🗺️ World Map', portfolio:'🏘️ My Properties', build:'🏗️ Build Mode', clients:'🤝 Clients', achievements:'🏆 Achievements', finance:'💹 Finance', leaderboard:'🏆 Leaderboard' };
 
 function showScreen(id) {
+  if (id !== 'leaderboard') lbDetach();
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('screen-' + id).classList.add('active');
   const hud = document.getElementById('hud');
@@ -3282,11 +3283,18 @@ function lbMaybeUpdate() {
   }, 5000);
 }
 
+let _lbRef = null;
+
+function lbDetach() {
+  if (_lbRef) { _lbRef.off(); _lbRef = null; }
+}
+
 function renderLeaderboard() {
   const list  = document.getElementById('lb-list');
   const noFb  = document.getElementById('lb-no-fb');
   if (!list) return;
 
+  lbDetach();
   lbMaybeUpdate();
 
   if (!db) {
@@ -3297,7 +3305,7 @@ function renderLeaderboard() {
         <div class="lb-rank">🥇</div>
         <div class="lb-info">
           <div class="lb-name">${mpX(G.playerName)} <span class="lb-you-tag">YOU</span></div>
-          <div class="lb-when">Local score · not synced</div>
+          <div class="lb-when">Local score · set up Firebase to go global</div>
         </div>
         <div class="lb-score">${fmtShort(score)}</div>
       </div>`;
@@ -3307,16 +3315,18 @@ function renderLeaderboard() {
   if (noFb) noFb.style.display = 'none';
   list.innerHTML = '<div class="lb-empty">⏳ Loading scores…</div>';
 
-  db.ref('leaderboard').orderByChild('score').limitToLast(10).once('value', snap => {
+  _lbRef = db.ref('leaderboard').orderByChild('score').limitToLast(10);
+  _lbRef.on('value', snap => {
     const rows = [];
     snap.forEach(c => rows.push({ id: c.key, ...c.val() }));
     rows.sort((a,b) => b.score - a.score);
-
     db.ref('online').once('value', onSnap => {
       const online = new Set();
       onSnap.forEach(c => online.add(c.key));
       lbDraw(rows, online);
-    });
+    }, () => lbDraw(rows, new Set()));
+  }, err => {
+    list.innerHTML = `<div class="lb-empty">⚠️ Could not load scores — check your Firebase rules allow reading <strong>/leaderboard</strong>.<br><small style="opacity:0.6;">${err.message}</small></div>`;
   });
 }
 
