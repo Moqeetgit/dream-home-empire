@@ -984,6 +984,25 @@ html,body { height:100%; background:var(--bg); font-family:'Segoe UI',system-ui,
 /* ═══════════════════════════════════════════
    MUSIC BUTTON (fixed, always visible)
 ═══════════════════════════════════════════ */
+/* Inline leaderboard on main menu */
+.menu-lb-section { margin: 4px 16px 16px; }
+.menu-lb-heading {
+  font-size:12px; font-weight:700; color:var(--text-dim); text-transform:uppercase;
+  letter-spacing:1px; margin-bottom:10px; display:flex; align-items:center; gap:8px;
+}
+.menu-lb-row {
+  display:flex; align-items:center; gap:10px; padding:9px 12px;
+  background:var(--surface); border:1px solid var(--border); border-radius:10px;
+  margin-bottom:6px;
+}
+.menu-lb-row.lb-you { border-color:rgba(108,92,231,0.4); background:linear-gradient(135deg,rgba(108,92,231,0.06),var(--surface)); }
+.menu-lb-rank  { font-size:17px; width:28px; text-align:center; flex-shrink:0; line-height:1; }
+.menu-lb-name  { flex:1; font-size:13px; font-weight:600; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:flex; align-items:center; gap:5px; }
+.menu-lb-score { font-size:13px; font-weight:800; color:var(--gold); flex-shrink:0; }
+@media (min-width:901px) {
+  .menu-lb-section { max-width:780px; margin:4px auto 20px; padding:0 16px; }
+}
+
 /* HUD icon buttons (leaderboard + online players) */
 .hud-icon-btn {
   background:rgba(255,255,255,0.07); border:1px solid var(--border);
@@ -1082,7 +1101,6 @@ html,body { height:100%; background:var(--bg); font-family:'Segoe UI',system-ui,
       <span id="hud-level">Lv.1</span>
       <div class="xp-bar"><div class="xp-fill" id="xp-fill" style="width:0%"></div></div>
     </div>
-    <button class="hud-icon-btn" onclick="openLeaderboard()" title="Leaderboard">🏆</button>
     <button class="hud-icon-btn" id="hud-mp-btn" onclick="openMpPanel()" title="Online Players" style="display:none;">👥 <span class="hud-online-count" id="hud-online-count">0</span></button>
   </div>
 
@@ -1221,11 +1239,6 @@ html,body { height:100%; background:var(--bg); font-family:'Segoe UI',system-ui,
         <h3>Buy Land</h3>
         <p>Find your perfect location</p>
       </div>
-      <div class="menu-card" onclick="showScreen('leaderboard')" style="border-color:rgba(247,201,72,0.25);">
-        <span class="card-emoji">🏆</span>
-        <h3>Leaderboard</h3>
-        <p>Top 10 richest builders</p>
-      </div>
       <div class="menu-card" onclick="showScreen('portfolio')">
         <span class="card-emoji">🏘️</span>
         <h3>My Properties</h3>
@@ -1253,6 +1266,11 @@ html,body { height:100%; background:var(--bg); font-family:'Segoe UI',system-ui,
       </div>
     </div>
     <p id="welcome-msg" style="color:var(--text-dim);font-size:13px;padding:0 20px 12px;text-align:center;"></p>
+    <!-- Inline leaderboard -->
+    <div class="menu-lb-section">
+      <div class="menu-lb-heading">🏆 Top Players</div>
+      <div id="menu-lb-list"></div>
+    </div>
     <!-- Online players (shown when Firebase is connected) -->
     <div id="mp-section" style="display:none;">
       <div class="mp-heading"><span class="mp-pulse"></span> Online Players</div>
@@ -1917,6 +1935,46 @@ function renderMenu() {
   const rep = REP_TITLES[Math.min(Math.floor(G.level/2), REP_TITLES.length-1)];
   const nameTag = G.isAnonymous ? '🎭 Anonymous' : `👋 ${G.playerName}`;
   document.getElementById('welcome-msg').textContent = `${nameTag} · ${rep} · Level ${G.level} · ${fmt(G.money)}`;
+  renderMenuLeaderboard();
+}
+
+function renderMenuLeaderboard() {
+  const el = document.getElementById('menu-lb-list');
+  if (!el) return;
+  const medals = ['🥇','🥈','🥉'];
+
+  function draw(rows) {
+    if (!rows.length) {
+      el.innerHTML = '<div class="mp-empty">No scores yet — be the first! 🏆</div>';
+      return;
+    }
+    el.innerHTML = rows.slice(0, 5).map((e, i) => {
+      const isYou  = e.id === _playerId;
+      const rankEl = i < 3 ? medals[i] : `<span style="font-size:12px;font-weight:800;color:var(--text-dim);">#${i+1}</span>`;
+      return `<div class="menu-lb-row${isYou ? ' lb-you' : ''}">
+        <div class="menu-lb-rank">${rankEl}</div>
+        <div class="menu-lb-name">${lbEsc(e.name)}${isYou ? '&nbsp;<span class="lb-you-tag">YOU</span>' : ''}</div>
+        <div class="menu-lb-score">${fmtShort(e.score)}</div>
+      </div>`;
+    }).join('');
+  }
+
+  if (db) {
+    db.ref('leaderboard').orderByChild('score').limitToLast(5).once('value', snap => {
+      const rows = [];
+      snap.forEach(c => rows.push({ id: c.key, ...c.val() }));
+      rows.sort((a, b) => b.score - a.score);
+      if (rows.length) { draw(rows); return; }
+      const lb = lbReadAll();
+      draw(Object.entries(lb).map(([id, v]) => ({ id, ...v })).sort((a, b) => b.score - a.score));
+    }, () => {
+      const lb = lbReadAll();
+      draw(Object.entries(lb).map(([id, v]) => ({ id, ...v })).sort((a, b) => b.score - a.score));
+    });
+  } else {
+    const lb = lbReadAll();
+    draw(Object.entries(lb).map(([id, v]) => ({ id, ...v })).sort((a, b) => b.score - a.score));
+  }
 }
 
 // ═══════════════════════════════════════════════════════════
