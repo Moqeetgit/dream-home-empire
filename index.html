@@ -378,6 +378,154 @@ html,body { height:100%; background:var(--bg); font-family:'Segoe UI',system-ui,
 .gap-8 { gap:8px; }
 
 /* ═══════════════════════════════════════════
+   DESKTOP (≥ 901px)
+═══════════════════════════════════════════ */
+@media (min-width: 901px) {
+  /* HUD */
+  #hud { padding: 12px 40px; gap: 16px; min-height: 60px; }
+  #hud-title { font-size: 17px; }
+  .hud-stat { padding: 7px 18px; font-size: 15px; }
+  .xp-bar { width: 90px; height: 6px; }
+  #screen-map, #screen-portfolio, #screen-build,
+  #screen-clients, #screen-achievements, #screen-finance { padding-top: 60px; }
+
+  /* Map */
+  .map-header { max-width: 1100px; margin: 0 auto; padding: 28px 32px 16px; }
+  .location-grid { max-width: 1100px; margin: 0 auto; grid-template-columns: repeat(4, 1fr); padding: 0 32px 48px; gap: 18px; }
+  .loc-bg { min-height: 140px; padding: 24px 18px; }
+  .loc-emoji { font-size: 44px; }
+  .loc-name { font-size: 17px; }
+  .loc-desc { font-size: 13px; }
+
+  /* Portfolio */
+  .portfolio-header { max-width: 920px; margin: 0 auto; padding: 24px 32px 16px; }
+  .stat-chips { max-width: 920px; margin: 0 auto; padding: 0 32px 16px; }
+  .property-list { max-width: 920px; margin: 0 auto; padding: 0 32px 48px; gap: 16px; }
+  .prop-banner { height: 100px; }
+  .prop-banner-emoji { font-size: 52px; }
+  .prop-banner-info h3 { font-size: 19px; }
+  .prop-stat-val { font-size: 16px; }
+  .prop-stat-lbl { font-size: 12px; }
+  .stat-chip { font-size: 14px; padding: 7px 16px; }
+
+  /* Clients */
+  .clients-header { max-width: 920px; margin: 0 auto; padding: 24px 32px 16px; }
+  .client-cards { max-width: 920px; margin: 0 auto; padding: 0 32px 48px; gap: 16px; }
+  .cc-avatar { width: 68px; height: 68px; font-size: 44px; }
+  .cc-info h3 { font-size: 18px; }
+  .cc-budget { font-size: 15px; }
+  .cc-desc { font-size: 14px; }
+  .cc-match-btn { font-size: 14px; padding: 12px 24px; }
+
+  /* Achievements */
+  .ach-header { max-width: 1000px; margin: 0 auto; padding: 24px 32px 16px; }
+  .ach-grid { max-width: 1000px; margin: 0 auto; grid-template-columns: repeat(4, 1fr); padding: 0 32px 48px; gap: 18px; }
+  .ach-card { padding: 20px 16px; }
+  .ach-card .ach-emoji { font-size: 38px; }
+  .ach-card h4 { font-size: 14px; }
+  .ach-card p { font-size: 12px; }
+  .ach-card .ach-xp { font-size: 13px; }
+
+  /* Finance */
+  .finance-content { max-width: 820px; margin: 0 auto; padding: 24px 32px; }
+  .finance-card h3 { font-size: 18px; margin-bottom: 16px; }
+  .finance-row { font-size: 15px; padding: 10px 0; }
+
+  /* Menu */
+  .menu-hero { max-width: 860px; padding: 64px 24px 40px; }
+  .menu-hero-emoji { font-size: 90px; }
+  .menu-hero h1 { font-size: 46px; }
+  .menu-hero p { font-size: 17px; margin-bottom: 38px; }
+  .menu-cards { max-width: 780px; grid-template-columns: repeat(3, 1fr); gap: 18px; padding: 0 24px 48px; }
+  .menu-card { padding: 26px 20px; }
+  .menu-card .card-emoji { font-size: 44px; margin-bottom: 10px; }
+  .menu-card h3 { font-size: 16px; }
+  .menu-card p { font-size: 13px; }
+
+  /* Build mode */
+  #design-panel { width: 260px; }
+  .grid-cell { width: 72px; height: 72px; }
+  .rb-emoji { font-size: 24px !important; }
+  .rb-name  { font-size: 9px !important; }
+  .build-info-bar { padding: 12px 20px; gap: 14px; }
+  .build-info-bar .bi-stat { font-size: 15px; }
+  #room-picker { padding: 14px 16px; }
+  #room-picker .picker-title { font-size: 14px; margin-bottom: 10px; }
+  .room-pick-btn { min-width: 82px; padding: 10px 12px; }
+  .rpb-emoji { font-size: 24px; }
+  .rpb-name { font-size: 11px; }
+  .rpb-cost { font-size: 11px; }
+  .build-actions { padding: 14px 20px; gap: 12px; }
+  .build-actions button { font-size: 14px; padding: 13px; }
+  .dp-header { padding: 18px 18px 12px; }
+  .dp-header h3 { font-size: 17px; }
+  .dp-section { padding: 14px 18px; }
+  .tier-btn .tb-name { font-size: 13px; }
+  .dp-room-value .rv-val { font-size: 24px; }
+
+  /* Modals — centered on desktop instead of bottom-sheet */
+  .modal-overlay { align-items: center; }
+  .modal-panel { border-radius: var(--radius); max-width: 540px; padding: 32px 28px 40px; }
+
+  /* Toast */
+  #toast-container { right: 24px; top: 80px; }
+  .toast { font-size: 14px; max-width: 320px; padding: 12px 18px; }
+
+  /* Welcome / Splash */
+  .splash-logo { font-size: 100px; }
+  .splash-title { font-size: 48px; }
+  .splash-sub { font-size: 19px; }
+  .splash-bar { width: 280px; }
+  .welcome-logo { font-size: 90px; }
+  .welcome-title { font-size: 42px; }
+  .welcome-sub { font-size: 18px; margin-bottom: 36px; }
+
+  /* Choice / Challenge */
+  .choice-greeting { font-size: 32px; }
+  .choice-sub { font-size: 16px; }
+  .choice-cards { max-width: 460px; gap: 18px; }
+  .choice-icon { font-size: 54px; }
+  .choice-card { padding: 28px 24px; }
+  .choice-card h3 { font-size: 22px; }
+  .choice-card p { font-size: 15px; }
+  .challenge-options { max-width: 500px; padding: 0 24px 48px; }
+  .challenge-option { padding: 18px 24px; }
+  .co-info h4 { font-size: 17px; }
+  .co-info p { font-size: 13px; }
+
+  /* Results */
+  .results-content { max-width: 540px; padding: 48px 24px; }
+  .results-trophy { font-size: 96px; }
+  .results-title { font-size: 34px; }
+  .rs-row { font-size: 15px; }
+
+  /* Tutorial */
+  .tut-slide-wrap { max-width: 500px; padding: 0 32px; }
+  .tut-title { font-size: 26px; }
+  .tut-desc { font-size: 17px; }
+  .tut-graphic-box { height: 200px; margin-bottom: 28px; }
+  .tut-next { padding: 15px 48px; font-size: 18px; }
+}
+
+/* ═══════════════════════════════════════════
+   TABLET (601px – 900px)
+═══════════════════════════════════════════ */
+@media (min-width: 601px) and (max-width: 900px) {
+  .location-grid { grid-template-columns: repeat(3, 1fr); padding: 0 20px 32px; gap: 14px; }
+  .ach-grid { grid-template-columns: repeat(3, 1fr); padding: 0 20px 32px; }
+  .menu-cards { grid-template-columns: repeat(3, 1fr); max-width: 580px; }
+  .finance-content { max-width: 620px; margin: 0 auto; }
+  .portfolio-header { max-width: 720px; margin: 0 auto; }
+  .stat-chips { max-width: 720px; margin: 0 auto; }
+  .property-list { max-width: 720px; margin: 0 auto; }
+  .clients-header { max-width: 720px; margin: 0 auto; }
+  .client-cards { max-width: 720px; margin: 0 auto; }
+  .map-header { max-width: 820px; margin: 0 auto; }
+  .ach-header { max-width: 820px; margin: 0 auto; }
+  .grid-cell { width: 60px; height: 60px; }
+}
+
+/* ═══════════════════════════════════════════
    TABLET / IPAD — build mode vertical stack
 ═══════════════════════════════════════════ */
 @media (max-width: 900px) {
@@ -513,6 +661,32 @@ html,body { height:100%; background:var(--bg); font-family:'Segoe UI',system-ui,
   /* Buttons */
   .btn-primary { padding:12px 20px; font-size:14px; }
   .btn-secondary { padding:10px 16px; font-size:13px; }
+}
+
+/* ═══════════════════════════════════════════
+   VERY SMALL PHONES (≤ 360px)
+═══════════════════════════════════════════ */
+@media (max-width: 360px) {
+  #hud { padding: 6px 8px; gap: 5px; min-height: 46px; }
+  #hud-back { padding: 5px 8px; font-size: 12px; }
+  .hud-stat { padding: 4px 7px; font-size: 12px; }
+  #property-grid { gap: 2px; padding: 5px; transform: rotateX(16deg); }
+  .grid-cell { width: 46px; height: 46px; }
+  .rb-emoji { font-size: 15px !important; }
+  .rb-name  { font-size: 6px !important; }
+  .build-actions button { font-size: 11px; padding: 8px 4px; }
+  .room-pick-btn { min-width: 54px; padding: 5px 5px; }
+  .rpb-emoji { font-size: 17px; }
+  .rpb-name, .rpb-cost { font-size: 8px; }
+  .menu-hero h1 { font-size: 22px; }
+  .menu-hero-emoji { font-size: 46px; }
+  .location-grid { gap: 8px; padding: 0 10px 20px; }
+  .loc-bg { min-height: 90px; }
+  .loc-name { font-size: 13px; }
+  .welcome-title { font-size: 24px; }
+  .welcome-logo { font-size: 56px; }
+  .modal-panel { padding: 16px 12px 24px; }
+  .plot-options { grid-template-columns: 1fr 1fr; }
 }
 
 /* Landscape phones */
@@ -1436,10 +1610,15 @@ function getRentMult() {
   return 1;
 }
 
-function setScreenTopPadding(px) {
+function hudHeight() {
+  return document.getElementById('hud').offsetHeight || 56;
+}
+
+function setScreenTopPadding(extra) {
+  const base = extra ? hudHeight() + extra : hudHeight();
   ['map','portfolio','build','clients','achievements','finance'].forEach(id => {
     const el = document.getElementById('screen-' + id);
-    if (el) el.style.paddingTop = px + 'px';
+    if (el) el.style.paddingTop = base + 'px';
   });
 }
 
@@ -1454,7 +1633,7 @@ function triggerMarketEvent() {
   document.getElementById('ev-name').textContent = ev.name;
   document.getElementById('ev-desc').textContent = ev.desc;
   banner.classList.add('show');
-  setScreenTopPadding(110);
+  setScreenTopPadding(54);
   toast(`Market Event: ${ev.name}`, 'gold', ev.emoji);
   if (document.getElementById('screen-build').classList.contains('active')) renderBuildMode();
 }
@@ -1462,7 +1641,7 @@ function triggerMarketEvent() {
 function hideEventBanner() {
   document.getElementById('event-banner').classList.remove('show');
   G.activeEvent = null;
-  setScreenTopPadding(56);
+  setScreenTopPadding(0);
   if (document.getElementById('screen-build').classList.contains('active')) renderBuildMode();
   toast('Market event ended.', '', '📊');
 }
