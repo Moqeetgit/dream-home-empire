@@ -984,6 +984,39 @@ html,body { height:100%; background:var(--bg); font-family:'Segoe UI',system-ui,
 /* ═══════════════════════════════════════════
    MUSIC BUTTON (fixed, always visible)
 ═══════════════════════════════════════════ */
+/* HUD icon buttons (leaderboard + online players) */
+.hud-icon-btn {
+  background:rgba(255,255,255,0.07); border:1px solid var(--border);
+  border-radius:8px; color:var(--text); font-size:15px;
+  padding:5px 9px; cursor:pointer; transition:background 0.15s;
+  display:flex; align-items:center; gap:4px; flex-shrink:0; line-height:1;
+}
+.hud-icon-btn:hover { background:rgba(255,255,255,0.14); }
+.hud-online-count { font-size:11px; font-weight:800; color:var(--green); }
+/* Online players floating panel */
+.mp-panel-overlay {
+  position:fixed; inset:0; background:rgba(0,0,0,0.55);
+  z-index:650; display:flex; align-items:center; justify-content:center; padding:16px;
+}
+.mp-panel-card {
+  background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+  width:100%; max-width:320px; max-height:72vh; overflow-y:auto;
+}
+.mp-panel-head {
+  padding:13px 16px; display:flex; align-items:center; justify-content:space-between;
+  border-bottom:1px solid var(--border); font-weight:700; font-size:15px;
+  position:sticky; top:0; background:var(--surface); z-index:1;
+}
+.mp-panel-close {
+  background:none; border:none; color:var(--text-dim); font-size:20px;
+  cursor:pointer; padding:2px 6px; line-height:1; border-radius:4px;
+}
+.mp-panel-close:hover { color:var(--text); }
+.mp-panel-body { padding:10px 12px 14px; display:flex; flex-direction:column; gap:8px; }
+
+/* ═══════════════════════════════════════════
+   MUSIC BUTTON (fixed, always visible)
+═══════════════════════════════════════════ */
 #music-btn {
   position:fixed; bottom:16px; right:16px; z-index:500;
   width:40px; height:40px; border-radius:50%;
@@ -1049,6 +1082,8 @@ html,body { height:100%; background:var(--bg); font-family:'Segoe UI',system-ui,
       <span id="hud-level">Lv.1</span>
       <div class="xp-bar"><div class="xp-fill" id="xp-fill" style="width:0%"></div></div>
     </div>
+    <button class="hud-icon-btn" onclick="openLeaderboard()" title="Leaderboard">🏆</button>
+    <button class="hud-icon-btn" id="hud-mp-btn" onclick="openMpPanel()" title="Online Players" style="display:none;">👥 <span class="hud-online-count" id="hud-online-count">0</span></button>
   </div>
 
   <!-- MARKET EVENT BANNER -->
@@ -1352,11 +1387,24 @@ html,body { height:100%; background:var(--bg); font-family:'Segoe UI',system-ui,
     <div class="lb-header">
       <div class="lb-header-text">
         <h2>🏆 Leaderboard</h2>
-        <p>Top 10 richest empire builders — online &amp; offline</p>
+        <p>Top 10 richest empire builders &nbsp;<span id="lb-source-badge" style="font-size:11px;opacity:0.65;"></span></p>
       </div>
       <button class="btn-secondary lb-refresh" onclick="renderLeaderboard()">🔄 Refresh</button>
     </div>
     <div id="lb-list" class="lb-list"></div>
+  </div>
+
+  <!-- Online Players Floating Panel -->
+  <div id="mp-panel-overlay" class="mp-panel-overlay" style="display:none;" onclick="closeMpPanel(event)">
+    <div class="mp-panel-card">
+      <div class="mp-panel-head">
+        <span><span class="mp-pulse"></span> Online Players</span>
+        <button class="mp-panel-close" onclick="closeMpPanel()">✕</button>
+      </div>
+      <div class="mp-panel-body" id="mp-panel-body">
+        <div class="mp-empty">No other players online.</div>
+      </div>
+    </div>
   </div>
 
   <!-- Plot Picker Modal -->
@@ -1836,9 +1884,28 @@ function hudBack() {
   const id = cur.id.replace('screen-', '');
   if (id === 'build') {
     if (confirm('Leave build mode? Your property progress is saved.')) showScreen('portfolio');
+  } else if (id === 'leaderboard' && _lbFrom && _lbFrom !== 'leaderboard') {
+    const ret = _lbFrom; _lbFrom = null; showScreen(ret);
   } else {
     showScreen(HUD_BACK_MAP[id] || 'menu');
   }
+}
+
+function openLeaderboard() {
+  const active = document.querySelector('.screen.active');
+  _lbFrom = active ? active.id.replace('screen-', '') : null;
+  showScreen('leaderboard');
+}
+
+function openMpPanel() {
+  const el = document.getElementById('mp-panel-overlay');
+  if (el) el.style.display = 'flex';
+}
+
+function closeMpPanel(e) {
+  if (e && e.target.id !== 'mp-panel-overlay') return;
+  const el = document.getElementById('mp-panel-overlay');
+  if (el) el.style.display = 'none';
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -3274,6 +3341,7 @@ const _playerId = (() => {
 
 let _lbBest     = parseInt(localStorage.getItem('dhe_lb_score') || '0');
 let _lbDebounce = null;
+let _lbFrom     = null;
 
 function lbReadAll() {
   try { return JSON.parse(localStorage.getItem('dhe_lb') || '{}'); }
@@ -3293,21 +3361,21 @@ function lbMaybeUpdate() {
       lb[_playerId] = { name: G.playerName, score, updatedAt: Date.now() };
       localStorage.setItem('dhe_lb', JSON.stringify(lb));
     }
+    if (db) {
+      db.ref('leaderboard/' + _playerId).set({ name: G.playerName, score, updatedAt: Date.now() });
+    }
   }, 5000);
 }
 
-function renderLeaderboard() {
-  const list = document.getElementById('lb-list');
-  if (!list) return;
-  lbMaybeUpdate();
+function lbSetBadge(text, color) {
+  const el = document.getElementById('lb-source-badge');
+  if (el) { el.textContent = text; el.style.color = color || ''; }
+}
 
-  const lb   = lbReadAll();
-  const rows = Object.entries(lb)
-    .map(([id, v]) => ({ id, ...v }))
-    .sort((a, b) => b.score - a.score)
-    .slice(0, 10);
-
-  // If the current player isn't in storage yet, show their live score anyway
+function lbDrawLocal() {
+  const lb = lbReadAll();
+  const rows = Object.entries(lb).map(([id, v]) => ({ id, ...v }))
+    .sort((a, b) => b.score - a.score);
   if (!G.isAnonymous && G.playerName && !rows.find(r => r.id === _playerId)) {
     const score = G.properties.reduce((a,p) => a + calcPropertyValue(p), 0) + G.money;
     if (score > 0) {
@@ -3315,8 +3383,28 @@ function renderLeaderboard() {
       rows.sort((a, b) => b.score - a.score);
     }
   }
-
   lbDraw(rows.slice(0, 10));
+}
+
+function renderLeaderboard() {
+  const list = document.getElementById('lb-list');
+  if (!list) return;
+  lbMaybeUpdate();
+
+  if (db) {
+    lbSetBadge('🌐 Global', 'var(--green)');
+    list.innerHTML = '<div class="lb-empty">⏳ Loading global scores…</div>';
+    db.ref('leaderboard').orderByChild('score').limitToLast(10).once('value', snap => {
+      const rows = [];
+      snap.forEach(c => rows.push({ id: c.key, ...c.val() }));
+      rows.sort((a, b) => b.score - a.score);
+      if (rows.length) lbDraw(rows.slice(0, 10));
+      else lbDrawLocal();
+    }, () => { lbSetBadge('💾 This device', ''); lbDrawLocal(); });
+  } else {
+    lbSetBadge('💾 This device', '');
+    lbDrawLocal();
+  }
 }
 
 function lbEsc(s) {
@@ -3433,11 +3521,11 @@ function mpListenOnline() {
 }
 
 function mpRenderOnline(players) {
+  // Main menu list
   const section = document.getElementById('mp-section');
   const list    = document.getElementById('mp-online-list');
-  if (!section || !list) return;
-  section.style.display = 'block';
-  list.innerHTML = players.length === 0
+  if (section) section.style.display = 'block';
+  const rowsHtml = players.length === 0
     ? '<div class="mp-empty">No other players online right now.</div>'
     : players.map(p => `
         <div class="mp-player-row">
@@ -3445,6 +3533,24 @@ function mpRenderOnline(players) {
           <span class="mp-player-name">${mpX(p.name)}</span>
           <button class="mp-challenge-btn" onclick="mpSendInvite('${p.id}','${mpX(p.name)}')">⚔️ Challenge</button>
         </div>`).join('');
+  if (list) list.innerHTML = rowsHtml;
+
+  // Floating panel
+  const panelBody = document.getElementById('mp-panel-body');
+  if (panelBody) panelBody.innerHTML = players.length === 0
+    ? '<div class="mp-empty" style="text-align:center;padding:20px 12px;">No other players online right now.</div>'
+    : players.map(p => `
+        <div class="mp-player-row">
+          <span class="mp-player-dot">●</span>
+          <span class="mp-player-name">${mpX(p.name)}</span>
+          <button class="mp-challenge-btn" onclick="mpSendInvite('${p.id}','${mpX(p.name)}');closeMpPanel()">⚔️ Challenge</button>
+        </div>`).join('');
+
+  // HUD online button
+  const hudBtn   = document.getElementById('hud-mp-btn');
+  const hudCount = document.getElementById('hud-online-count');
+  if (hudBtn)   hudBtn.style.display = 'flex';
+  if (hudCount) hudCount.textContent = players.length;
 }
 
 function mpX(s) {
