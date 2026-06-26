@@ -1356,11 +1356,6 @@ html,body { height:100%; background:var(--bg); font-family:'Segoe UI',system-ui,
       </div>
       <button class="btn-secondary lb-refresh" onclick="renderLeaderboard()">🔄 Refresh</button>
     </div>
-    <div id="lb-no-fb" class="lb-no-fb" style="display:none;">
-      <strong>Global leaderboard requires Firebase.</strong><br>
-      Once Firebase is set up, scores from <em>every device worldwide</em> are saved here automatically — even when players are offline.<br>
-      Your local score is shown below.
-    </div>
     <div id="lb-list" class="lb-list"></div>
   </div>
 
@@ -1816,7 +1811,6 @@ const HUD_BACK_MAP = { map:'menu', portfolio:'menu', build:'portfolio', clients:
 const HUD_TITLES = { map:'🗺️ World Map', portfolio:'🏘️ My Properties', build:'🏗️ Build Mode', clients:'🤝 Clients', achievements:'🏆 Achievements', finance:'💹 Finance', leaderboard:'🏆 Leaderboard' };
 
 function showScreen(id) {
-  if (id !== 'leaderboard') lbDetach();
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('screen-' + id).classList.add('active');
   const hud = document.getElementById('hud');
@@ -3264,83 +3258,82 @@ const Music = (() => {
 function musicToggle() { Music.toggle(); }
 
 // ═══════════════════════════════════════════════════════════
-// LEADERBOARD
+// LEADERBOARD  (localStorage — no server needed)
+// Each named player who plays on this device is remembered.
 // ═══════════════════════════════════════════════════════════
+
+// Stable per-browser player ID — created once, lives in localStorage
+const _playerId = (() => {
+  let id = localStorage.getItem('dhe_player_id');
+  if (!id) {
+    id = 'p_' + Math.random().toString(36).substr(2, 9);
+    localStorage.setItem('dhe_player_id', id);
+  }
+  return id;
+})();
+
 let _lbBest     = parseInt(localStorage.getItem('dhe_lb_score') || '0');
 let _lbDebounce = null;
 
+function lbReadAll() {
+  try { return JSON.parse(localStorage.getItem('dhe_lb') || '{}'); }
+  catch(e) { return {}; }
+}
+
 function lbMaybeUpdate() {
-  if (!db || !mpPlayerId || G.isAnonymous) return;
+  if (G.isAnonymous || !G.playerName) return;
   const score = G.properties.reduce((a,p) => a + calcPropertyValue(p), 0) + G.money;
   if (score <= _lbBest) return;
   clearTimeout(_lbDebounce);
   _lbDebounce = setTimeout(() => {
     _lbBest = score;
     localStorage.setItem('dhe_lb_score', score);
-    db.ref('leaderboard/' + mpPlayerId).set({
-      name: G.playerName, score, updatedAt: Date.now()
-    });
+    const lb = lbReadAll();
+    if (!lb[_playerId] || score > lb[_playerId].score) {
+      lb[_playerId] = { name: G.playerName, score, updatedAt: Date.now() };
+      localStorage.setItem('dhe_lb', JSON.stringify(lb));
+    }
   }, 5000);
 }
 
-let _lbRef = null;
-
-function lbDetach() {
-  if (_lbRef) { _lbRef.off(); _lbRef = null; }
-}
-
 function renderLeaderboard() {
-  const list  = document.getElementById('lb-list');
-  const noFb  = document.getElementById('lb-no-fb');
+  const list = document.getElementById('lb-list');
   if (!list) return;
-
-  lbDetach();
   lbMaybeUpdate();
 
-  if (!db) {
-    if (noFb) noFb.style.display = 'block';
+  const lb   = lbReadAll();
+  const rows = Object.entries(lb)
+    .map(([id, v]) => ({ id, ...v }))
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 10);
+
+  // If the current player isn't in storage yet, show their live score anyway
+  if (!G.isAnonymous && G.playerName && !rows.find(r => r.id === _playerId)) {
     const score = G.properties.reduce((a,p) => a + calcPropertyValue(p), 0) + G.money;
-    list.innerHTML = `
-      <div class="lb-row lb-gold lb-you">
-        <div class="lb-rank">🥇</div>
-        <div class="lb-info">
-          <div class="lb-name">${mpX(G.playerName)} <span class="lb-you-tag">YOU</span></div>
-          <div class="lb-when">Local score · set up Firebase to go global</div>
-        </div>
-        <div class="lb-score">${fmtShort(score)}</div>
-      </div>`;
-    return;
+    if (score > 0) {
+      rows.push({ id: _playerId, name: G.playerName, score, updatedAt: Date.now() });
+      rows.sort((a, b) => b.score - a.score);
+    }
   }
 
-  if (noFb) noFb.style.display = 'none';
-  list.innerHTML = '<div class="lb-empty">⏳ Loading scores…</div>';
-
-  _lbRef = db.ref('leaderboard').orderByChild('score').limitToLast(10);
-  _lbRef.on('value', snap => {
-    const rows = [];
-    snap.forEach(c => rows.push({ id: c.key, ...c.val() }));
-    rows.sort((a,b) => b.score - a.score);
-    db.ref('online').once('value', onSnap => {
-      const online = new Set();
-      onSnap.forEach(c => online.add(c.key));
-      lbDraw(rows, online);
-    }, () => lbDraw(rows, new Set()));
-  }, err => {
-    list.innerHTML = `<div class="lb-empty">⚠️ Could not load scores — check your Firebase rules allow reading <strong>/leaderboard</strong>.<br><small style="opacity:0.6;">${err.message}</small></div>`;
-  });
+  lbDraw(rows.slice(0, 10));
 }
 
-function lbDraw(rows, online) {
+function lbEsc(s) {
+  return String(s).replace(/[&<>"']/g,
+    c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' })[c]);
+}
+
+function lbDraw(rows) {
   const list = document.getElementById('lb-list');
   if (!list) return;
   if (!rows.length) {
-    list.innerHTML = '<div class="lb-empty">No scores yet — be the first! 🏆</div>';
+    list.innerHTML = '<div class="lb-empty">No scores yet — be the first to play! 🏆</div>';
     return;
   }
   const medals = ['🥇','🥈','🥉'];
-  list.innerHTML = rows.slice(0,10).map((e, i) => {
-    const isYou    = e.id === mpPlayerId;
-    const isOnline = online && online.has(e.id);
+  list.innerHTML = rows.map((e, i) => {
+    const isYou    = e.id === _playerId;
     const rankEl   = i < 3
       ? `<div class="lb-rank">${medals[i]}</div>`
       : `<div class="lb-rank"><span class="lb-rank-num">#${i+1}</span></div>`;
@@ -3350,9 +3343,8 @@ function lbDraw(rows, online) {
         ${rankEl}
         <div class="lb-info">
           <div class="lb-name">
-            ${mpX(e.name)}
-            ${isYou    ? '<span class="lb-you-tag">YOU</span>' : ''}
-            ${isOnline ? '<span class="lb-online-dot" title="Online now"></span>' : ''}
+            ${lbEsc(e.name)}
+            ${isYou ? '<span class="lb-you-tag">YOU</span>' : ''}
           </div>
           <div class="lb-when">${lbAgo(e.updatedAt)}</div>
         </div>
@@ -3362,7 +3354,7 @@ function lbDraw(rows, online) {
 }
 
 function lbAgo(ts) {
-  if (!ts) return 'unknown';
+  if (!ts) return '';
   const d = Date.now() - ts;
   if (d < 60000)    return 'just now';
   if (d < 3600000)  return Math.floor(d / 60000) + 'm ago';
