@@ -1501,7 +1501,7 @@ html,body { height:100%; background:var(--bg); font-family:'Segoe UI',system-ui,
       </div>
       <div id="auction-activity" style="font-size:13px;color:var(--text-dim);text-align:center;min-height:20px;margin:8px 0;"></div>
       <div style="display:flex;gap:10px;margin-top:14px;">
-        <button class="btn-primary" onclick="acceptAuction()" style="flex:1;">✅ Accept Bid</button>
+        <button class="btn-primary" onclick="acceptAuction()" style="flex:1;">🔨 Accept &amp; Sell Now</button>
         <button class="btn-secondary" onclick="cancelAuction()" style="flex:1;">✕ Cancel</button>
       </div>
     </div>
@@ -3016,12 +3016,14 @@ function selectChallenge(minutes) {
     G.challengeEndTime = Date.now() + minutes * 60 * 1000;
     G.challengeDuration = minutes;
     document.getElementById('hud-timer').style.display = 'flex';
+    renderMenu(); updateHud();
+    showScreen('map');
+    toast(`${minutes}-minute challenge — GO! ⏰`, 'gold', '⏰');
   } else {
     G.challengeEndTime = 0; G.challengeDuration = 0;
     document.getElementById('hud-timer').style.display = 'none';
+    showScreen('menu'); renderMenu(); updateHud();
   }
-  showScreen('menu'); renderMenu(); updateHud();
-  if (minutes > 0) toast(`${minutes}-minute challenge — GO!`, 'gold', '⏰');
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -3258,11 +3260,9 @@ function acceptAuction() {
 
 function autoAcceptAuction() {
   clearInterval(auctionState.interval);
-  const { propId, currentBid } = auctionState;
   auctionState = null;
   document.getElementById('auction-modal').style.display = 'none';
-  toast('Auction ended — best bid accepted!', 'gold', '🔨');
-  completeSale(propId, currentBid);
+  toast('⏰ Too slow — the buyers walked away!', '', '🚪');
 }
 
 function cancelAuction() {
