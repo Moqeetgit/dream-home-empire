@@ -3,7 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Dream Home Empire 🏠</title>
+<meta name="description" content="Buy land, build dream homes, earn rent and compete with friends in this fun real-estate empire game for kids!">
+<meta name="keywords" content="dream home, building game, kids game, real estate, empire, html5 game, multiplayer">
+<meta name="author" content="Moqeet">
+<meta property="og:title" content="Dream Home Empire">
+<meta property="og:description" content="Build your dream property empire — buy land, construct homes, earn rent and challenge friends!">
+<meta property="og:type" content="website">
+<title>Dream Home Empire</title>
+<!-- CrazyGames SDK -->
+<script src="https://sdk.crazygames.com/crazygames-sdk-v3.js"></script>
+<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <style>
@@ -1920,8 +1929,10 @@ const SCREENS_WITH_HUD = ['map','portfolio','build','clients','achievements','fi
 const HUD_BACK_MAP = { map:'menu', portfolio:'menu', build:'portfolio', clients:'menu', achievements:'menu', finance:'menu', leaderboard:'menu' };
 const HUD_TITLES = { map:'🗺️ World Map', portfolio:'🏘️ My Properties', build:'🏗️ Build Mode', clients:'🤝 Clients', achievements:'🏆 Achievements', finance:'💹 Finance', leaderboard:'🏆 Leaderboard' };
 
+const _CG_PLAY_SCREENS = new Set(['map','portfolio','build','clients','achievements','finance']);
 function showScreen(id) {
   if (id !== 'menu') menuLbDetach();
+  if (_CG_PLAY_SCREENS.has(id)) CG.start(); else CG.stop();
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('screen-' + id).classList.add('active');
   const hud = document.getElementById('hud');
@@ -3084,18 +3095,20 @@ function shareScore() {
 }
 
 function playAgain() {
-  clearSave();
-  clearUndoHistory();
-  Object.assign(G, {
-    money:200000, xp:0, level:1, totalEarned:200000, totalSpent:0,
-    propertiesSold:0, clientsCompleted:0, totalRoomsBuilt:0,
-    luxuryRooms:0, premiumRooms:0, properties:[], completedAchievements:[],
-    activeEvent:null, eventEndTime:0, marketHealth:100,
-    totalDebt:0, emergencyLoansUsed:0, challengeEndTime:0, challengeDuration:0,
-    playerName:G.playerName, isAnonymous:G.isAnonymous, lastRentTime:Date.now(),
+  CG.ad(() => {
+    clearSave();
+    clearUndoHistory();
+    Object.assign(G, {
+      money:200000, xp:0, level:1, totalEarned:200000, totalSpent:0,
+      propertiesSold:0, clientsCompleted:0, totalRoomsBuilt:0,
+      luxuryRooms:0, premiumRooms:0, properties:[], completedAchievements:[],
+      activeEvent:null, eventEndTime:0, marketHealth:100,
+      totalDebt:0, emergencyLoansUsed:0, challengeEndTime:0, challengeDuration:0,
+      playerName:G.playerName, isAnonymous:G.isAnonymous, lastRentTime:Date.now(),
+    });
+    nextPropId = 1; lowMoneyWarned = false;
+    showChallengeSelect();
   });
-  nextPropId = 1; lowMoneyWarned = false;
-  showChallengeSelect();
 }
 
 function continueFreePlay() {
@@ -3323,6 +3336,7 @@ setInterval(saveGame, 60000);
 // SPLASH SCREEN & INIT
 // ═══════════════════════════════════════════════════════════
 window.addEventListener('DOMContentLoaded', () => {
+  CG.init();
   mpInit();
   document.addEventListener('keydown', handleUndoShortcut);
   let p = 0;
@@ -3335,6 +3349,7 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 function launchGame() {
+  CG.loaded();
   Music.init();
   updateHud();
   initWelcome();
@@ -3587,6 +3602,52 @@ function lbAgo(ts) {
   if (d < 86400000) return Math.floor(d / 3600000) + 'h ago';
   return Math.floor(d / 86400000) + 'd ago';
 }
+
+// ═══════════════════════════════════════════════════════════
+// CRAZYGAMES SDK WRAPPER
+// Safe to call even when the SDK is absent (local dev).
+// ═══════════════════════════════════════════════════════════
+const CG = (() => {
+  const sdk   = () => window.CrazyGames?.SDK;
+  let playing = false;
+  return {
+    init() {
+      try { sdk()?.init?.(); } catch(e) {}
+    },
+    loaded() {
+      try { sdk()?.game?.sdkGameLoadingFinished?.(); } catch(e) {}
+    },
+    start() {
+      if (playing) return;
+      playing = true;
+      try { sdk()?.game?.gameplayStarted?.(); } catch(e) {}
+    },
+    stop() {
+      if (!playing) return;
+      playing = false;
+      try { sdk()?.game?.gameplayStopped?.(); } catch(e) {}
+    },
+    ad(cb) {
+      const s = sdk();
+      if (!s?.ad?.requestAd) { if (cb) cb(); return; }
+      // Mute music for the ad, restore after
+      const wasMuted = localStorage.getItem('dhe_mute') === '1';
+      if (!wasMuted) try { Music.toggle(); } catch(e) {}
+      const resume = () => {
+        if (!wasMuted) try { Music.toggle(); } catch(e) {}
+        if (cb) cb();
+      };
+      try {
+        this.stop();
+        s.ad.requestAd('interstitial', {
+          adStarted:  () => {},
+          adFinished: resume,
+          adError:    resume,
+        });
+      } catch(e) { resume(); }
+    }
+  };
+})();
 
 // ═══════════════════════════════════════════════════════════
 // FIREBASE CONFIG
@@ -3849,6 +3910,7 @@ function mpShowResults(myScore, oppScore) {
   const youWon = oppScore === null || myScore >= oppScore;
   if (youWon) {
     // Send winner straight to the prize wheel
+    CG.stop();
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById('screen-spinner').classList.add('active');
     document.getElementById('hud').style.display = 'none';
