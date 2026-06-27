@@ -448,11 +448,24 @@ html,body { height:100%; background:var(--bg); font-family:'Segoe UI',system-ui,
   .menu-hero-emoji { font-size: 90px; }
   .menu-hero h1 { font-size: 46px; }
   .menu-hero p { font-size: 17px; margin-bottom: 38px; }
+  .online-cta { max-width: 780px; padding: 18px 28px; margin-bottom: 18px; }
+  .online-cta-icon { font-size: 34px; }
+  .online-cta-label { font-size: 17px; }
+  .online-cta-sub { font-size: 13px; }
   .menu-cards { max-width: 780px; grid-template-columns: repeat(3, 1fr); gap: 18px; padding: 0 24px 48px; }
   .menu-card { padding: 26px 20px; }
   .menu-card .card-emoji { font-size: 44px; margin-bottom: 10px; }
   .menu-card h3 { font-size: 16px; }
   .menu-card p { font-size: 13px; }
+
+  /* Online screen */
+  .online-header { max-width: 720px; margin: 0 auto; padding: 24px 32px 16px; }
+  .online-you-box, .online-anon-warn { max-width: 720px; margin-left: auto; margin-right: auto; }
+  .online-player-cards { max-width: 720px; margin: 0 auto; padding: 0 32px 48px; }
+  .online-player-card { padding: 18px 20px; }
+  .op-avatar { width: 58px; height: 58px; font-size: 22px; }
+  .op-name { font-size: 17px; }
+  .op-challenge { font-size: 14px; padding: 11px 22px; }
 
   /* Build mode */
   #design-panel { width: 260px; }
@@ -672,6 +685,15 @@ html,body { height:100%; background:var(--bg); font-family:'Segoe UI',system-ui,
   /* Buttons */
   .btn-primary { padding:12px 20px; font-size:14px; }
   .btn-secondary { padding:10px 16px; font-size:13px; }
+
+  /* Online */
+  .online-cta { padding:12px 14px; max-width:calc(100% - 24px); }
+  .online-cta-icon { font-size:24px; }
+  .online-cta-label { font-size:14px; }
+  .online-player-card { padding:12px; gap:10px; }
+  .op-avatar { width:44px; height:44px; font-size:18px; }
+  .op-name { font-size:14px; }
+  .op-challenge { padding:8px 14px; font-size:12px; }
 }
 
 /* ═══════════════════════════════════════════
@@ -998,6 +1020,59 @@ html,body { height:100%; background:var(--bg); font-family:'Segoe UI',system-ui,
 .mp-win  { background:rgba(46,204,113,0.15); color:#55efc4; border:1px solid rgba(46,204,113,0.3); }
 .mp-lose { background:rgba(231,76,60,0.15); color:#ff7675; border:1px solid rgba(231,76,60,0.3); }
 
+/* ═══════════════════════════════════════════
+   PLAY ONLINE CTA (menu)
+═══════════════════════════════════════════ */
+.online-cta {
+  display:flex; align-items:center; justify-content:space-between;
+  width:100%; max-width:440px; padding:14px 20px; margin:0 0 14px;
+  background:linear-gradient(135deg,#5f3dc4,#845ef7);
+  border-radius:var(--radius); cursor:pointer; color:#fff;
+  box-shadow:0 4px 20px rgba(108,92,231,0.4);
+  transition:transform 0.12s, box-shadow 0.12s;
+  touch-action:manipulation; user-select:none;
+}
+.online-cta:hover { transform:scale(1.02); box-shadow:0 6px 28px rgba(108,92,231,0.6); }
+.online-cta:active { transform:scale(0.98); }
+.online-cta-left { display:flex; align-items:center; gap:12px; }
+.online-cta-icon { font-size:28px; line-height:1; }
+.online-cta-label { font-size:15px; font-weight:800; }
+.online-cta-sub { font-size:12px; opacity:0.85; margin-top:2px; }
+.online-cta-arrow { font-size:22px; opacity:0.7; }
+
+/* ═══════════════════════════════════════════
+   ONLINE PLAYERS SCREEN
+═══════════════════════════════════════════ */
+#screen-online { padding-top:56px; overflow-y:auto; }
+.online-header { padding:20px 16px 14px; }
+.online-header h2 { font-size:22px; font-weight:800; }
+.online-header p { color:var(--text-dim); font-size:14px; margin-top:4px; }
+.online-you-box { margin:0 16px 14px; background:rgba(0,206,201,0.1); border:1px solid rgba(0,206,201,0.3); border-radius:var(--radius-sm); padding:12px 16px; display:flex; align-items:center; gap:10px; }
+.online-you-dot { width:9px; height:9px; background:#00cec9; border-radius:50%; flex-shrink:0; animation:pulse 2s ease infinite; }
+.online-you-text { font-size:13px; color:rgba(255,255,255,0.7); }
+.online-you-name { font-weight:700; color:#fff; }
+.online-anon-warn { margin:0 16px 14px; background:rgba(247,201,72,0.1); border:1px solid rgba(247,201,72,0.3); border-radius:var(--radius-sm); padding:12px 16px; font-size:13px; color:var(--gold); }
+.online-player-cards { display:flex; flex-direction:column; gap:12px; padding:0 16px 30px; }
+.online-player-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:16px; display:flex; align-items:center; gap:14px; }
+.op-avatar { width:52px; height:52px; background:linear-gradient(135deg,#6c5ce7,#a29bfe); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:20px; font-weight:900; flex-shrink:0; position:relative; color:#fff; }
+.op-dot { width:11px; height:11px; background:#00cec9; border-radius:50%; position:absolute; bottom:1px; right:1px; border:2px solid var(--surface); }
+.op-info { flex:1; min-width:0; }
+.op-name { font-size:16px; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.op-sub { font-size:12px; color:#00cec9; margin-top:2px; }
+.op-challenge { padding:10px 18px; background:linear-gradient(135deg,#6c5ce7,#a29bfe); color:#fff; font-weight:800; font-size:13px; border:none; border-radius:20px; cursor:pointer; flex-shrink:0; transition:transform 0.12s, box-shadow 0.12s; white-space:nowrap; }
+.op-challenge:hover { transform:scale(1.05); box-shadow:0 0 16px rgba(108,92,231,0.4); }
+.online-empty { text-align:center; padding:60px 20px; color:var(--text-dim); }
+.online-empty .big-emoji { font-size:64px; display:block; margin-bottom:16px; }
+.online-empty p { font-size:15px; }
+.online-empty .online-empty-sub { font-size:13px; margin-top:8px; }
+
+/* Duration picker modal */
+.dur-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:4px; }
+.dur-btn { background:var(--surface2); border:1px solid var(--border); border-radius:var(--radius-sm); padding:16px 10px; text-align:center; cursor:pointer; transition:transform 0.12s, border-color 0.12s; }
+.dur-btn:hover { transform:scale(1.05); border-color:var(--gold); }
+.dur-time { font-size:26px; font-weight:900; color:var(--gold); display:block; }
+.dur-label { font-size:11px; color:var(--text-dim); margin-top:4px; display:block; }
+
 </style>
 </head>
 <body>
@@ -1145,6 +1220,16 @@ html,body { height:100%; background:var(--bg); font-family:'Segoe UI',system-ui,
       <span class="menu-hero-emoji">🏰</span>
       <h1>Dream Home Empire</h1>
       <p>Build your real estate empire from the ground up</p>
+    </div>
+    <div class="online-cta" onclick="showScreen('online')">
+      <div class="online-cta-left">
+        <span class="online-cta-icon">⚔️</span>
+        <div>
+          <div class="online-cta-label">Play Online</div>
+          <div class="online-cta-sub" id="online-count-text">Challenge friends live</div>
+        </div>
+      </div>
+      <span class="online-cta-arrow">›</span>
     </div>
     <div class="menu-cards">
       <div class="menu-card accent" onclick="showScreen('map')">
@@ -1305,6 +1390,16 @@ html,body { height:100%; background:var(--bg); font-family:'Segoe UI',system-ui,
     </div>
   </div>
 
+  <!-- ONLINE PLAYERS -->
+  <div id="screen-online" class="screen">
+    <div class="online-header">
+      <h2>⚔️ Online Players</h2>
+      <p>Challenge someone to a timed building match — highest empire value wins!</p>
+    </div>
+    <div id="online-status-bar"></div>
+    <div id="online-players-list" class="online-player-cards"></div>
+  </div>
+
   <!-- PRIZE SPINNER SCREEN -->
   <div id="screen-spinner" class="screen">
     <div class="spinner-title" id="spin-title">🎉 You Won!</div>
@@ -1351,6 +1446,21 @@ html,body { height:100%; background:var(--bg); font-family:'Segoe UI',system-ui,
         <button class="btn-primary" onclick="acceptAuction()" style="flex:1;">🔨 Accept &amp; Sell Now</button>
         <button class="btn-secondary" onclick="cancelAuction()" style="flex:1;">✕ Cancel</button>
       </div>
+    </div>
+  </div>
+
+  <!-- DURATION PICKER MODAL -->
+  <div id="dur-modal" class="modal-overlay" style="display:none;" onclick="closeDurModal(event)">
+    <div class="modal-panel">
+      <h3 id="dur-modal-title">⚔️ Challenge Player</h3>
+      <p>How long should the match last?</p>
+      <div class="dur-grid">
+        <div class="dur-btn" onclick="pickDuration(2)"><span class="dur-time">2</span><span class="dur-label">⚡ Quick</span></div>
+        <div class="dur-btn" onclick="pickDuration(5)"><span class="dur-time">5</span><span class="dur-label">🏃 Sprint</span></div>
+        <div class="dur-btn" onclick="pickDuration(10)"><span class="dur-time">10</span><span class="dur-label">🏆 Classic</span></div>
+        <div class="dur-btn" onclick="pickDuration(15)"><span class="dur-time">15</span><span class="dur-label">⚔️ Expert</span></div>
+      </div>
+      <button class="modal-close" onclick="closeDurModal()">Cancel</button>
     </div>
   </div>
 
@@ -1757,11 +1867,11 @@ function updateEventCountdown() {
 // ═══════════════════════════════════════════════════════════
 // SCREEN NAVIGATION
 // ═══════════════════════════════════════════════════════════
-const SCREENS_WITH_HUD = ['map','portfolio','build','clients','achievements','finance'];
-const HUD_BACK_MAP = { map:'menu', portfolio:'menu', build:'portfolio', clients:'menu', achievements:'menu', finance:'menu' };
-const HUD_TITLES = { map:'🗺️ World Map', portfolio:'🏘️ My Properties', build:'🏗️ Build Mode', clients:'🤝 Clients', achievements:'🏆 Achievements', finance:'💹 Finance' };
+const SCREENS_WITH_HUD = ['map','portfolio','build','clients','achievements','finance','online'];
+const HUD_BACK_MAP = { map:'menu', portfolio:'menu', build:'portfolio', clients:'menu', achievements:'menu', finance:'menu', online:'menu' };
+const HUD_TITLES = { map:'🗺️ World Map', portfolio:'🏘️ My Properties', build:'🏗️ Build Mode', clients:'🤝 Clients', achievements:'🏆 Achievements', finance:'💹 Finance', online:'⚔️ Online Players' };
 
-const _CG_PLAY_SCREENS = new Set(['map','portfolio','build','clients','achievements','finance']);
+const _CG_PLAY_SCREENS = new Set(['map','portfolio','build','clients','achievements','finance','online']);
 function showScreen(id) {
   if (_CG_PLAY_SCREENS.has(id)) CG.start(); else CG.stop();
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -1780,6 +1890,7 @@ function showScreen(id) {
   if (id === 'achievements') renderAchievements();
   if (id === 'finance')      renderFinance();
   if (id === 'menu')         renderMenu();
+  if (id === 'online')       renderOnlineScreen();
 }
 
 function hudBack() {
@@ -2764,12 +2875,14 @@ function playAnonymous() {
 function showChoice() {
   const el = document.getElementById('choice-greeting');
   el.textContent = G.isAnonymous ? 'Hey there! 👋' : `Hey ${G.playerName}! 👋`;
+  if (!G.isAnonymous) mpRegisterPresence();
   showScreen('choice');
 }
 
 function continueGame() {
   if (!loadGame()) { clearSave(); initWelcome(); return; }
   updateHud(); showScreen('menu'); renderMenu();
+  if (!G.isAnonymous) mpRegisterPresence();
   toast(`Welcome back, ${G.playerName}! 👋`, 'gold', '🏠');
 }
 
@@ -3191,7 +3304,125 @@ function mpInit() {
     firebase.initializeApp(FIREBASE_CONFIG);
     db = firebase.database();
     mpPlayerId = mpGetPlayerId();
+    mpListenInvites();
+    mpListenOnlinePlayers();
+    window.addEventListener('beforeunload', () => {
+      if (db && mpPlayerId) db.ref('presence/' + mpPlayerId).remove();
+    });
   } catch(e) { console.warn('Firebase init:', e); }
+}
+
+// Sanitise user-supplied text before rendering
+function mpX(str) {
+  return String(str || '').replace(/[<>&"']/g, '').slice(0, 24);
+}
+
+// ═══════════════════════════════════════════════════════════
+// PRESENCE — register yourself as online & watch others
+// ═══════════════════════════════════════════════════════════
+let mpPresenceRegistered = false;
+let _onlinePlayers = [];
+
+function mpRegisterPresence() {
+  if (!db || !mpPlayerId || G.isAnonymous || mpPresenceRegistered) return;
+  mpPresenceRegistered = true;
+  const ref = db.ref('presence/' + mpPlayerId);
+  ref.set({ id: mpPlayerId, name: G.playerName, online: true, ts: Date.now() });
+  ref.onDisconnect().remove();
+  // Refresh timestamp every 30 s so stale entries can be detected
+  setInterval(() => { if (db && mpPlayerId) ref.update({ ts: Date.now() }); }, 30000);
+}
+
+function mpListenOnlinePlayers() {
+  if (!db) return;
+  db.ref('presence').on('value', snap => {
+    _onlinePlayers = [];
+    snap.forEach(child => {
+      const p = child.val();
+      // Ignore self and entries older than 2 minutes
+      if (!p || p.id === mpPlayerId) return;
+      if (Date.now() - (p.ts || 0) > 120000) return;
+      _onlinePlayers.push(p);
+    });
+    updateOnlineCount();
+    const onlineScreen = document.getElementById('screen-online');
+    if (onlineScreen && onlineScreen.classList.contains('active')) renderOnlinePlayers();
+  });
+}
+
+function updateOnlineCount() {
+  const el = document.getElementById('online-count-text');
+  if (!el) return;
+  const n = _onlinePlayers.length;
+  el.textContent = n > 0 ? `${n} player${n > 1 ? 's' : ''} online now!` : 'Challenge friends live';
+}
+
+function renderOnlineScreen() {
+  const bar = document.getElementById('online-status-bar');
+  if (bar) {
+    if (!db) {
+      bar.innerHTML = '<div class="online-anon-warn">📡 Real-time connection unavailable.</div>';
+    } else if (G.isAnonymous) {
+      bar.innerHTML = '<div class="online-anon-warn">✏️ You\'re playing anonymously — enter your name on the welcome screen to challenge other players!</div>';
+    } else {
+      bar.innerHTML = `<div class="online-you-box"><div class="online-you-dot"></div><div class="online-you-text">Online as <span class="online-you-name">${G.playerName}</span></div></div>`;
+    }
+  }
+  renderOnlinePlayers();
+}
+
+function renderOnlinePlayers() {
+  const list = document.getElementById('online-players-list');
+  if (!list) return;
+  if (_onlinePlayers.length === 0) {
+    list.innerHTML = `
+      <div class="online-empty">
+        <span class="big-emoji">👀</span>
+        <p>No other players online right now.</p>
+        <p class="online-empty-sub">Share the game link with a friend and challenge them!</p>
+      </div>`;
+    return;
+  }
+  list.innerHTML = '';
+  _onlinePlayers.forEach(p => {
+    const initials = (p.name || '?').slice(0, 2).toUpperCase();
+    const card = document.createElement('div');
+    card.className = 'online-player-card';
+    card.innerHTML = `
+      <div class="op-avatar">${initials}<div class="op-dot"></div></div>
+      <div class="op-info">
+        <div class="op-name">${mpX(p.name)}</div>
+        <div class="op-sub">🟢 Online now</div>
+      </div>
+      <button class="op-challenge" onclick="showDurPicker('${p.id}','${mpX(p.name).replace(/'/g,'&#39;')}')">⚔️ Challenge</button>`;
+    list.appendChild(card);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+// DURATION PICKER — shown before challenging a player
+// ═══════════════════════════════════════════════════════════
+let _durTarget = null;
+
+function showDurPicker(toId, toName) {
+  if (G.isAnonymous) { toast('Enter your name to challenge players!', '', '✏️'); return; }
+  _durTarget = { id: toId, name: toName };
+  document.getElementById('dur-modal-title').textContent = `⚔️ Challenge ${mpX(toName)}`;
+  document.getElementById('dur-modal').style.display = 'flex';
+}
+
+function pickDuration(minutes) {
+  document.getElementById('dur-modal').style.display = 'none';
+  if (_durTarget) {
+    mpSendInvite(_durTarget.id, _durTarget.name, minutes);
+    _durTarget = null;
+  }
+}
+
+function closeDurModal(e) {
+  if (e && e.target !== document.getElementById('dur-modal')) return;
+  document.getElementById('dur-modal').style.display = 'none';
+  _durTarget = null;
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -3211,7 +3442,7 @@ function mpSendInvite(toId, toName, duration) {
     p2Id: toId, p2Name: toName,
     duration, startAt: 0
   });
-  const label = duration === 2 ? '⚡ Sprint' : duration === 10 ? '🏆 Marathon' : '🏃 Challenge';
+  const label = duration === 2 ? '⚡ Quick' : duration === 5 ? '🏃 Sprint' : duration === 10 ? '🏆 Classic' : '⚔️ Challenge';
   toast(label + ' sent to ' + toName + '! Waiting…', 'gold', '⚔️');
   mpWatchAcceptance(sessionId, toName, duration);
 }
