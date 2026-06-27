@@ -233,8 +233,9 @@ html,body { height:100%; background:var(--bg); font-family:'Segoe UI',system-ui,
 .rb-tier  { color:rgba(255,255,255,0.5); margin-top:2px; pointer-events:none; }
 
 /* Room picker drawer */
-#room-picker { background:var(--surface); border-top:1px solid var(--border); padding:12px 10px; overflow-x:auto; flex-shrink:0; }
+#room-picker { background:var(--surface); border-top:1px solid var(--border); padding:12px 10px; flex-shrink:0; }
 #room-picker .picker-title { font-size:13px; font-weight:700; color:var(--text-dim); margin-bottom:8px; padding:0 4px; }
+#room-picker-list-wrap { overflow-x:auto; }
 #room-picker-list { display:flex; gap:8px; width:max-content; }
 .room-pick-btn {
   background:var(--surface2); border:1px solid var(--border); border-radius:10px;
@@ -290,7 +291,7 @@ html,body { height:100%; background:var(--bg); font-family:'Segoe UI',system-ui,
 .ba-sell { background:linear-gradient(135deg, #e17055, #d63031); color:#fff; }
 .ba-rent { background:linear-gradient(135deg, #6c5ce7, #a29bfe); color:#fff; }
 .ba-collect { background:linear-gradient(135deg, var(--gold-dark), var(--gold)); color:#111; }
-.ba-undo { background:rgba(255,255,255,0.07); color:var(--text); border:1px solid rgba(247,201,72,0.35) !important; }
+.ba-undo { background:rgba(255,255,255,0.07); color:var(--text); border:1px solid rgba(247,201,72,0.35) !important; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .ba-undo:disabled { opacity:0.4; cursor:not-allowed; }
 .undo-kbd { opacity:0.7; font-size:11px; font-weight:800; margin-left:4px; }
 
@@ -562,12 +563,12 @@ html,body { height:100%; background:var(--bg); font-family:'Segoe UI',system-ui,
    MOBILE RESPONSIVE
 ═══════════════════════════════════════════ */
 @media (max-width: 480px) {
-  /* HUD — hide title & market to save space */
+  /* HUD — hide title to save space; push stats to the right */
   #hud { padding:8px 10px; gap:6px; min-height:50px; }
   #hud-title { display:none; }
-  #hud-market { display:none !important; }
   #hud-back { padding:6px 10px; font-size:13px; }
   .hud-stat { padding:5px 8px; font-size:13px; gap:4px; }
+  #hud-money { margin-left:auto; }
   #event-banner { top:50px; padding:8px 12px; }
   #event-banner .eb-name { font-size:12px; }
 
@@ -663,7 +664,6 @@ html,body { height:100%; background:var(--bg); font-family:'Segoe UI',system-ui,
   .tenant-rent { font-size:14px; }
   .auction-bid { font-size:30px; }
   .auction-bid-label { font-size:12px; }
-  .bidder-chip { font-size:11px; padding:3px 9px; }
 
   /* Toasts */
   #toast-container { right:8px; top:60px; }
@@ -918,11 +918,6 @@ html,body { height:100%; background:var(--bg); font-family:'Segoe UI',system-ui,
 .auction-display { text-align:center; padding:16px 0 8px; }
 .auction-bid { font-size:38px; font-weight:900; color:var(--gold); display:block; }
 .auction-bid-label { font-size:13px; color:var(--text-dim); margin-top:4px; min-height:18px; }
-.auction-timer-bar { width:100%; height:8px; background:rgba(255,255,255,0.08); border-radius:4px; overflow:hidden; margin:14px 0; }
-.auction-timer-fill { height:100%; background:linear-gradient(90deg,var(--green),var(--gold)); border-radius:4px; transition:width 0.5s linear; }
-.auction-bidders { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin:8px 0; }
-.bidder-chip { font-size:12px; background:rgba(255,255,255,0.06); border:1px solid var(--border); border-radius:16px; padding:4px 12px; transition:all 0.2s; }
-.bidder-chip.active { border-color:var(--gold); color:var(--gold); background:rgba(247,201,72,0.1); }
 .plot-mortgage-link { font-size:10px; color:#74b9ff; margin-top:5px; cursor:pointer; text-decoration:underline; }
 
 /* ═══════════════════════════════════════════
@@ -956,7 +951,7 @@ html,body { height:100%; background:var(--bg); font-family:'Segoe UI',system-ui,
 /* Spinner (prize wheel) screen */
 #screen-spinner {
   flex-direction:column; align-items:center; justify-content:center;
-  min-height:100vh; padding:20px 16px;
+  padding:20px 16px;
   background:radial-gradient(ellipse at 50% 20%, rgba(108,92,231,0.25), transparent 65%), var(--bg);
   overflow-y:auto;
 }
@@ -1014,12 +1009,13 @@ html,body { height:100%; background:var(--bg); font-family:'Segoe UI',system-ui,
     <span id="hud-title">Dream Home Empire</span>
     <div class="hud-stat" id="hud-money">💰 <span id="hud-money-val">$50,000</span></div>
     <div class="hud-stat hud-timer" id="hud-timer" style="display:none;font-size:13px;">⏰ 00:00</div>
-    <div class="hud-stat" id="hud-market" style="font-size:12px;color:var(--text-dim);">📊 100%</div>
+    <div id="mp-vs-badge" class="hud-stat" style="display:none;background:rgba(108,92,231,0.2);border:1px solid rgba(108,92,231,0.4);color:#a29bfe;font-size:12px;flex-shrink:0;"></div>
     <div class="hud-stat" style="flex-direction:column;gap:2px;padding:6px 12px;">
       <span id="hud-level">Lv.1</span>
       <div class="xp-bar"><div class="xp-fill" id="xp-fill" style="width:0%"></div></div>
     </div>
   </div>
+
 
   <!-- MARKET EVENT BANNER -->
   <div id="event-banner">
@@ -1030,8 +1026,6 @@ html,body { height:100%; background:var(--bg); font-family:'Segoe UI',system-ui,
     </div>
     <div class="eb-timer" id="ev-timer"></div>
   </div>
-
-  <!-- ECONOMIC CYCLE NEWS TICKER -->
 
   <!-- SPLASH -->
   <div id="screen-splash" class="screen active">
@@ -1222,7 +1216,9 @@ html,body { height:100%; background:var(--bg); font-family:'Segoe UI',system-ui,
       <div id="room-picker">
         <button id="cancel-place" onclick="cancelPlacement()">✕ Cancel Placement</button>
         <div class="picker-title">TAP A ROOM TO PLACE IT  ·  Tap empty cell to build</div>
-        <div id="room-picker-list"></div>
+        <div id="room-picker-list-wrap">
+          <div id="room-picker-list"></div>
+        </div>
       </div>
       <div class="build-actions" id="build-actions"></div>
     </div>
@@ -2192,7 +2188,7 @@ function syncPlacementControls() {
     if (rt) title.textContent = `TAP GRID TO PLACE: ${rt.name} (${rt.w}x${rt.h}) - ${fmtShort(getEffectiveRoomCost(rt))}`;
   } else {
     cancelBtn.style.display = 'none';
-    title.textContent = 'TAP A ROOM TO PLACE IT  -  Tap empty cell to build';
+    title.textContent = 'TAP A ROOM TO PLACE IT  ·  Tap empty cell to build';
   }
 }
 
