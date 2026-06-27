@@ -398,8 +398,7 @@ html,body { height:100%; background:var(--bg); font-family:'Segoe UI',system-ui,
   .hud-stat { padding: 7px 18px; font-size: 15px; }
   .xp-bar { width: 90px; height: 6px; }
   #screen-map, #screen-portfolio, #screen-build,
-  #screen-clients, #screen-achievements, #screen-finance,
-  #screen-leaderboard { padding-top: 60px; }
+  #screen-clients, #screen-achievements, #screen-finance { padding-top: 60px; }
 
   /* Map */
   .map-header { max-width: 1100px; margin: 0 auto; padding: 28px 32px 16px; }
@@ -943,53 +942,6 @@ html,body { height:100%; background:var(--bg); font-family:'Segoe UI',system-ui,
 .eb-desc { font-size:11px; opacity:0.85; }
 .eb-timer { font-size:12px; font-weight:700; background:rgba(0,0,0,0.35); padding:4px 10px; border-radius:20px; white-space:nowrap; flex-shrink:0; }
 
-/* ═══════════════════════════════════════════
-   LEADERBOARD
-═══════════════════════════════════════════ */
-#screen-leaderboard { padding-top:56px; overflow-y:auto; }
-.lb-header { padding:20px 16px 10px; display:flex; flex-wrap:wrap; align-items:center; gap:10px; }
-.lb-header-text { flex:1; }
-.lb-header-text h2 { font-size:22px; font-weight:800; }
-.lb-header-text p  { color:var(--text-dim); font-size:14px; margin-top:4px; }
-.lb-refresh { font-size:12px; padding:8px 14px; }
-.lb-list { padding:0 16px 30px; display:flex; flex-direction:column; gap:10px; }
-.lb-row {
-  background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
-  padding:14px 16px; display:flex; align-items:center; gap:14px;
-}
-.lb-row.lb-gold   { border-color:rgba(247,201,72,0.45); background:linear-gradient(135deg,rgba(247,201,72,0.06),var(--surface)); }
-.lb-row.lb-silver { border-color:rgba(180,180,200,0.35); }
-.lb-row.lb-bronze { border-color:rgba(205,127,50,0.35); }
-.lb-row.lb-you    { border-color:rgba(108,92,231,0.5); background:linear-gradient(135deg,rgba(108,92,231,0.07),var(--surface)); }
-.lb-rank { font-size:22px; width:38px; text-align:center; flex-shrink:0; line-height:1; }
-.lb-rank-num { font-size:14px; font-weight:800; color:var(--text-dim); }
-.lb-info { flex:1; min-width:0; }
-.lb-name { font-size:15px; font-weight:700; display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
-.lb-you-tag    { font-size:10px; background:rgba(108,92,231,0.2); color:#a29bfe; border-radius:10px; padding:2px 8px; font-weight:700; flex-shrink:0; }
-.lb-online-dot { width:7px; height:7px; background:var(--green); border-radius:50%; display:inline-block; flex-shrink:0; animation:pulse 2s ease infinite; }
-.lb-when { font-size:11px; color:var(--text-dim); margin-top:3px; }
-.lb-score { font-size:16px; font-weight:800; color:var(--gold); flex-shrink:0; }
-.lb-empty  { text-align:center; padding:40px 20px; color:var(--text-dim); font-size:15px; }
-.lb-no-fb  { margin:0 16px 24px; background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:var(--radius); padding:20px; text-align:center; color:var(--text-dim); font-size:13px; line-height:1.7; }
-.lb-no-fb strong { color:var(--text); }
-
-@media (min-width:901px) {
-  .lb-header { max-width:720px; margin:0 auto; padding:24px 32px 14px; }
-  .lb-list   { max-width:720px; margin:0 auto; padding:0 32px 48px; gap:12px; }
-  .lb-row    { padding:16px 20px; }
-  .lb-rank   { font-size:26px; width:42px; }
-  .lb-name   { font-size:16px; }
-  .lb-score  { font-size:18px; }
-  .lb-no-fb  { max-width:720px; margin:0 auto 24px; }
-}
-@media (max-width:480px) {
-  .lb-header { padding:16px 12px 10px; }
-  .lb-list   { padding:0 12px 24px; gap:8px; }
-  .lb-row    { padding:12px 12px; gap:10px; }
-  .lb-rank   { font-size:18px; width:32px; }
-  .lb-score  { font-size:14px; }
-}
-
 /* ── Menu side-by-side layout ── */
 .menu-layout {
   display:flex; flex-direction:column; align-items:center; width:100%;
@@ -1018,21 +970,6 @@ html,body { height:100%; background:var(--bg); font-family:'Segoe UI',system-ui,
   .menu-cards { padding-bottom:6px; }
 }
 
-/* Inline leaderboard rows */
-.menu-lb-section { margin:0; }
-.menu-lb-heading {
-  font-size:12px; font-weight:700; color:var(--text-dim); text-transform:uppercase;
-  letter-spacing:1px; margin-bottom:10px; display:flex; align-items:center; gap:8px;
-}
-.menu-lb-row {
-  display:flex; align-items:center; gap:10px; padding:8px 10px;
-  background:var(--surface); border:1px solid var(--border); border-radius:10px;
-  margin-bottom:5px;
-}
-.menu-lb-row.lb-you { border-color:rgba(108,92,231,0.4); background:linear-gradient(135deg,rgba(108,92,231,0.06),var(--surface)); }
-.menu-lb-rank  { font-size:16px; width:26px; text-align:center; flex-shrink:0; line-height:1; }
-.menu-lb-name  { flex:1; font-size:12px; font-weight:600; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:flex; align-items:center; gap:5px; }
-.menu-lb-score { font-size:12px; font-weight:800; color:var(--gold); flex-shrink:0; }
 
 /* HUD icon buttons (leaderboard + online players) */
 .hud-icon-btn {
@@ -1209,7 +1146,6 @@ html,body { height:100%; background:var(--bg); font-family:'Segoe UI',system-ui,
       <span id="hud-level">Lv.1</span>
       <div class="xp-bar"><div class="xp-fill" id="xp-fill" style="width:0%"></div></div>
     </div>
-    <button class="hud-icon-btn" onclick="openLeaderboard()" title="Leaderboard">🏆</button>
     <button class="hud-icon-btn" id="hud-mp-btn" onclick="openMpPanel()" title="Online Players" style="display:none;">👥 <span class="hud-online-count" id="hud-online-count">0</span></button>
   </div>
 
@@ -1387,16 +1323,8 @@ html,body { height:100%; background:var(--bg); font-family:'Segoe UI',system-ui,
         </div>
         <p id="welcome-msg" style="color:var(--text-dim);font-size:13px;padding:0 20px 10px;text-align:center;"></p>
       </div>
-      <!-- RIGHT: leaderboard + online players -->
+      <!-- RIGHT: online players -->
       <div class="menu-right">
-        <!-- Top 10 Leaderboard -->
-        <div class="menu-right-card">
-          <div class="menu-right-card-heading">🏆 Top 10 Players</div>
-          <div class="menu-lb-section">
-            <div id="menu-lb-list"></div>
-          </div>
-        </div>
-        <!-- Online players (shown when Firebase is connected) -->
         <div id="mp-section" style="display:none;">
           <div class="menu-right-card">
             <div class="menu-right-card-heading"><span class="mp-pulse"></span>&nbsp;Online Now</div>
@@ -1530,17 +1458,6 @@ html,body { height:100%; background:var(--bg); font-family:'Segoe UI',system-ui,
   </div>
 
   <!-- LEADERBOARD -->
-  <div id="screen-leaderboard" class="screen">
-    <div class="lb-header">
-      <div class="lb-header-text">
-        <h2>🏆 Leaderboard</h2>
-        <p>Top 10 richest empire builders &nbsp;<span id="lb-source-badge" style="font-size:11px;opacity:0.65;"></span></p>
-      </div>
-      <button class="btn-secondary lb-refresh" onclick="renderLeaderboard()">🔄 Refresh</button>
-    </div>
-    <div id="lb-list" class="lb-list"></div>
-  </div>
-
   <!-- Online Players Floating Panel -->
   <div id="mp-panel-overlay" class="mp-panel-overlay" style="display:none;" onclick="closeMpPanel(event)">
     <div class="mp-panel-card">
@@ -1909,7 +1826,6 @@ function addMoney(amount) {
   }
   if (G.money >= 20000) lowMoneyWarned = false;
   updateHud();
-  if (amount > 0) lbMaybeUpdate();
 }
 
 function addXP(amount) {
@@ -2089,13 +2005,12 @@ function updateEventCountdown() {
 // ═══════════════════════════════════════════════════════════
 // SCREEN NAVIGATION
 // ═══════════════════════════════════════════════════════════
-const SCREENS_WITH_HUD = ['map','portfolio','build','clients','achievements','finance','leaderboard'];
-const HUD_BACK_MAP = { map:'menu', portfolio:'menu', build:'portfolio', clients:'menu', achievements:'menu', finance:'menu', leaderboard:'menu' };
-const HUD_TITLES = { map:'🗺️ World Map', portfolio:'🏘️ My Properties', build:'🏗️ Build Mode', clients:'🤝 Clients', achievements:'🏆 Achievements', finance:'💹 Finance', leaderboard:'🏆 Leaderboard' };
+const SCREENS_WITH_HUD = ['map','portfolio','build','clients','achievements','finance'];
+const HUD_BACK_MAP = { map:'menu', portfolio:'menu', build:'portfolio', clients:'menu', achievements:'menu', finance:'menu' };
+const HUD_TITLES = { map:'🗺️ World Map', portfolio:'🏘️ My Properties', build:'🏗️ Build Mode', clients:'🤝 Clients', achievements:'🏆 Achievements', finance:'💹 Finance' };
 
 const _CG_PLAY_SCREENS = new Set(['map','portfolio','build','clients','achievements','finance']);
 function showScreen(id) {
-  if (id !== 'menu') menuLbDetach();
   if (_CG_PLAY_SCREENS.has(id)) CG.start(); else CG.stop();
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('screen-' + id).classList.add('active');
@@ -2114,7 +2029,6 @@ function showScreen(id) {
   if (id === 'achievements') renderAchievements();
   if (id === 'finance')      renderFinance();
   if (id === 'menu')         renderMenu();
-  if (id === 'leaderboard') renderLeaderboard();
 }
 
 function hudBack() {
@@ -2123,17 +2037,9 @@ function hudBack() {
   const id = cur.id.replace('screen-', '');
   if (id === 'build') {
     if (confirm('Leave build mode? Your property progress is saved.')) showScreen('portfolio');
-  } else if (id === 'leaderboard' && _lbFrom && _lbFrom !== 'leaderboard') {
-    const ret = _lbFrom; _lbFrom = null; showScreen(ret);
   } else {
     showScreen(HUD_BACK_MAP[id] || 'menu');
   }
-}
-
-function openLeaderboard() {
-  const active = document.querySelector('.screen.active');
-  _lbFrom = active ? active.id.replace('screen-', '') : null;
-  showScreen('leaderboard');
 }
 
 function openMpPanel() {
@@ -2156,53 +2062,6 @@ function renderMenu() {
   const rep = REP_TITLES[Math.min(Math.floor(G.level/2), REP_TITLES.length-1)];
   const nameTag = G.isAnonymous ? '🎭 Anonymous' : `👋 ${G.playerName}`;
   document.getElementById('welcome-msg').textContent = `${nameTag} · ${rep} · Level ${G.level} · ${fmt(G.money)}`;
-  renderMenuLeaderboard();
-}
-
-let _menuLbRef = null;
-
-function menuLbDetach() {
-  if (_menuLbRef) { _menuLbRef.off(); _menuLbRef = null; }
-}
-
-function renderMenuLeaderboard() {
-  const el = document.getElementById('menu-lb-list');
-  if (!el) return;
-  menuLbDetach();
-  const medals = ['🥇','🥈','🥉'];
-
-  function draw(rows) {
-    if (!rows.length) {
-      el.innerHTML = '<div class="mp-empty">No scores yet — be the first! 🏆</div>';
-      return;
-    }
-    el.innerHTML = rows.slice(0, 10).map((e, i) => {
-      const isYou  = e.id === _playerId;
-      const rankEl = i < 3 ? medals[i] : `<span style="font-size:12px;font-weight:800;color:var(--text-dim);">#${i+1}</span>`;
-      return `<div class="menu-lb-row${isYou ? ' lb-you' : ''}">
-        <div class="menu-lb-rank">${rankEl}</div>
-        <div class="menu-lb-name">${lbEsc(e.name)}${isYou ? '&nbsp;<span class="lb-you-tag">YOU</span>' : ''}</div>
-        <div class="menu-lb-score">${fmtShort(e.score)}</div>
-      </div>`;
-    }).join('');
-  }
-
-  function drawLocal() {
-    const lb = lbReadAll();
-    draw(Object.entries(lb).map(([id, v]) => ({ id, ...v })).sort((a, b) => b.score - a.score));
-  }
-
-  if (db) {
-    _menuLbRef = db.ref('leaderboard').orderByChild('score').limitToLast(10);
-    _menuLbRef.on('value', snap => {
-      const rows = [];
-      snap.forEach(c => rows.push({ id: c.key, ...c.val() }));
-      rows.sort((a, b) => b.score - a.score);
-      if (rows.length) draw(rows); else drawLocal();
-    }, drawLocal);
-  } else {
-    drawLocal();
-  }
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -3399,7 +3258,7 @@ function updateNewsTicker() {
   const text   = document.getElementById('ticker-text');
   if (!ticker) return;
   const activeId = (document.querySelector('.screen.active')?.id || '').replace('screen-', '');
-  const show = ['map','portfolio','build','clients','finance','achievements','menu','leaderboard'].includes(activeId);
+  const show = ['map','portfolio','build','clients','finance','achievements','menu'].includes(activeId);
   ticker.style.display = show ? 'flex' : 'none';
   if (label) { label.textContent = phase.emoji + ' ' + phase.name.toUpperCase(); label.style.color = phase.color; }
   if (text) {
@@ -3721,116 +3580,6 @@ const _playerId = (() => {
   return id;
 })();
 
-let _lbBest     = parseInt(localStorage.getItem('dhe_lb_score') || '0');
-let _lbDebounce = null;
-let _lbFrom     = null;
-
-function lbReadAll() {
-  try { return JSON.parse(localStorage.getItem('dhe_lb') || '{}'); }
-  catch(e) { return {}; }
-}
-
-function lbMaybeUpdate() {
-  if (G.isAnonymous || !G.playerName) return;
-  const score = G.properties.reduce((a,p) => a + calcPropertyValue(p), 0) + G.money;
-  if (score <= _lbBest) return;
-  clearTimeout(_lbDebounce);
-  _lbDebounce = setTimeout(() => {
-    _lbBest = score;
-    localStorage.setItem('dhe_lb_score', score);
-    const lb = lbReadAll();
-    if (!lb[_playerId] || score > lb[_playerId].score) {
-      lb[_playerId] = { name: G.playerName, score, updatedAt: Date.now() };
-      localStorage.setItem('dhe_lb', JSON.stringify(lb));
-    }
-    if (db) {
-      db.ref('leaderboard/' + _playerId).set({ name: G.playerName, score, updatedAt: Date.now() });
-    }
-  }, 5000);
-}
-
-function lbSetBadge(text, color) {
-  const el = document.getElementById('lb-source-badge');
-  if (el) { el.textContent = text; el.style.color = color || ''; }
-}
-
-function lbDrawLocal() {
-  const lb = lbReadAll();
-  const rows = Object.entries(lb).map(([id, v]) => ({ id, ...v }))
-    .sort((a, b) => b.score - a.score);
-  if (!G.isAnonymous && G.playerName && !rows.find(r => r.id === _playerId)) {
-    const score = G.properties.reduce((a,p) => a + calcPropertyValue(p), 0) + G.money;
-    if (score > 0) {
-      rows.push({ id: _playerId, name: G.playerName, score, updatedAt: Date.now() });
-      rows.sort((a, b) => b.score - a.score);
-    }
-  }
-  lbDraw(rows.slice(0, 10));
-}
-
-function renderLeaderboard() {
-  const list = document.getElementById('lb-list');
-  if (!list) return;
-  lbMaybeUpdate();
-
-  if (db) {
-    lbSetBadge('🌐 Global', 'var(--green)');
-    list.innerHTML = '<div class="lb-empty">⏳ Loading global scores…</div>';
-    db.ref('leaderboard').orderByChild('score').limitToLast(10).once('value', snap => {
-      const rows = [];
-      snap.forEach(c => rows.push({ id: c.key, ...c.val() }));
-      rows.sort((a, b) => b.score - a.score);
-      if (rows.length) lbDraw(rows.slice(0, 10));
-      else lbDrawLocal();
-    }, () => { lbSetBadge('💾 This device', ''); lbDrawLocal(); });
-  } else {
-    lbSetBadge('💾 This device', '');
-    lbDrawLocal();
-  }
-}
-
-function lbEsc(s) {
-  return String(s).replace(/[&<>"']/g,
-    c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' })[c]);
-}
-
-function lbDraw(rows) {
-  const list = document.getElementById('lb-list');
-  if (!list) return;
-  if (!rows.length) {
-    list.innerHTML = '<div class="lb-empty">No scores yet — be the first to play! 🏆</div>';
-    return;
-  }
-  const medals = ['🥇','🥈','🥉'];
-  list.innerHTML = rows.map((e, i) => {
-    const isYou    = e.id === _playerId;
-    const rankEl   = i < 3
-      ? `<div class="lb-rank">${medals[i]}</div>`
-      : `<div class="lb-rank"><span class="lb-rank-num">#${i+1}</span></div>`;
-    const rowClass = i===0 ? 'lb-gold' : i===1 ? 'lb-silver' : i===2 ? 'lb-bronze' : '';
-    return `
-      <div class="lb-row ${rowClass} ${isYou ? 'lb-you' : ''}">
-        ${rankEl}
-        <div class="lb-info">
-          <div class="lb-name">
-            ${lbEsc(e.name)}
-            ${isYou ? '<span class="lb-you-tag">YOU</span>' : ''}
-          </div>
-          <div class="lb-when">${lbAgo(e.updatedAt)}</div>
-        </div>
-        <div class="lb-score">${fmtShort(e.score)}</div>
-      </div>`;
-  }).join('');
-}
-
-function lbAgo(ts) {
-  if (!ts) return '';
-  const d = Date.now() - ts;
-  if (d < 60000)    return 'just now';
-  if (d < 3600000)  return Math.floor(d / 60000) + 'm ago';
-  if (d < 86400000) return Math.floor(d / 3600000) + 'h ago';
-  return Math.floor(d / 86400000) + 'd ago';
-}
 
 // ═══════════════════════════════════════════════════════════
 // CRAZYGAMES SDK WRAPPER
