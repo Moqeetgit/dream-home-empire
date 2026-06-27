@@ -990,9 +990,6 @@ html,body { height:100%; background:var(--bg); font-family:'Segoe UI',system-ui,
   .lb-score  { font-size:14px; }
 }
 
-/* ═══════════════════════════════════════════
-   MUSIC BUTTON (fixed, always visible)
-═══════════════════════════════════════════ */
 /* ── Menu side-by-side layout ── */
 .menu-layout {
   display:flex; flex-direction:column; align-items:center; width:100%;
@@ -1126,21 +1123,6 @@ html,body { height:100%; background:var(--bg); font-family:'Segoe UI',system-ui,
 .ai-buyout-btn:hover    { background:rgba(225,112,85,0.28); }
 .ai-buyout-btn:disabled { opacity:0.4; cursor:not-allowed; }
 
-/* ═══════════════════════════════════════════
-   MUSIC BUTTON (fixed, always visible)
-═══════════════════════════════════════════ */
-#music-btn {
-  position:fixed; bottom:16px; right:16px; z-index:500;
-  width:40px; height:40px; border-radius:50%;
-  background:rgba(15,15,26,0.88); backdrop-filter:blur(8px);
-  border:1px solid var(--border); color:var(--text-dim);
-  font-size:17px; cursor:pointer;
-  display:flex; align-items:center; justify-content:center;
-  box-shadow:0 4px 16px rgba(0,0,0,0.5);
-  transition:border-color 0.15s, transform 0.15s;
-}
-#music-btn:hover { border-color:var(--gold); transform:scale(1.12); }
-@media (max-width:480px) { #music-btn { width:36px; height:36px; bottom:10px; right:10px; font-size:15px; } }
 
 /* ═══════════════════════════════════════════
    MULTIPLAYER
@@ -1644,7 +1626,6 @@ html,body { height:100%; background:var(--bg); font-family:'Segoe UI',system-ui,
   </div>
 
   <!-- MUSIC TOGGLE (always visible) -->
-  <button id="music-btn" onclick="musicToggle()" title="Toggle music">🔊</button>
 
 </div>
 <script>
@@ -3718,133 +3699,12 @@ window.addEventListener('DOMContentLoaded', () => {
 
 function launchGame() {
   CG.loaded();
-  Music.init();
   cycleInit();
   updateHud();
   initWelcome();
   showScreen('welcome');
 }
 
-// ═══════════════════════════════════════════════════════════
-// BACKGROUND MUSIC  (Web Audio API — no external files needed)
-// Gentle C-major pentatonic: melody + pad chords + bass
-// ═══════════════════════════════════════════════════════════
-const Music = (() => {
-  const MUTED_KEY = 'dhe_mute';
-  const BPM       = 72;
-  const BEAT      = 60 / BPM;   // seconds per beat
-  const AHEAD     = 0.12;       // look-ahead window (seconds)
-
-  // Pentatonic C major frequencies (Hz)
-  const N = {
-    C3:130.81, G3:196.00, A3:220.00,
-    C4:261.63, D4:293.66, E4:329.63, G4:392.00, A4:440.00,
-    C5:523.25
-  };
-
-  // Melody [freq, beats] — 0 = rest — 32-beat loop (~26 s at 72 BPM)
-  const MEL = [
-    [N.E4,2],[N.G4,1],[N.A4,1],
-    [N.G4,1.5],[N.E4,0.5],[N.C4,2],
-    [N.D4,1],[N.E4,1],[N.G4,2],
-    [N.E4,3],[0,1],
-    [N.G4,2],[N.A4,1],[N.C5,1],
-    [N.A4,1.5],[N.G4,0.5],[N.E4,2],
-    [N.D4,1],[N.E4,1],[N.D4,1],[N.C4,1],
-    [N.C4,3],[0,1],
-  ];
-
-  // Pad chords [[freqs], beats]
-  const CHORDS = [
-    [[N.C3,N.G3,N.C4], 8],
-    [[N.A3,N.C4,N.E4], 8],
-    [[N.C3,N.G3,N.C4], 4],
-    [[N.G3,N.C4,N.D4], 4],
-  ];
-
-  // Bass [freq, beats]
-  const BASS = [
-    [N.C3,8],[N.A3,8],[N.C3,4],[N.G3,4]
-  ];
-
-  let ac=null, mg=null, mi=0, ci=0, bi=0;
-
-  const isMuted = () => localStorage.getItem(MUTED_KEY) === '1';
-
-  function note(freq, t, beats, type, vol) {
-    if (!ac || !freq) return;
-    const dur = beats * BEAT;
-    const osc = ac.createOscillator();
-    const g   = ac.createGain();
-    osc.type = type;
-    osc.frequency.setValueAtTime(freq, t);
-    g.gain.setValueAtTime(0, t);
-    g.gain.linearRampToValueAtTime(vol, t + Math.min(0.06, dur * 0.1));
-    g.gain.setValueAtTime(vol, t + dur * 0.72);
-    g.gain.linearRampToValueAtTime(0, t + dur * 0.95);
-    osc.connect(g); g.connect(mg);
-    osc.start(t); osc.stop(t + dur);
-  }
-
-  function tick(seq, idx, t, type, vol, lenFn, nextFn) {
-    if (!ac) return;
-    const now = ac.currentTime;
-    if (t < now - BEAT * 2) t = now + 0.05;
-    const [f, b] = seq[idx];
-    const beats = lenFn ? lenFn(b) : b;
-    note(f, t, beats, type, vol);
-    const ni = (idx + 1) % seq.length;
-    const nt = t + b * BEAT;
-    setTimeout(() => nextFn(ni, nt), Math.max(10, (nt - ac.currentTime - AHEAD) * 1000));
-  }
-
-  const schedMel   = (i,t) => tick(MEL,    i, t, 'triangle', 0.13, null,       (ni,nt)=>schedMel(ni,nt));
-  const schedChord = (i,t) => tick(CHORDS, i, t, 'sine',     0.042, b=>b*0.9,  (ni,nt)=>schedChord(ni,nt));
-  const schedBass  = (i,t) => tick(BASS,   i, t, 'sine',     0.075, b=>b*0.72, (ni,nt)=>schedBass(ni,nt));
-
-  function startAC() {
-    if (ac) return;
-    try {
-      ac = new (window.AudioContext || window.webkitAudioContext)();
-      mg = ac.createGain();
-      mg.gain.setValueAtTime(0, ac.currentTime);
-      mg.connect(ac.destination);
-      if (!isMuted()) mg.gain.linearRampToValueAtTime(1, ac.currentTime + 2.5);
-      const t0 = ac.currentTime + 0.15;
-      schedMel(0,t0); schedChord(0,t0); schedBass(0,t0);
-    } catch(e) {}
-  }
-
-  // Start audio on first user gesture (browser requirement)
-  const _first = () => {
-    document.removeEventListener('click',      _first);
-    document.removeEventListener('touchstart', _first);
-    startAC();
-  };
-  document.addEventListener('click',      _first);
-  document.addEventListener('touchstart', _first, { passive:true });
-
-  return {
-    toggle() {
-      const muting = !isMuted();
-      localStorage.setItem(MUTED_KEY, muting ? '1' : '0');
-      if (muting) {
-        if (mg && ac) { mg.gain.cancelScheduledValues(ac.currentTime); mg.gain.linearRampToValueAtTime(0, ac.currentTime + 0.4); }
-      } else {
-        if (!ac) { startAC(); }
-        else { mg.gain.cancelScheduledValues(ac.currentTime); mg.gain.linearRampToValueAtTime(1, ac.currentTime + 0.4); }
-      }
-      this.updateBtn();
-    },
-    updateBtn() {
-      const btn = document.getElementById('music-btn');
-      if (btn) btn.textContent = isMuted() ? '🔇' : '🔊';
-    },
-    init() { this.updateBtn(); }
-  };
-})();
-
-function musicToggle() { Music.toggle(); }
 
 // ═══════════════════════════════════════════════════════════
 // LEADERBOARD  (localStorage — no server needed)
@@ -3999,13 +3859,7 @@ const CG = (() => {
     ad(cb) {
       const s = sdk();
       if (!s?.ad?.requestAd) { if (cb) cb(); return; }
-      // Mute music for the ad, restore after
-      const wasMuted = localStorage.getItem('dhe_mute') === '1';
-      if (!wasMuted) try { Music.toggle(); } catch(e) {}
-      const resume = () => {
-        if (!wasMuted) try { Music.toggle(); } catch(e) {}
-        if (cb) cb();
-      };
+      const resume = () => { if (cb) cb(); };
       try {
         this.stop();
         s.ad.requestAd('interstitial', {
