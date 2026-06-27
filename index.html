@@ -942,36 +942,7 @@ html,body { height:100%; background:var(--bg); font-family:'Segoe UI',system-ui,
 .eb-desc { font-size:11px; opacity:0.85; }
 .eb-timer { font-size:12px; font-weight:700; background:rgba(0,0,0,0.35); padding:4px 10px; border-radius:20px; white-space:nowrap; flex-shrink:0; }
 
-/* ── Menu side-by-side layout ── */
-.menu-layout {
-  display:flex; flex-direction:column; align-items:center; width:100%;
-}
-.menu-left {
-  width:100%; display:flex; flex-direction:column; align-items:center;
-}
-.menu-right {
-  width:100%; padding:0 16px 24px;
-}
-.menu-right-card {
-  background:var(--surface2); border:1px solid var(--border);
-  border-radius:var(--radius); padding:14px 14px 10px; margin-bottom:12px;
-}
-.menu-right-card-heading {
-  font-size:12px; font-weight:700; color:var(--text-dim); text-transform:uppercase;
-  letter-spacing:1px; margin-bottom:10px; display:flex; align-items:center; gap:8px;
-}
-@media (min-width:700px) {
-  .menu-layout {
-    flex-direction:row; align-items:flex-start;
-    max-width:960px; margin:0 auto; gap:18px; padding:0 20px 40px;
-  }
-  .menu-left  { flex:1.3; }
-  .menu-right { flex:1; min-width:260px; max-width:320px; padding:0; }
-  .menu-cards { padding-bottom:6px; }
-}
-
-
-/* HUD icon buttons (leaderboard + online players) */
+/* HUD icon buttons */
 .hud-icon-btn {
   background:rgba(255,255,255,0.07); border:1px solid var(--border);
   border-radius:8px; color:var(--text); font-size:15px;
@@ -979,27 +950,6 @@ html,body { height:100%; background:var(--bg); font-family:'Segoe UI',system-ui,
   display:flex; align-items:center; gap:4px; flex-shrink:0; line-height:1;
 }
 .hud-icon-btn:hover { background:rgba(255,255,255,0.14); }
-.hud-online-count { font-size:11px; font-weight:800; color:var(--green); }
-/* Online players floating panel */
-.mp-panel-overlay {
-  position:fixed; inset:0; background:rgba(0,0,0,0.55);
-  z-index:650; display:flex; align-items:center; justify-content:center; padding:16px;
-}
-.mp-panel-card {
-  background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
-  width:100%; max-width:320px; max-height:72vh; overflow-y:auto;
-}
-.mp-panel-head {
-  padding:13px 16px; display:flex; align-items:center; justify-content:space-between;
-  border-bottom:1px solid var(--border); font-weight:700; font-size:15px;
-  position:sticky; top:0; background:var(--surface); z-index:1;
-}
-.mp-panel-close {
-  background:none; border:none; color:var(--text-dim); font-size:20px;
-  cursor:pointer; padding:2px 6px; line-height:1; border-radius:4px;
-}
-.mp-panel-close:hover { color:var(--text); }
-.mp-panel-body { padding:10px 12px 14px; display:flex; flex-direction:column; gap:8px; }
 
 /* ═══════════════════════════════════════════
    ECONOMIC CYCLE — NEWS TICKER (fixed bottom)
@@ -1061,20 +1011,6 @@ html,body { height:100%; background:var(--bg); font-family:'Segoe UI',system-ui,
 .ai-buyout-btn:disabled { opacity:0.4; cursor:not-allowed; }
 
 
-/* ═══════════════════════════════════════════
-   MULTIPLAYER
-═══════════════════════════════════════════ */
-#mp-section { width:100%; max-width:440px; padding:0 16px 24px; }
-.mp-heading { font-size:12px; font-weight:700; color:var(--text-dim); text-transform:uppercase; letter-spacing:1px; margin-bottom:10px; display:flex; align-items:center; gap:8px; }
-.mp-heading .mp-pulse { width:8px; height:8px; background:var(--green); border-radius:50%; animation:pulse 1.5s ease infinite; flex-shrink:0; }
-.mp-player-row { display:flex; align-items:center; gap:10px; background:var(--surface); border:1px solid var(--border); border-radius:30px; padding:8px 8px 8px 16px; margin-bottom:8px; }
-.mp-player-dot { color:var(--green); font-size:10px; }
-.mp-player-name { flex:1; font-size:14px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.mp-challenge-btn { background:linear-gradient(135deg,#6c5ce7,#a29bfe); color:#fff; border:none; border-radius:20px; padding:7px 14px; font-size:12px; font-weight:700; cursor:pointer; white-space:nowrap; flex-shrink:0; }
-.mp-challenge-btn:hover { opacity:0.88; transform:scale(1.04); }
-.mp-invite-btns { display:flex; gap:4px; flex-shrink:0; }
-.mp-challenge-btn.mp-sm { padding:5px 8px; font-size:11px; }
-.mp-empty { color:var(--text-dim); font-size:13px; text-align:center; padding:10px 0; }
 /* Spinner (prize wheel) screen */
 #screen-spinner {
   flex-direction:column; align-items:center; justify-content:center;
@@ -1121,14 +1057,10 @@ html,body { height:100%; background:var(--bg); font-family:'Segoe UI',system-ui,
 #mp-countdown { font-size:100px; font-weight:900; color:#fff; animation:popIn 0.3s ease; line-height:1; }
 #mp-countdown-sub { font-size:16px; color:rgba(255,255,255,0.7); text-align:center; max-width:300px; line-height:1.5; }
 
-#mp-vs-badge { display:none; background:rgba(108,92,231,0.25); border:1px solid rgba(108,92,231,0.5); color:#a29bfe; border-radius:20px; padding:5px 12px; font-size:12px; font-weight:700; white-space:nowrap; }
-
 .mp-result-banner { padding:14px; border-radius:var(--radius-sm); margin-bottom:14px; font-size:18px; font-weight:900; text-align:center; }
 .mp-win  { background:rgba(46,204,113,0.15); color:#55efc4; border:1px solid rgba(46,204,113,0.3); }
 .mp-lose { background:rgba(231,76,60,0.15); color:#ff7675; border:1px solid rgba(231,76,60,0.3); }
 
-@media (min-width:901px) { #mp-section { max-width:780px; padding:0 24px 28px; } }
-@media (max-width:480px) { .mp-challenge-btn { padding:6px 10px; font-size:11px; } }
 </style>
 </head>
 <body>
@@ -1141,12 +1073,10 @@ html,body { height:100%; background:var(--bg); font-family:'Segoe UI',system-ui,
     <div class="hud-stat" id="hud-money">💰 <span id="hud-money-val">$50,000</span></div>
     <div class="hud-stat hud-timer" id="hud-timer" style="display:none;font-size:13px;">⏰ 00:00</div>
     <div class="hud-stat" id="hud-market" style="font-size:12px;color:var(--text-dim);">📊 100%</div>
-    <div id="mp-vs-badge"></div>
     <div class="hud-stat" style="flex-direction:column;gap:2px;padding:6px 12px;">
       <span id="hud-level">Lv.1</span>
       <div class="xp-bar"><div class="xp-fill" id="xp-fill" style="width:0%"></div></div>
     </div>
-    <button class="hud-icon-btn" id="hud-mp-btn" onclick="openMpPanel()" title="Online Players" style="display:none;">👥 <span class="hud-online-count" id="hud-online-count">0</span></button>
   </div>
 
   <!-- MARKET EVENT BANNER -->
@@ -1286,53 +1216,39 @@ html,body { height:100%; background:var(--bg); font-family:'Segoe UI',system-ui,
       <h1>Dream Home Empire</h1>
       <p>Build your real estate empire from the ground up</p>
     </div>
-    <div class="menu-layout">
-      <!-- LEFT: action cards -->
-      <div class="menu-left">
-        <div class="menu-cards">
-          <div class="menu-card accent" onclick="showScreen('map')">
-            <span class="card-emoji">🗺️</span>
-            <h3>Buy Land</h3>
-            <p>Find your perfect location</p>
-          </div>
-          <div class="menu-card" onclick="showScreen('portfolio')">
-            <span class="card-emoji">🏘️</span>
-            <h3>My Properties</h3>
-            <p>Manage your empire</p>
-          </div>
-          <div class="menu-card" onclick="showScreen('clients')">
-            <span class="card-emoji">🤝</span>
-            <h3>Clients</h3>
-            <p>Complete requests for big bonuses</p>
-          </div>
-          <div class="menu-card" onclick="showScreen('finance')">
-            <span class="card-emoji">💹</span>
-            <h3>Finance</h3>
-            <p>Track income &amp; expenses</p>
-          </div>
-          <div class="menu-card" onclick="showScreen('achievements')">
-            <span class="card-emoji">🏆</span>
-            <h3>Achievements</h3>
-            <p>Unlock rewards</p>
-          </div>
-          <div class="menu-card" onclick="collectAllRent()">
-            <span class="card-emoji">💵</span>
-            <h3>Collect Rent</h3>
-            <p id="rent-available-text">No rent due</p>
-          </div>
-        </div>
-        <p id="welcome-msg" style="color:var(--text-dim);font-size:13px;padding:0 20px 10px;text-align:center;"></p>
+    <div class="menu-cards">
+      <div class="menu-card accent" onclick="showScreen('map')">
+        <span class="card-emoji">🗺️</span>
+        <h3>Buy Land</h3>
+        <p>Find your perfect location</p>
       </div>
-      <!-- RIGHT: online players -->
-      <div class="menu-right">
-        <div id="mp-section" style="display:none;">
-          <div class="menu-right-card">
-            <div class="menu-right-card-heading"><span class="mp-pulse"></span>&nbsp;Online Now</div>
-            <div id="mp-online-list"></div>
-          </div>
-        </div>
+      <div class="menu-card" onclick="showScreen('portfolio')">
+        <span class="card-emoji">🏘️</span>
+        <h3>My Properties</h3>
+        <p>Manage your empire</p>
+      </div>
+      <div class="menu-card" onclick="showScreen('clients')">
+        <span class="card-emoji">🤝</span>
+        <h3>Clients</h3>
+        <p>Complete requests for big bonuses</p>
+      </div>
+      <div class="menu-card" onclick="showScreen('finance')">
+        <span class="card-emoji">💹</span>
+        <h3>Finance</h3>
+        <p>Track income &amp; expenses</p>
+      </div>
+      <div class="menu-card" onclick="showScreen('achievements')">
+        <span class="card-emoji">🏆</span>
+        <h3>Achievements</h3>
+        <p>Unlock rewards</p>
+      </div>
+      <div class="menu-card" onclick="collectAllRent()">
+        <span class="card-emoji">💵</span>
+        <h3>Collect Rent</h3>
+        <p id="rent-available-text">No rent due</p>
       </div>
     </div>
+    <p id="welcome-msg" style="color:var(--text-dim);font-size:13px;padding:0 20px 10px;text-align:center;"></p>
   </div>
 
   <!-- WORLD MAP -->
@@ -1453,20 +1369,6 @@ html,body { height:100%; background:var(--bg); font-family:'Segoe UI',system-ui,
         <div class="finance-row"><span>Interest</span><span class="fr-val fr-neg">20% ($15,000)</span></div>
         <div class="finance-row"><span>Total Owed</span><span class="fr-val fr-neg">$90,000</span></div>
         <div style="margin-top:14px;"><button class="btn-primary" onclick="getEmergencyLoan()" style="width:100%;background:linear-gradient(135deg,#e17055,#d63031);">🏦 Get Emergency Loan</button></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- LEADERBOARD -->
-  <!-- Online Players Floating Panel -->
-  <div id="mp-panel-overlay" class="mp-panel-overlay" style="display:none;" onclick="closeMpPanel(event)">
-    <div class="mp-panel-card">
-      <div class="mp-panel-head">
-        <span><span class="mp-pulse"></span> Online Players</span>
-        <button class="mp-panel-close" onclick="closeMpPanel()">✕</button>
-      </div>
-      <div class="mp-panel-body" id="mp-panel-body">
-        <div class="mp-empty">No other players online.</div>
       </div>
     </div>
   </div>
@@ -2040,17 +1942,6 @@ function hudBack() {
   } else {
     showScreen(HUD_BACK_MAP[id] || 'menu');
   }
-}
-
-function openMpPanel() {
-  const el = document.getElementById('mp-panel-overlay');
-  if (el) el.style.display = 'flex';
-}
-
-function closeMpPanel(e) {
-  if (e && e.target.id !== 'mp-panel-overlay') return;
-  const el = document.getElementById('mp-panel-overlay');
-  if (el) el.style.display = 'none';
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -3061,7 +2952,6 @@ function startWithName() {
   if (!name) { input.style.borderColor = 'var(--red)'; input.focus(); return; }
   input.style.borderColor = '';
   G.playerName = name; G.isAnonymous = false;
-  mpRegister(name);
   showChoice();
 }
 
@@ -3078,7 +2968,6 @@ function showChoice() {
 
 function continueGame() {
   if (!loadGame()) { clearSave(); initWelcome(); return; }
-  if (!G.isAnonymous) mpRegister(G.playerName);
   updateHud(); showScreen('menu'); renderMenu();
   toast(`Welcome back, ${G.playerName}! 👋`, 'gold', '🏠');
 }
@@ -3663,76 +3552,6 @@ function mpInit() {
     db = firebase.database();
     mpPlayerId = mpGetPlayerId();
   } catch(e) { console.warn('Firebase init:', e); }
-}
-
-// ═══════════════════════════════════════════════════════════
-// PRESENCE — register / heartbeat / listen
-// ═══════════════════════════════════════════════════════════
-function mpRegister(name) {
-  if (!db) return;
-  const ref = db.ref('online/' + mpPlayerId);
-  ref.set({ name, lastSeen: Date.now() });
-  ref.onDisconnect().remove();
-  if (mpHeartbeat) clearInterval(mpHeartbeat);
-  mpHeartbeat = setInterval(() => ref.update({ lastSeen: Date.now() }), 30000);
-  // Show 👥 button immediately so player knows the feature exists
-  const hudBtn = document.getElementById('hud-mp-btn');
-  if (hudBtn) hudBtn.style.display = 'flex';
-  mpListenOnline();
-  mpListenInvites();
-}
-
-function mpListenOnline() {
-  db.ref('online').on('value', snap => {
-    const now = Date.now(), players = [];
-    snap.forEach(child => {
-      const p = child.val();
-      if (child.key !== mpPlayerId && (now - p.lastSeen) < 120000)
-        players.push({ id: child.key, name: p.name });
-    });
-    mpRenderOnline(players);
-  });
-}
-
-function mpRenderOnline(players) {
-  // Main menu list
-  const section = document.getElementById('mp-section');
-  const list    = document.getElementById('mp-online-list');
-  if (section) section.style.display = 'block';
-  function playerRow(p, closePanel) {
-    const close = closePanel ? 'closeMpPanel();' : '';
-    return `
-      <div class="mp-player-row" style="flex-wrap:wrap;gap:8px;">
-        <span class="mp-player-dot">●</span>
-        <span class="mp-player-name" style="flex:1;">${mpX(p.name)}</span>
-        <div class="mp-invite-btns">
-          <button class="mp-challenge-btn mp-sm" onclick="${close}mpSendInvite('${p.id}','${mpX(p.name)}',2)" title="Sprint — 2 min">⚡ 2m</button>
-          <button class="mp-challenge-btn mp-sm" onclick="${close}mpSendInvite('${p.id}','${mpX(p.name)}',5)" title="Challenge — 5 min">🏃 5m</button>
-          <button class="mp-challenge-btn mp-sm" onclick="${close}mpSendInvite('${p.id}','${mpX(p.name)}',10)" title="Marathon — 10 min">🏆 10m</button>
-        </div>
-      </div>`;
-  }
-  const rowsHtml = players.length === 0
-    ? '<div class="mp-empty">No other players online right now.</div>'
-    : players.map(p => playerRow(p, false)).join('');
-  if (list) list.innerHTML = rowsHtml;
-
-  // Floating panel
-  const panelBody = document.getElementById('mp-panel-body');
-  if (panelBody) panelBody.innerHTML = players.length === 0
-    ? '<div class="mp-empty" style="text-align:center;padding:20px 12px;">No other players online right now.</div>'
-    : players.map(p => playerRow(p, true)).join('');
-
-  // HUD online button
-  const hudBtn   = document.getElementById('hud-mp-btn');
-  const hudCount = document.getElementById('hud-online-count');
-  if (hudBtn)   hudBtn.style.display = 'flex';
-  if (hudCount) hudCount.textContent = players.length;
-}
-
-function mpX(s) {
-  return String(s).replace(/[&<>"']/g,
-    c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' })[c]);
 }
 
 // ═══════════════════════════════════════════════════════════
