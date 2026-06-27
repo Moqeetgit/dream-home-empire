@@ -951,64 +951,6 @@ html,body { height:100%; background:var(--bg); font-family:'Segoe UI',system-ui,
 }
 .hud-icon-btn:hover { background:rgba(255,255,255,0.14); }
 
-/* ═══════════════════════════════════════════
-   ECONOMIC CYCLE — NEWS TICKER (fixed bottom)
-═══════════════════════════════════════════ */
-#news-ticker {
-  position:fixed; bottom:64px; left:0; right:0;
-  z-index:480; height:26px;
-  background:rgba(8,8,18,0.97);
-  border-top:1px solid rgba(255,255,255,0.07);
-  display:none; align-items:center; overflow:hidden;
-}
-.ticker-label {
-  font-size:10px; font-weight:800; letter-spacing:0.8px;
-  padding:0 10px; flex-shrink:0; white-space:nowrap;
-  border-right:1px solid rgba(255,255,255,0.12);
-}
-.ticker-scroll { flex:1; overflow:hidden; position:relative; height:100%; }
-.ticker-inner {
-  position:absolute; white-space:nowrap;
-  font-size:11px; color:var(--text-dim); line-height:26px;
-  animation:ticker-run 50s linear infinite;
-}
-@keyframes ticker-run {
-  from { transform:translateX(100vw); }
-  to   { transform:translateX(-100%); }
-}
-
-/* AI rival badge on map location cards */
-.loc-ai-badge {
-  position:absolute; bottom:8px; right:8px;
-  font-size:10px; background:rgba(0,0,0,0.72);
-  border:1px solid rgba(225,112,85,0.4);
-  border-radius:6px; padding:2px 7px; color:#e17055;
-  white-space:nowrap;
-}
-
-/* Rival landlords section inside plot modal */
-.ai-rivals-section {
-  margin-top:14px; padding:12px;
-  background:rgba(225,112,85,0.07);
-  border:1px solid rgba(225,112,85,0.22); border-radius:10px;
-}
-.ai-rivals-title {
-  font-size:12px; font-weight:700; color:#e17055; margin-bottom:9px;
-}
-.ai-rival-row {
-  display:flex; align-items:center; gap:8px; padding:6px 0;
-  font-size:12px; border-bottom:1px solid rgba(255,255,255,0.05);
-}
-.ai-rival-row:last-child { border-bottom:none; }
-.ai-rival-name  { flex:1; font-weight:600; }
-.ai-rival-count { color:var(--text-dim); font-size:11px; }
-.ai-buyout-btn {
-  background:rgba(225,112,85,0.15); border:1px solid rgba(225,112,85,0.35);
-  color:#e17055; border-radius:6px; padding:4px 9px;
-  font-size:11px; cursor:pointer; font-weight:700; white-space:nowrap;
-}
-.ai-buyout-btn:hover    { background:rgba(225,112,85,0.28); }
-.ai-buyout-btn:disabled { opacity:0.4; cursor:not-allowed; }
 
 
 /* Spinner (prize wheel) screen */
@@ -1090,12 +1032,6 @@ html,body { height:100%; background:var(--bg); font-family:'Segoe UI',system-ui,
   </div>
 
   <!-- ECONOMIC CYCLE NEWS TICKER -->
-  <div id="news-ticker" style="display:none;">
-    <div id="ticker-phase-label" class="ticker-label">📈 RECOVERY</div>
-    <div class="ticker-scroll">
-      <div id="ticker-text" class="ticker-inner">Market data loading…</div>
-    </div>
-  </div>
 
   <!-- SPLASH -->
   <div id="screen-splash" class="screen active">
@@ -1444,7 +1380,6 @@ html,body { height:100%; background:var(--bg); font-family:'Segoe UI',system-ui,
     <div id="mp-countdown-sub">Get ready…</div>
   </div>
 
-  <!-- MUSIC TOGGLE (always visible) -->
 
 </div>
 <script>
@@ -1568,80 +1503,6 @@ const MARKET_EVENTS = [
   { id:'lake_fever',    name:'🏞️ Lake Life!',            emoji:'🏞️', desc:'Lakeside properties worth 2× — serene sells!',  type:'location',      mult:2.0,  duration:3, color:'#48cae4', locationId:'lakeside' },
 ];
 
-// ── Economic cycle phases ──────────────────────────────────
-// Order: recovery → boom → peak → correction → recovery …
-// healthTarget drives G.marketHealth (used in calcPropertyValue).
-// landCostMult adjusts land purchase price with the market.
-const CYCLE_PHASES = [
-  {
-    id:'recovery', name:'Recovery', emoji:'📈', color:'#00b894',
-    healthTarget:82, rentMult:1.0, landCostMult:0.95,
-    minDuration:90, maxDuration:150,
-    headlines:[
-      '🏗️ New builds attract first-time buyers back to the market',
-      '🏦 Banks cut interest rates — now is the smart time to buy',
-      '📈 Property sales picking up — early signs of market recovery',
-      '🏡 Experts say buy now before the next wave of price rises',
-    ]
-  },
-  {
-    id:'boom', name:'Boom', emoji:'🚀', color:'#f7c948',
-    healthTarget:120, rentMult:1.2, landCostMult:1.25,
-    minDuration:60, maxDuration:120,
-    headlines:[
-      '🚀 Property values surge — sellers making record profits this month',
-      '💰 Rental income at all-time high as demand outstrips supply',
-      '🔥 Bidding wars break out across every neighbourhood',
-      '📊 Investors flooding the market — land prices up 25% this quarter',
-    ]
-  },
-  {
-    id:'peak', name:'Peak', emoji:'⚠️', color:'#e17055',
-    healthTarget:130, rentMult:1.3, landCostMult:1.45,
-    minDuration:30, maxDuration:60,
-    headlines:[
-      '⚠️ Experts warn: market may be dangerously overheated right now',
-      '📉 Interest rates rising sharply — buyers starting to hold back',
-      '🔔 Is the bubble about to burst? Analysts divided — sell now?',
-      '💡 Smart money quietly SELLING before the inevitable correction',
-    ]
-  },
-  {
-    id:'correction', name:'Correction', emoji:'📉', color:'#e74c3c',
-    healthTarget:65, rentMult:0.85, landCostMult:0.72,
-    minDuration:60, maxDuration:120,
-    headlines:[
-      '📉 Market correction hits hard — property values sliding fast',
-      '🛒 Savvy investors buying cheap now to profit in the next boom',
-      '🏦 Banks tighten mortgage rules as property values fall',
-      '💸 Sellers forced to slash prices just to find any buyers',
-    ]
-  },
-];
-
-// ── AI landlord competitors ────────────────────────────────
-// Each has a strategy expressed as buy/sell probability per cycle phase.
-// They buy into locations, raising or lowering player neighbourhood value.
-const AI_LANDLORDS = [
-  {
-    id:'riverbank', name:'RiverBank Realty', emoji:'🏦', color:'#0984e3',
-    preferredLocs:['beach','desert','island','urban'],
-    buyChance: { recovery:0.55, boom:0.75, peak:0.60, correction:0.40 },
-    sellChance:{ recovery:0.05, boom:0.15, peak:0.65, correction:0.10 },
-  },
-  {
-    id:'skyview', name:'SkyView Properties', emoji:'🏙️', color:'#6c5ce7',
-    preferredLocs:['urban','lakeside','mountain'],
-    buyChance: { recovery:0.70, boom:0.15, peak:0.05, correction:0.75 },
-    sellChance:{ recovery:0.05, boom:0.25, peak:0.80, correction:0.02 },
-  },
-  {
-    id:'greenland', name:'GreenLand Homes', emoji:'🌿', color:'#00b894',
-    preferredLocs:['forest','lakeside','mountain','urban'],
-    buyChance: { recovery:0.50, boom:0.45, peak:0.20, correction:0.50 },
-    sellChance:{ recovery:0.08, boom:0.25, peak:0.50, correction:0.08 },
-  },
-];
 
 const TENANT_TYPES = [
   { id:'student',     name:'Student',      emoji:'🎓', rentMult:0.80, riskLabel:'Low Risk',  riskClass:'risk-low',  desc:'Pays 20% less but very reliable and tidy.' },
@@ -1671,8 +1532,6 @@ let G = {
   playerName: 'Anonymous', isAnonymous: true,
   challengeEndTime: 0, challengeDuration: 0,
   lastRentTime: Date.now(),
-  cyclePhase: 'recovery', cycleEndTime: 0, cycleRentMult: 1.0,
-  aiProperties: [],
 };
 let nextPropId = 1;
 
@@ -1749,11 +1608,7 @@ function updateHud() {
   const nxt = (LEVEL_THRESHOLDS[G.level]||LEVEL_THRESHOLDS[LEVEL_THRESHOLDS.length-1]) - (LEVEL_THRESHOLDS[G.level-1]||0);
   document.getElementById('xp-fill').style.width = Math.min(100, (cur/nxt)*100) + '%';
   const mhEl = document.getElementById('hud-market');
-  if (mhEl) {
-    const phase = getCyclePhase();
-    mhEl.textContent = phase.emoji + ' ' + phase.name;
-    mhEl.style.color = phase.color;
-  }
+  if (mhEl) mhEl.textContent = '📊 ' + Math.round(G.marketHealth) + '%';
 }
 
 function clonePlain(obj) {
@@ -1853,10 +1708,9 @@ function getEffectiveRoomCost(rt) {
 }
 
 function getRentMult() {
-  const cycleMult = G.cycleRentMult || 1.0;
   if (G.activeEvent && G.activeEvent.type === 'rent_mult' && Date.now() < G.eventEndTime)
-    return G.activeEvent.mult * cycleMult;
-  return cycleMult;
+    return G.activeEvent.mult;
+  return 1.0;
 }
 
 function hudHeight() {
@@ -1916,7 +1770,6 @@ function showScreen(id) {
   if (_CG_PLAY_SCREENS.has(id)) CG.start(); else CG.stop();
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('screen-' + id).classList.add('active');
-  updateNewsTicker();
   const hud = document.getElementById('hud');
   if (SCREENS_WITH_HUD.includes(id)) {
     hud.style.display = 'flex';
@@ -1961,15 +1814,8 @@ function renderMenu() {
 function renderMap() {
   const grid  = document.getElementById('location-grid');
   grid.innerHTML = '';
-  const phase = getCyclePhase();
   LOCATIONS.forEach(loc => {
-    const locked   = G.level < loc.unlockLevel;
-    const aiHere   = (G.aiProperties || []).filter(p => p.locationId === loc.id);
-    const aiEmojis = [...new Set(aiHere.map(p => AI_LANDLORDS.find(l => l.id === p.landlordId)?.emoji || ''))].join('');
-    const aiBadge  = aiHere.length
-      ? `<div class="loc-ai-badge">${aiEmojis} ${aiHere.length} rival${aiHere.length > 1 ? 's' : ''}</div>`
-      : '';
-    const adjFrom  = Math.round(loc.plots[0].cost * phase.landCostMult);
+    const locked = G.level < loc.unlockLevel;
     const card = document.createElement('div');
     card.className = 'location-card' + (locked ? ' locked' : '');
     card.style.background = `linear-gradient(135deg, ${loc.bg[0]}, ${loc.bg[1]})`;
@@ -1979,9 +1825,8 @@ function renderMap() {
         <span class="loc-emoji">${loc.emoji}</span>
         <div class="loc-name">${loc.name}</div>
         <div class="loc-desc">${loc.desc}</div>
-        <div class="loc-price">From ${fmt(adjFrom)} · ${loc.multiplier}× value</div>
-      </div>
-      ${aiBadge}`;
+        <div class="loc-price">From ${fmt(loc.plots[0].cost)} · ${loc.multiplier}× value</div>
+      </div>`;
     if (!locked) card.onclick = () => openPlotModal(loc.id);
     grid.appendChild(card);
   });
@@ -1990,29 +1835,22 @@ function renderMap() {
 let modalLocationId = null;
 function openPlotModal(locationId) {
   modalLocationId = locationId;
-  const loc   = LOCATIONS.find(l => l.id === locationId);
-  const phase = getCyclePhase();
-  const mult  = phase.landCostMult;
+  const loc = LOCATIONS.find(l => l.id === locationId);
   document.getElementById('modal-title').textContent = loc.emoji + ' ' + loc.name;
   document.getElementById('modal-desc').textContent = 'Choose your plot size. Larger plots = more rooms possible.';
   const opts = document.getElementById('plot-options');
   opts.innerHTML = '';
   loc.plots.forEach((plot, i) => {
-    const adjCost     = Math.round(plot.cost * mult);
-    const canAfford   = G.money >= adjCost;
-    const downPmt     = Math.round(adjCost * 0.3);
+    const canAfford   = G.money >= plot.cost;
+    const downPmt     = Math.round(plot.cost * 0.3);
     const canMortgage = G.money >= downPmt;
-    const cycleTag    = mult !== 1.0
-      ? `<div style="font-size:10px;color:${phase.color};margin-top:2px;">${phase.emoji} ${mult > 1 ? '+' : ''}${Math.round((mult-1)*100)}% ${phase.name}</div>`
-      : '';
     const btn = document.createElement('div');
     btn.className = 'plot-btn' + (canAfford || canMortgage ? '' : ' disabled');
     btn.innerHTML = `
       <div class="plot-size">${plot.emoji}</div>
       <div class="plot-label">${plot.label}</div>
-      <div class="plot-cost">${fmt(adjCost)}${mult !== 1.0 ? ` <span style="font-size:10px;color:var(--text-dim);text-decoration:line-through;">${fmt(plot.cost)}</span>` : ''}</div>
+      <div class="plot-cost">${fmt(plot.cost)}</div>
       <div style="font-size:10px;color:var(--text-dim);margin-top:2px;">${plot.gridW}×${plot.gridH} grid</div>
-      ${cycleTag}
       ${canAfford   ? `<div style="font-size:10px;color:var(--green);margin-top:5px;">✅ Buy Outright</div>` : ''}
       ${canMortgage ? `<div class="plot-mortgage-link" onclick="event.stopPropagation();closeModal();buyLand('${locationId}',${i},true);">🏦 Mortgage: ${fmt(downPmt)} down</div>` : ''}
       ${!canMortgage ? `<div style="font-size:10px;color:var(--red);margin-top:5px;">Need ${fmt(downPmt)} min</div>` : ''}`;
@@ -2020,33 +1858,6 @@ function openPlotModal(locationId) {
     else if (canMortgage) btn.onclick = () => { closeModal(); buyLand(locationId, i, true); };
     opts.appendChild(btn);
   });
-
-  // Show rival landlords active in this location + buy-out option
-  const aiHere  = (G.aiProperties || []).filter(p => p.locationId === locationId);
-  const grouped = {};
-  aiHere.forEach(p => { (grouped[p.landlordId] = grouped[p.landlordId] || []).push(p); });
-  if (Object.keys(grouped).length) {
-    const sec = document.createElement('div');
-    sec.className = 'ai-rivals-section';
-    sec.innerHTML = `<div class="ai-rivals-title">⚔️ Rival Landlords Active Here</div>`;
-    Object.entries(grouped).forEach(([lid, props]) => {
-      const ll        = AI_LANDLORDS.find(l => l.id === lid);
-      const cheapest  = [...props].sort((a, b) => a.value - b.value)[0];
-      const buyoutCost = Math.round(cheapest.value * 1.4);
-      const canBuy    = G.money >= buyoutCost;
-      const row = document.createElement('div');
-      row.className = 'ai-rival-row';
-      row.innerHTML = `
-        <span>${ll.emoji}</span>
-        <span class="ai-rival-name" style="color:${ll.color}">${ll.name}</span>
-        <span class="ai-rival-count">${props.length} prop${props.length > 1 ? 's' : ''}</span>
-        <button class="ai-buyout-btn" onclick="buyOutAI('${locationId}','${lid}')" ${canBuy ? '' : 'disabled'}>
-          Buy Out ${fmt(buyoutCost)}
-        </button>`;
-      sec.appendChild(row);
-    });
-    opts.appendChild(sec);
-  }
 
   document.getElementById('modal-overlay').style.display = 'flex';
 }
@@ -2062,9 +1873,8 @@ function closeModal(e) {
 function buyLand(locationId, plotIdx, useMortgage = false) {
   const loc      = LOCATIONS.find(l => l.id === locationId);
   const plot     = loc.plots[plotIdx];
-  const adjCost  = Math.round(plot.cost * getCyclePhase().landCostMult);
-  const downPayment = useMortgage ? Math.round(adjCost * 0.3) : adjCost;
-  const mortgageAmt  = useMortgage ? Math.round((adjCost - Math.round(adjCost * 0.3)) * 1.08) : 0;
+  const downPayment = useMortgage ? Math.round(plot.cost * 0.3) : plot.cost;
+  const mortgageAmt  = useMortgage ? Math.round((plot.cost - Math.round(plot.cost * 0.3)) * 1.08) : 0;
   if (G.money < downPayment) { toast('Not enough money!', '', '💸'); return; }
   pushUndo(`Buy ${plot.label} land`);
   addMoney(-downPayment);
@@ -2160,7 +1970,7 @@ function calcPropertyValue(prop) {
     const style = STYLES.find(s => s.id === room.style);
     base += rt.value * tier.valueMult * (1 + style.bonus);
   });
-  return Math.round(base * loc.multiplier * getEventMult(prop) * getNeighborhoodMult(prop) * (G.marketHealth / 100));
+  return Math.round(base * loc.multiplier * getEventMult(prop));
 }
 
 function calcRoomValue(room) {
@@ -2916,11 +2726,6 @@ function loadGame() {
     Object.assign(G, save.G);
     if (save.nextPropId) nextPropId = save.nextPropId;
     G.challengeEndTime = 0; G.challengeDuration = 0;
-    // Defaults for fields added in newer versions (old saves won't have them)
-    if (!G.aiProperties)   G.aiProperties   = [];
-    if (!G.cyclePhase)     G.cyclePhase     = 'recovery';
-    if (!G.cycleRentMult)  G.cycleRentMult  = 1.0;
-    if (!G.cycleEndTime)   G.cycleEndTime   = 0;
     clearUndoHistory();
     return true;
   } catch(e) { return false; }
@@ -3067,10 +2872,8 @@ function playAgain() {
       activeEvent:null, eventEndTime:0, marketHealth:100,
       totalDebt:0, emergencyLoansUsed:0, challengeEndTime:0, challengeDuration:0,
       playerName:G.playerName, isAnonymous:G.isAnonymous, lastRentTime:Date.now(),
-      cyclePhase:'recovery', cycleEndTime:0, cycleRentMult:1.0, aiProperties:[],
     });
     nextPropId = 1; lowMoneyWarned = false;
-    cycleInit();
     showChallengeSelect();
   });
 }
@@ -3081,146 +2884,6 @@ function continueFreePlay() {
   showScreen('menu'); renderMenu();
 }
 
-// ═══════════════════════════════════════════════════════════
-// ECONOMIC CYCLES
-// ═══════════════════════════════════════════════════════════
-function getCyclePhase() {
-  return CYCLE_PHASES.find(p => p.id === G.cyclePhase) || CYCLE_PHASES[0];
-}
-
-// Neighbourhood effect from AI rivals in the same location.
-// 1-2 rivals → +8% (rising tide / area development).
-// 3+ rivals  → -8% (tenant competition hurts your rent/value).
-function getNeighborhoodMult(prop) {
-  if (!G.aiProperties || !G.aiProperties.length) return 1.0;
-  const n = G.aiProperties.filter(p => p.locationId === prop.locationId).length;
-  if (n === 0) return 1.0;
-  return n <= 2 ? 1.08 : 0.92;
-}
-
-// Called every 10 s — nudges G.marketHealth toward the phase target.
-function cycleTick() {
-  const target = getCyclePhase().healthTarget;
-  const diff   = target - G.marketHealth;
-  const nudge  = Math.sign(diff) * Math.min(Math.abs(diff) * 0.12 + 0.5, 4)
-               + (Math.random() - 0.5) * 1.2;
-  G.marketHealth = Math.max(55, Math.min(140, G.marketHealth + nudge));
-  updateHud();
-  if (Date.now() >= G.cycleEndTime) cycleAdvance();
-}
-
-function cycleAdvance() {
-  const order   = ['recovery','boom','peak','correction'];
-  const nextId  = order[(order.indexOf(G.cyclePhase) + 1) % order.length];
-  G.cyclePhase  = nextId;
-  const phase   = getCyclePhase();
-  const secs    = phase.minDuration + Math.random() * (phase.maxDuration - phase.minDuration);
-  G.cycleEndTime  = Date.now() + secs * 1000;
-  G.cycleRentMult = phase.rentMult;
-  const tips = {
-    recovery:   'Market recovering — smart time to buy land cheap!',
-    boom:       'BOOM! Values surging — great time to sell properties!',
-    peak:       '⚠️ PEAK — prices will fall soon. Think about selling!',
-    correction: 'Correction — land is cheap! Build now for the next boom!',
-  };
-  toast(tips[nextId], nextId === 'peak' || nextId === 'correction' ? '' : 'gold', phase.emoji);
-  updateNewsTicker();
-  updateHud();
-}
-
-function cycleInit() {
-  if (!G.cycleEndTime || G.cycleEndTime <= Date.now()) {
-    const phase     = getCyclePhase();
-    const secs      = phase.minDuration + Math.random() * (phase.maxDuration - phase.minDuration);
-    G.cycleEndTime  = Date.now() + secs * 1000;
-    G.cycleRentMult = phase.rentMult;
-    G.marketHealth  = phase.healthTarget;
-  }
-  updateNewsTicker();
-  updateHud();
-}
-
-function updateNewsTicker() {
-  const phase  = getCyclePhase();
-  const ticker = document.getElementById('news-ticker');
-  const label  = document.getElementById('ticker-phase-label');
-  const text   = document.getElementById('ticker-text');
-  if (!ticker) return;
-  const activeId = (document.querySelector('.screen.active')?.id || '').replace('screen-', '');
-  const show = ['map','portfolio','build','clients','finance','achievements','menu'].includes(activeId);
-  ticker.style.display = show ? 'flex' : 'none';
-  if (label) { label.textContent = phase.emoji + ' ' + phase.name.toUpperCase(); label.style.color = phase.color; }
-  if (text) {
-    const h = phase.headlines;
-    text.textContent = h.join('   ·   ') + '   ·   ' + h[0] + '   ·   ' + h[1];
-    // Restart animation so ticker starts fresh on phase change
-    text.style.animation = 'none';
-    void text.offsetWidth;
-    text.style.animation = '';
-  }
-}
-
-// ═══════════════════════════════════════════════════════════
-// AI LANDLORDS
-// ═══════════════════════════════════════════════════════════
-function aiTick() {
-  if (!G.aiProperties) G.aiProperties = [];
-  const phase = G.cyclePhase || 'recovery';
-  AI_LANDLORDS.forEach(landlord => {
-    const owned = G.aiProperties.filter(p => p.landlordId === landlord.id);
-    // Sell decision
-    if (owned.length > 0 && Math.random() < (landlord.sellChance[phase] || 0)) {
-      aiLandlordSell(landlord, owned);
-    }
-    // Buy decision (cap per landlord to keep it fair for the player)
-    if (owned.length < 7 && Math.random() < (landlord.buyChance[phase] || 0)) {
-      aiLandlordBuy(landlord);
-    }
-  });
-  if (document.getElementById('screen-map').classList.contains('active')) renderMap();
-}
-
-function aiLandlordBuy(landlord) {
-  const available = LOCATIONS.filter(loc => {
-    const here = G.aiProperties.filter(p => p.landlordId === landlord.id && p.locationId === loc.id).length;
-    return here < 3;
-  });
-  if (!available.length) return;
-  const preferred = available.filter(loc => landlord.preferredLocs.includes(loc.id));
-  const pool      = preferred.length ? [...preferred, ...preferred, ...available] : available;
-  const loc       = pool[Math.floor(Math.random() * pool.length)];
-  const plotIdx   = Math.floor(Math.random() * Math.min(2, loc.plots.length));
-  const plot      = loc.plots[plotIdx];
-  const value     = Math.round(plot.cost * loc.multiplier * (G.marketHealth / 100));
-  G.aiProperties.push({ landlordId: landlord.id, locationId: loc.id, value, boughtAt: Date.now() });
-  toast(`${landlord.emoji} ${landlord.name} bought land in ${loc.name}!`, '', landlord.emoji);
-}
-
-function aiLandlordSell(landlord, owned) {
-  const target = [...owned].sort((a, b) => b.value - a.value)[0];
-  G.aiProperties = G.aiProperties.filter(
-    p => !(p.landlordId === landlord.id && p.locationId === target.locationId && p.boughtAt === target.boughtAt)
-  );
-  const locName = LOCATIONS.find(l => l.id === target.locationId)?.name || target.locationId;
-  toast(`${landlord.emoji} ${landlord.name} sold their property in ${locName}`, '', '💼');
-}
-
-function buyOutAI(locationId, landlordId) {
-  const landlord = AI_LANDLORDS.find(l => l.id === landlordId);
-  const props    = G.aiProperties.filter(p => p.landlordId === landlordId && p.locationId === locationId);
-  if (!props.length) { toast('No rival property to buy out.', '', '🤔'); return; }
-  const cheapest   = [...props].sort((a, b) => a.value - b.value)[0];
-  const cost       = Math.round(cheapest.value * 1.4);
-  if (G.money < cost) { toast(`Need ${fmt(cost)} to buy out ${landlord.name}!`, '', '💸'); return; }
-  addMoney(-cost);
-  G.aiProperties = G.aiProperties.filter(
-    p => !(p.landlordId === landlordId && p.locationId === locationId && p.boughtAt === cheapest.boughtAt)
-  );
-  saveGame();
-  const locName = LOCATIONS.find(l => l.id === locationId)?.name || locationId;
-  toast(`${landlord.emoji} ${landlord.name} bought out of ${locName}!`, 'gold', '🤝');
-  openPlotModal(locationId);
-}
 
 // ═══════════════════════════════════════════════════════════
 // UTILITY
@@ -3424,8 +3087,6 @@ setInterval(() => {
   if (!G.activeEvent || Date.now() >= G.eventEndTime) triggerMarketEvent();
 }, 150000);
 setInterval(updateEventCountdown, 1000);
-setInterval(cycleTick, 10000);   // nudge marketHealth toward cycle target every 10 s
-setInterval(aiTick, 70000);      // AI landlords make buy/sell decisions every 70 s
 setInterval(updateChallengeTimer, 1000);
 setInterval(saveGame, 60000);
 
@@ -3447,27 +3108,10 @@ window.addEventListener('DOMContentLoaded', () => {
 
 function launchGame() {
   CG.loaded();
-  cycleInit();
   updateHud();
   initWelcome();
   showScreen('welcome');
 }
-
-
-// ═══════════════════════════════════════════════════════════
-// LEADERBOARD  (localStorage — no server needed)
-// Each named player who plays on this device is remembered.
-// ═══════════════════════════════════════════════════════════
-
-// Stable per-browser player ID — created once, lives in localStorage
-const _playerId = (() => {
-  let id = localStorage.getItem('dhe_player_id');
-  if (!id) {
-    id = 'p_' + Math.random().toString(36).substr(2, 9);
-    localStorage.setItem('dhe_player_id', id);
-  }
-  return id;
-})();
 
 
 // ═══════════════════════════════════════════════════════════
@@ -3657,10 +3301,8 @@ function mpBeginGame(duration, opponentName) {
     activeEvent:null, eventEndTime:0, marketHealth:100,
     totalDebt:0, emergencyLoansUsed:0, lastRentTime:Date.now(),
     playerName:G.playerName, isAnonymous:false,
-    cyclePhase:'recovery', cycleEndTime:0, cycleRentMult:1.0, aiProperties:[],
   });
   nextPropId = 1; lowMoneyWarned = false;
-  cycleInit();
   G.challengeEndTime  = Date.now() + duration * 60 * 1000;
   G.challengeDuration = duration;
   const badge = document.getElementById('mp-vs-badge');
